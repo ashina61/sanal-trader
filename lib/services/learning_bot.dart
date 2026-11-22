@@ -22,15 +22,20 @@ const botSellThreshold = -0.45;
 const botExpertLabels = ['Kısa trend', '24s momentum', 'Ters yön'];
 
 class BotPrediction {
-  const BotPrediction({required this.priceTry, required this.at, required this.signals});
+  const BotPrediction({
+    required this.priceTry, required this.at, required this.signals,
+    this.technicalVote = 0,
+  });
   final double priceTry;
   final DateTime at;
   final List<int> signals;
+  final int technicalVote;
 
   Map<String, dynamic> toJson() => {
     'priceTry': priceTry,
     'at': at.toUtc().millisecondsSinceEpoch,
     'signals': signals,
+    'technicalVote': technicalVote,
   };
 
   factory BotPrediction.fromJson(Map<String, dynamic> json) {
@@ -40,6 +45,7 @@ class BotPrediction {
       priceTry: (json['priceTry'] as num?)?.toDouble() ?? 0,
       at: DateTime.fromMillisecondsSinceEpoch((json['at'] as num?)?.toInt() ?? 0, isUtc: true),
       signals: signals.length == 3 ? signals : [0, 0, 0],
+      technicalVote: ((json['technicalVote'] as num?)?.toInt() ?? 0).clamp(-1, 1),
     );
   }
 }
@@ -74,6 +80,9 @@ class BotState {
     this.baselineCorrect = 0,
     this.trainedCoins = 0,
     this.peakEquityTry = initialCashTry,
+    this.technicalWeight = 0.35,
+    this.technicalEvaluated = 0,
+    this.technicalCorrect = 0,
   });
 
   factory BotState.initial() => const BotState(
@@ -98,6 +107,9 @@ class BotState {
   final int baselineCorrect;
   final int trainedCoins;
   final double peakEquityTry;
+  final double technicalWeight;
+  final int technicalEvaluated;
+  final int technicalCorrect;
 
   BotState copyWith({
     bool? enabled,
@@ -116,6 +128,9 @@ class BotState {
     int? baselineCorrect,
     int? trainedCoins,
     double? peakEquityTry,
+    double? technicalWeight,
+    int? technicalEvaluated,
+    int? technicalCorrect,
   }) => BotState(
     enabled: enabled ?? this.enabled,
     weights: weights ?? this.weights,
@@ -133,6 +148,9 @@ class BotState {
     baselineCorrect: baselineCorrect ?? this.baselineCorrect,
     trainedCoins: trainedCoins ?? this.trainedCoins,
     peakEquityTry: peakEquityTry ?? this.peakEquityTry,
+    technicalWeight: technicalWeight ?? this.technicalWeight,
+    technicalEvaluated: technicalEvaluated ?? this.technicalEvaluated,
+    technicalCorrect: technicalCorrect ?? this.technicalCorrect,
   );
 
   Map<String, dynamic> toJson() => {
@@ -152,6 +170,9 @@ class BotState {
     'baselineCorrect': baselineCorrect,
     'trainedCoins': trainedCoins,
     'peakEquityTry': peakEquityTry,
+    'technicalWeight': technicalWeight,
+    'technicalEvaluated': technicalEvaluated,
+    'technicalCorrect': technicalCorrect,
   };
 
   factory BotState.fromJson(Map<String, dynamic> json) {
@@ -190,6 +211,9 @@ class BotState {
       trainedCoins: (json['trainedCoins'] as num?)?.toInt() ?? 0,
       peakEquityTry: math.max(initialCashTry,
         (json['peakEquityTry'] as num?)?.toDouble() ?? initialCashTry),
+      technicalWeight: ((json['technicalWeight'] as num?)?.toDouble() ?? .35).clamp(.15, .75),
+      technicalEvaluated: math.max(0, (json['technicalEvaluated'] as num?)?.toInt() ?? 0),
+      technicalCorrect: math.max(0, (json['technicalCorrect'] as num?)?.toInt() ?? 0),
     );
   }
 
@@ -227,6 +251,9 @@ BotState observeBot(BotState state, Iterable<CoinQuote> quotes, {DateTime? now})
   final preds = Map<String, BotPrediction>.from(state.predictions);
   var evaluated = state.evaluated;
   var correct = state.correct;
+  var technicalWeight = state.technicalWeight;
+  var technicalEvaluated = state.technicalEvaluated;
+  var technicalCorrect = state.technicalCorrect;
 
   for (final quote in quotes) {
     if (!quote.isFresh || quote.updatedAt.toUtc().isAfter(currentTime)) continue;
@@ -244,6 +271,15 @@ BotState observeBot(BotState state, Iterable<CoinQuote> quotes, {DateTime? now})
             evaluated++;
             if ((vote > 0 ? 1 : -1) == outcome) correct++;
           }
+          if (previous.technicalVote != 0) {
+            technicalEvaluated++;
+            final matched = previous.technicalVote == outcome;
+            if (matched) technicalCorrect++;
+            // Slow, bounded calibration: past technical forecasts earn
+            // weight only when future price direction actually confirms.
+            technicalWeight = (technicalWeight * .995 +
+              (matched ? .75 : .15) * .005).clamp(.15, .75);
+          }
           for (var i = 0; i < 3; i++) {
             weights[i] *= math.exp(0.16 * previous.signals[i] * outcome);
           }
@@ -259,13 +295,25 @@ BotState observeBot(BotState state, Iterable<CoinQuote> quotes, {DateTime? now})
       }
     }
     final signals = botSignals(quote);
-    if (signals.any((value) => value != 0)) {
-      preds[quote.id] = BotPrediction(priceTry: quote.priceTry, at: quote.updatedAt.toUtc(), signals: signals);
+    final technical = analyzeTechnical(quote);
+    final technicalVote = !technical.ready || technical.score.abs() < .25
+        ? 0 : technical.score > 0 ? 1 : -1;
+    if (signals.any((value) => value != 0) || technicalVote != 0) {
+      preds[quote.id] = BotPrediction(
+        priceTry: quote.priceTry, at: quote.updatedAt.toUtc(),
+        signals: signals, technicalVote: technicalVote,
+      );
     } else {
       preds.remove(quote.id);
     }
   }
-  return state.copyWith(weights: weights, predictions: preds, evaluated: evaluated, correct: correct);
+  return state.copyWith(
+    weights: weights, predictions: preds,
+    evaluated: evaluated, correct: correct,
+    technicalWeight: technicalWeight,
+    technicalEvaluated: technicalEvaluated,
+    technicalCorrect: technicalCorrect,
+  );
 }
 
 class BotOrder {
@@ -329,12 +377,14 @@ BotOrder? planBotOrder({
   if (equity < state.peakEquityTry * 0.88) return null;
   for (final q in available) {
     if (!cooled(q) || !botSignals(q).any((signal) => signal != 0)) continue;
-    final score = botScore(q, state.weights);
-    if (score < botBuyThreshold) continue;
+    final adaptiveScore = botScore(q, state.weights);
     final report = analyzeTechnical(q);
     // Do not invent technical confirmation: close history is required.
     if (!report.ready || report.score < .18 ||
         report.trend == TrendDirection.falling) continue;
+    final score = adaptiveScore * (1 - state.technicalWeight) +
+        report.score * state.technicalWeight;
+    if (score < botBuyThreshold) continue;
     // Crypto-market regime: suppress altcoin buys in a falling BTC market.
     if (q.id != 'bitcoin' && btc.ready &&
         btc.trend == TrendDirection.falling && btc.score < -.20) continue;
@@ -357,8 +407,9 @@ BotOrder? planBotOrder({
         reason: 'Trend ${report.trendLabel}, RSI ${report.rsi.toStringAsFixed(0)}, '
             'MACD ${report.macdHistogram >= 0 ? '+' : '-'}, '
             'teknik ${report.score.toStringAsFixed(2)}, '
-            'öğrenen puan ${score.toStringAsFixed(2)}',
-        score: score + report.score * .5,
+            'öğrenen puan ${adaptiveScore.toStringAsFixed(2)}, '
+            'birleşik ${score.toStringAsFixed(2)}',
+        score: score,
       ));
     }
   }
