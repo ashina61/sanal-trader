@@ -30,6 +30,19 @@ Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etk
 
 Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 
+## Geniş altcoin taraması ve öğrenen bot
+
+- Sabit 6 coin yerine Binance public spot listesinden **24 saatlik USDT işlem hacmine göre en çok 72 likit coin** seçilir. Desteklenmeyen, düşük hacimli, sabit değerli ve kaldıraçlı ürünler elenir. Tam kripto evreni değil; ilk aşamada **Binance'te likit USDT spot çiftleri** kapsamındadır.
+- Canlı fiyatlar WebSocket ile güncellenir. USDT/TRY piyasa çifti kullanılarak sanal TL karşılığı hesaplanır.
+- En likit 36 coinin yaklaşık 7 günlük saatlik kapanış fiyatları geçmiş strateji eğitimine alınır (API erişimi varsa).
+- Öğrenme motoru **son 24 saatlik veriyi eğitimden ayırır** ve o bölümdeki yön tahmini doğruluğunu basit momentum tahminiyle karşılaştırır. Bu, **kârlılık veya ileriye dönük performans garantisi değildir**.
+- Geçmiş veriden eğitim başarılı değilse **bot yeni AL emri açmaz**; güvenli şekilde bekler. Kullanıcı Bot sekmesinden durdurabilir.
+- Canlı olarak yeni fiyatlar geldikçe sonraki fiyatla karşılaştırılmış tahminlere göre strateji ağırlıkları güncellenir. Sonuçlar bu tarayıcıda saklanır.
+- Piyasa sekmesinde coin arama ve gerçek USDT hacmine göre sıralama bulunur. Çok küçük tokenlerin TL fiyatı yeterli ondalık hassasiyette gösterilir.
+- Binance API/CORS/ağ/rate-limit sorunlarında liste 6 coinlik CoinGecko yedeğine dönebilir; sahte fiyat oluşturulmaz.
+
+**Sınır:** Tarayıcı kapalıyken bot işlemez. 7/24 işlem ve cihazlar arası güvenilir öğrenme için sunucu tarafı altyapı gerekir.
+
 ## Bu sürümde neler var?
 
 - Bitcoin, Ethereum, Solana, XRP, BNB, DOGE için CoinGecko TRY piyasa verisi

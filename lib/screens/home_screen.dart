@@ -568,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             const SizedBox(width: 6),
             Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight,
-                child: Text(formatTry(quote.priceTry), style: const TextStyle(fontWeight: FontWeight.w800))),
+                child: Text(formatCoinPriceTry(quote.priceTry), style: const TextStyle(fontWeight: FontWeight.w800))),
               Text(formatChange(quote.change24h), style: TextStyle(fontSize: 12, color: up ? const Color(0xFF43D9A3) : const Color(0xFFF27777))),
             ])),
           ]),

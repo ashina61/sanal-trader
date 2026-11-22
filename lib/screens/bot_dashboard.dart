@@ -198,7 +198,7 @@ class BotDashboard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 5),
       child: ListTile(
         dense: true,
-        title: Text('${quote.symbol} · ${formatTry(quote.priceTry)}',
+        title: Text('${quote.symbol} · ${formatCoinPriceTry(quote.priceTry)}',
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         subtitle: Text('24s ${quote.change24h.toStringAsFixed(2)}% · Puan ${score.toStringAsFixed(2)}',
             style: const TextStyle(color: Colors.white54, fontSize: 11)),

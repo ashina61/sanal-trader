@@ -108,7 +108,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         children: [
           Text(quote.name, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          Text(formatTry(quote.priceTry), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+          Text(formatCoinPriceTry(quote.priceTry), style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           Text('${formatChange(quote.change24h)} (24s)', style: TextStyle(color: accent, fontWeight: FontWeight.w700)),
           const SizedBox(height: 20),
