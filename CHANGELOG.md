@@ -1,3 +1,7 @@
+## 2026-11-23 — Hızlı risk azaltımı testi düzeltmesi
+
+- Test senaryosundaki 15dk kapanış serisi yanlışlıkla karar eşiğinin üzerinde kalıyordu. Gerçek koşulu karşılayan kontrollü düşüş örneğiyle düzeltildi. Risk şartı ve mevcut kasa değiştirilmedi.
+
 ## 2026-11-23 — %65 kasa doluluk kilidi için kontrollü risk azaltımı
 
 - Botun mevcut kasa yaklaşık %65 pozisyon taşıdığı için ne yeni LONG/SHORT açabildiği ne de onaylı rotasyon bulabildiği kontrol edildi. Gerçek 15dk verisine dayanan ve en az 90 dakikadır taşınan zayıf pozisyonlarda koşullu erken zarar sınırlaması eklendi.

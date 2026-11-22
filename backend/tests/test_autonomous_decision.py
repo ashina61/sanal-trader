@@ -208,7 +208,7 @@ class AutonomousDecisionTests(unittest.TestCase):
         quotes[pair]["priceTry"] = current
         state["intraday"][pair] = {
             "fetchedAt": NOW.isoformat(),
-            "prices": [current * (1.02 - i * .0002) for i in range(95)] +
+            "prices": [current * (1.035 - i * .0003) for i in range(95)] +
                       [current * 1.0001],
         }
         plan = assess_decision(state, quotes, NOW)
