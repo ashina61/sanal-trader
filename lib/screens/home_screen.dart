@@ -4,6 +4,9 @@ import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
 import '../services/market_service.dart';
 import '../services/portfolio_repository.dart';
+import '../services/bot_store.dart';
+import '../services/learning_bot.dart';
+import 'bot_dashboard.dart';
 import '../widgets/formatters.dart';
 import '../widgets/mini_chart.dart';
 import 'coin_detail_screen.dart';
@@ -19,6 +22,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _marketService = MarketService();
+  final _botStore = BotStore();
+  BotState? _botState;
+  bool _botBusy = false;
+  String? _botError;
+  String? _botMessage;
   final _quotes = <String, CoinQuote>{};
   Portfolio? _portfolio;
   Timer? _refreshTimer;
@@ -34,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadPortfolio();
+    _loadBot();
     _loadMarket();
     _startTimer();
   }
@@ -64,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _loadPortfolio() async {
     try {
       final data = await widget.repository.load();
-      if (mounted) setState(() { _portfolio = data; _walletError = null; });
+      if (mounted) {
+        setState(() { _portfolio = data; _walletError = null; });
+        await _runBotCycle();
+      }
     } catch (error) {
       if (mounted) setState(() => _walletError = '$error');
     }
@@ -82,11 +94,105 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _marketFetchedAt = DateTime.now();
         _marketError = null;
       });
+      await _runBotCycle();
     } catch (error) {
       if (mounted) setState(() => _marketError = '$error');
     } finally {
       _busy = false;
       if (mounted) setState(() => _loadingMarket = false);
+    }
+  }
+
+
+  Future<void> _loadBot() async {
+    try {
+      final state = await _botStore.load();
+      if (!mounted) return;
+      setState(() { _botState = state; _botError = null; });
+      await _runBotCycle();
+    } catch (error) {
+      if (mounted) setState(() => _botError = 'Bot ayarları okunamadı: $error');
+    }
+  }
+
+  Future<void> _setBotEnabled(bool enabled) async {
+    if (_botBusy || _botState == null) return;
+    if (enabled) {
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Öğrenen sanal botu başlat?'),
+          content: const Text(
+            'Bot, açık olan tarayıcıda yeni fiyatlar geldikçe kendi kendine SANAL alış/satış yapabilir. '
+            'İşlem başına %12, toplam pozisyonda %65 ve günde 8 işlem sınırı vardır. '
+            'Sonuçları kâr garantisi değildir; kapalı tarayıcıda çalışmaz. '
+            'Gerçek borsaya emir veya para transferi gönderilmez.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+            FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sanal botu aç')),
+          ],
+        ),
+      );
+      if (accepted != true || !mounted) return;
+    }
+    try {
+      final next = _botState!.copyWith(enabled: enabled);
+      await _botStore.save(next);
+      if (!mounted) return;
+      setState(() {
+        _botState = next;
+        _botError = null;
+        _botMessage = enabled ? 'Piyasa verisiyle karar değerlendiriliyor.' : 'Bot durduruldu.';
+      });
+      if (enabled) await _runBotCycle();
+    } catch (error) {
+      if (mounted) setState(() => _botError = 'Bot ayarı kaydedilemedi: $error');
+    }
+  }
+
+  Future<void> _runBotCycle() async {
+    if (!mounted || _botBusy || _botState?.enabled != true ||
+        _portfolio == null || _quotes.isEmpty) return;
+    _botBusy = true;
+    setState(() => _botError = null);
+    try {
+      final evolved = observeBot(_botState!, _quotes.values);
+      final order = planBotOrder(
+        state: evolved,
+        wallet: _portfolio!,
+        quotes: _quotes,
+      );
+
+      if (order == null) {
+        await _botStore.save(evolved);
+        if (mounted) setState(() {
+          _botState = evolved;
+          _botMessage = 'Yeni sinyal bekleniyor veya risk limitleri devrede.';
+        });
+      } else {
+        // Use the exact same validated virtual wallet pathway as manual orders.
+        final wallet = await widget.repository.placeOrder(
+          quote: order.quote,
+          side: order.side,
+          amountTry: order.amountTry,
+        );
+        final recorded = botRecordedTrade(evolved, order);
+        await _botStore.save(recorded);
+        if (mounted) setState(() {
+          _portfolio = wallet;
+          _botState = recorded;
+          _botMessage = (order.side == TradeSide.buy ? 'Sanal AL • ' : 'Sanal SAT • ') +
+              order.quote.symbol + ' • ' + order.reason;
+        });
+      }
+    } catch (error) {
+      if (mounted) setState(() {
+        _botError = 'Bot işlemi yapılmadı: $error';
+        _botMessage = 'Veri veya kayıt hatası nedeniyle işlem atlandı.';
+      });
+    } finally {
+      _botBusy = false;
+      if (mounted) setState(() {});
     }
   }
 
@@ -115,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Portföyü sıfırla?'),
-        content: const Text('Sanal cüzdan ₺650 bakiyeye döner ve işlem geçmişi silinir. Bu işlem geri alınamaz.'),
+        content: const Text('Sanal cüzdan ₺650 bakiyeye döner; işlem geçmişi ve botun öğrendikleri silinir. Bot kapatılır. Bu işlem geri alınamaz.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
           FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sıfırla')),
@@ -125,6 +231,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (approved != true || !mounted) return;
     try {
       await widget.repository.reset();
+      await _botStore.clear();
+      if (mounted) setState(() {
+        _botState = BotState.initial();
+        _botMessage = 'Bot ve sanal portföy sıfırlandı.';
+      });
       await _loadPortfolio();
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sıfırlanamadı: $error')));
@@ -157,7 +268,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: switch (_tab) {
               0 => _marketList(),
               1 => _holdingsList(),
-              _ => _historyList(),
+              2 => _historyList(),
+              _ => BotDashboard(
+                state: _botState,
+                busy: _botBusy,
+                error: _botError,
+                lastStatus: _botMessage,
+                onEnabledChanged: _setBotEnabled,
+              ),
             },
           ),
         ),
@@ -169,6 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           NavigationDestination(icon: Icon(Icons.show_chart), label: 'Piyasa'),
           NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), label: 'Portföy'),
           NavigationDestination(icon: Icon(Icons.history), label: 'Geçmiş'),
+          NavigationDestination(icon: Icon(Icons.smart_toy_outlined), label: 'Bot'),
         ],
       ),
     );
