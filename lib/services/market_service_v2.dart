@@ -219,11 +219,12 @@ class MarketService {
   }
 
   Future<List<CoinQuote>> _fetchCoinGeckoQuotes() async {
+    // Broad market-cap fallback when Binance cannot be accessed. This is
+    // scheduled REST data, not a live WebSocket feed.
     final uri = Uri.https('api.coingecko.com', '/api/v3/coins/markets', {
       'vs_currency': 'try',
-      'ids': coinIds.join(','),
       'order': 'market_cap_desc',
-      'per_page': '10',
+      'per_page': '100',
       'page': '1',
       'sparkline': 'true',
     });
@@ -231,13 +232,29 @@ class MarketService {
       'accept': 'application/json',
     }).timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) {
-      throw Exception('HTTP ${response.statusCode}');
+      throw Exception('HTTP ' + response.statusCode.toString());
     }
     final raw = jsonDecode(response.body);
     if (raw is! List) throw const FormatException('CoinGecko formatı bozuk');
-    final data = raw.whereType<Map<String, dynamic>>().map(CoinQuote.fromJson)
-        .where((q) => q.priceTry.isFinite && q.priceTry > 0).toList();
-    if (data.isEmpty) throw Exception('CoinGecko boş yanıt');
+    final data = <CoinQuote>[];
+    for (final item in raw) {
+      if (item is! Map<String, dynamic>) continue;
+      final sym = (item['symbol'] as String?)?.toUpperCase() ?? '';
+      // Avoid stables and leveraged/synthetic symbols on backup provider.
+      if (!eligibleUsdtSpotSymbol(sym + 'USDT')) continue;
+      final turnover = (item['total_volume'] as num?)?.toDouble();
+      if (turnover == null || !turnover.isFinite || turnover < 50000000) {
+        continue;
+      }
+      try {
+        final q = CoinQuote.fromJson(item);
+        if (q.priceTry.isFinite && q.priceTry > 0) data.add(q);
+      } catch (_) {
+        continue; // Ignore malformed individual symbols, not entire page.
+      }
+      if (data.length >= 72) break;
+    }
+    if (data.isEmpty) throw Exception('CoinGecko uygun coin döndürmedi');
     return data;
   }
 
