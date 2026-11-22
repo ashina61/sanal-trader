@@ -19,8 +19,10 @@ def minute_signal(closes, mark):
         return None
     def change(n):
         return 100 * (mark / closes[-(n + 1)] - 1)
-    steps = [mark] + closes[-5:]
-    upside = sum(steps[i] > steps[i+1] for i in range(5))
+    # Evaluate candles in chronological order and finish with the observed
+    # market mark. Reversed ordering previously rejected valid uptrends.
+    steps = closes[-5:] + [mark]
+    upside = sum(steps[i] > steps[i - 1] for i in range(1, 6))
     prior = closes[-21:-1]
     breakout = mark > max(prior) * 1.0008
     breakdown = mark < min(prior) * .9992
