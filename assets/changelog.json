@@ -3,6 +3,18 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.9",
+      "date": "2026-11-23",
+      "title": "Gerçek tek kasa mimarisi — demo modülleri kalıcı olarak temizlendi",
+      "details": [
+        "Çalışan uygulamadan önce zaten kaldırılmış olan eski yerel demo ve tarayıcı botunun kaynak dosyaları ile ilgili 12 artık kullanılmayan Flutter test dosyası depodan kaldırıldı.",
+        "Premium stil bileşenleri bağımsız premium_theme.dart içine taşındı; hiçbir yerel model veya işlem motoru import etmiyor.",
+        "Firebase, web-socket ve shared_preferences gibi artık kullanılmayan paketler uygulamanın bağımlılıklarından çıkarıldı; uygulama yalnızca sunucu sanal cüzdanını okur.",
+        "README tamamen mevcut tek sunucu botu, risk sınırlamaları ve isteğe bağlı Cloudflare tetikleyicisine göre düzeltildi.",
+        "bot-data cüzdanına, 650 TL başlangıç tutarına ve geçmiş sanal işlemlere dokunulmadı."
+      ]
+    },
+    {
       "version": "0.9.8",
       "date": "2026-11-23",
       "title": "Günlük emir kilidi çözümü ve gerçek 15 dakikalık veri",

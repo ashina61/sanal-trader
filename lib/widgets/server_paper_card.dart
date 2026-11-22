@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../services/server_paper_repository.dart';
 import 'formatters.dart';
-import 'premium_dashboard.dart';
+import 'premium_theme.dart';
 
 String _money(dynamic value) => value is num && value.toDouble().isFinite
     ? formatTry(value.toDouble()) : '—';

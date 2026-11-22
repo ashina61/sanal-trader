@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/server_paper_repository.dart';
 import '../widgets/server_paper_card.dart';
 import '../widgets/server_paper_overview.dart';
-import '../widgets/premium_dashboard.dart';
+import '../widgets/premium_theme.dart';
 import '../widgets/formatters.dart';
 import 'update_history_screen.dart';
 

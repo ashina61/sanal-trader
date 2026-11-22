@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'widgets/premium_dashboard.dart';
+import 'widgets/premium_theme.dart';
 
 /// One autonomous brain, one server-side 650 TRY paper wallet.
 /// No local wallet or browser-bound bot is created by the live application.

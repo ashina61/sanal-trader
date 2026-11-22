@@ -1,7 +1,7 @@
 name: sanal_trader
 publish_to: 'none'
-description: Gerçek kripto fiyatlarıyla, tamamen sanal parayla işlem yapma uygulaması.
-version: 0.9.8+15
+description: Yalnızca sunucudaki 650 TL sanal kripto portföyünü gösteren uygulama.
+version: 0.9.9+16
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
@@ -10,17 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.6.0
-  web_socket_channel: ^3.0.3
-  shared_preferences: ^2.5.6
   intl: ^0.20.2
-  firebase_core: ^5.1.0
-  firebase_auth: ^7.0.1
-  cloud_firestore: ^7.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  shared_preferences_platform_interface: ^2.4.2
   flutter_lints: ^6.0.0
 
 flutter:

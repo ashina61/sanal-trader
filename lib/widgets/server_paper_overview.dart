@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/server_paper_repository.dart';
 import 'formatters.dart';
-import 'premium_dashboard.dart';
+import 'premium_theme.dart';
 
 /// One prominent, read-only overview of the actual background paper wallet.
 /// This is the only live application wallet; no browser trading runs.

@@ -1,3 +1,10 @@
+## 2026-11-23 — v0.9.9 Tam demo temizliği ve bağımlılık sadeleşmesi
+
+- Eski yerel/demo cüzdanı, tarayıcı botu, manuel işlem ekranları ve onlara ait kullanılmayan model/servis/bileşen/test dosyaları GitHub deposundan silindi.
+- `PremiumColors`, `PremiumSurface` ve `PremiumSectionTitle` yeni `premium_theme.dart` dosyasıyla tamamen sunucu botu ekranlarından bağımsız bir stile taşındı.
+- Firebase, WebSocket ve shared_preferences gibi eski demo paketleri kaldırıldı; uygulama başlangıcı sadece bir GitHub sunucu cüzdanını okuyor.
+- README tek sunucu mimarisini yansıtıyor. Kullanıcının `bot-data` sanal portföyü, alım/satımlar ve açık pozisyonlar korundu.
+
 ## 2026-11-23 — Hızlı risk azaltımı testi düzeltmesi
 
 - Test senaryosundaki 15dk kapanış serisi yanlışlıkla karar eşiğinin üzerinde kalıyordu. Gerçek koşulu karşılayan kontrollü düşüş örneğiyle düzeltildi. Risk şartı ve mevcut kasa değiştirilmedi.
