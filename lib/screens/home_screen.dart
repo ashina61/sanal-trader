@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
-import '../services/market_service.dart';
+import '../services/market_service_v2.dart';
 import '../services/portfolio_repository.dart';
 import '../services/bot_store.dart';
 import '../services/learning_bot.dart';
@@ -22,6 +22,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _marketService = MarketService();
+  StreamSubscription<LivePriceEvent>? _liveSubscription;
+  Timer? _uiTimer;
+  Timer? _botTimer;
+  final _pendingLiveQuotes = <String, CoinQuote>{};
+  String _feedStatus = 'Veri akışına bağlanılıyor';
+  String _shownFeedStatus = 'Bağlantı bekleniyor';
+  bool _manualTradeOpen = false;
+  DateTime? _lastBotRun;
   final _botStore = BotStore();
   BotState? _botState;
   bool _botBusy = false;
@@ -41,6 +49,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _liveSubscription = _marketService.liveEvents.listen(_receiveLiveEvent);
+    _marketService.startLive();
+    _uiTimer = Timer.periodic(
+      const Duration(seconds: 2), (_) => _flushLiveUpdates(),
+    );
     _loadPortfolio();
     _loadBot();
     _loadMarket();
@@ -49,16 +62,63 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _startTimer() {
     _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 90), (_) => _loadMarket());
+    _botTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(minutes: 2), (_) {
+      if (!_marketService.isLive) _loadMarket();
+    });
+    _botTimer = Timer.periodic(const Duration(seconds: 45), (_) {
+      _runBotCycle();
+    });
+  }
+
+  void _receiveLiveEvent(LivePriceEvent event) {
+    if (!mounted) return;
+    _feedStatus = event.status;
+    final quote = event.quote;
+    if (quote != null) {
+      _pendingLiveQuotes[quote.id] = quote;
+    }
+  }
+
+  void _flushLiveUpdates() {
+    if (!mounted) return;
+    if (_pendingLiveQuotes.isEmpty) {
+      if (_feedStatus != _shownFeedStatus) {
+        setState(() => _shownFeedStatus = _feedStatus);
+      }
+      return;
+    }
+    final current = Map<String, CoinQuote>.from(_pendingLiveQuotes);
+    _pendingLiveQuotes.clear();
+    setState(() {
+      for (final entry in current.entries) {
+        final old = _quotes[entry.key];
+        if (old == null || !old.updatedAt.isAfter(entry.value.updatedAt)) {
+          _quotes[entry.key] = entry.value;
+        }
+      }
+      _marketFetchedAt = DateTime.now();
+      _shownFeedStatus = _marketService.sourceStatus;
+      _loadingMarket = false;
+      _marketError = null;
+    });
+    if (_botState?.enabled == true &&
+        (_lastBotRun == null ||
+          DateTime.now().difference(_lastBotRun!) >= const Duration(seconds: 45))) {
+      _runBotCycle();
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _marketService.startLive();
       _startTimer();
-      _loadMarket();
+      if (!_marketService.isLive) _loadMarket();
     } else {
+      _marketService.stopLive();
       _refreshTimer?.cancel();
+      _botTimer?.cancel();
     }
   }
 
@@ -66,6 +126,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
+    _botTimer?.cancel();
+    _uiTimer?.cancel();
+    _liveSubscription?.cancel();
     _marketService.dispose();
     super.dispose();
   }
@@ -83,15 +146,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadMarket() async {
-    if (_busy) return;
+    if (_busy || _marketService.isLive) return;
     _busy = true;
     if (mounted) setState(() => _loadingMarket = _quotes.isEmpty);
     try {
       final quotes = await _marketService.fetchQuotes();
       if (!mounted) return;
       setState(() {
-        _quotes..clear()..addEntries(quotes.map((quote) => MapEntry(quote.id, quote)));
+        for (final quote in quotes) {
+          final old = _quotes[quote.id];
+          if (old == null || !old.updatedAt.isAfter(quote.updatedAt)) {
+            _quotes[quote.id] = quote;
+          }
+        }
         _marketFetchedAt = DateTime.now();
+        _shownFeedStatus = _marketService.sourceStatus;
         _marketError = null;
       });
       await _runBotCycle();
@@ -151,8 +220,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _runBotCycle() async {
-    if (!mounted || _botBusy || _botState?.enabled != true ||
-        _portfolio == null || _quotes.isEmpty) return;
+    if (!mounted || _botBusy || _manualTradeOpen || _botState?.enabled != true ||
+        _portfolio == null || _quotes.isEmpty ||
+        (_marketError != null && !_marketService.isLive)) return;
+    _lastBotRun = DateTime.now();
     _botBusy = true;
     setState(() => _botError = null);
     try {
@@ -196,11 +267,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _refresh() async { await Future.wait([_loadMarket(), _loadPortfolio()]); }
+  Future<void> _refresh() async {
+    _flushLiveUpdates();
+    await Future.wait([_loadMarket(), _loadPortfolio()]);
+  }
 
   Future<void> _openCoin(CoinQuote quote) async {
     final wallet = _portfolio;
     if (wallet == null) return;
+    _manualTradeOpen = true;
     final success = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => CoinDetailScreen(
         quote: quote,
@@ -208,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         repository: widget.repository,
       )),
     );
+    _manualTradeOpen = false;
     if (success == true) {
       await _loadPortfolio();
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
@@ -260,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       body: Column(children: [
         _walletCard(),
-        if (_marketError != null) _warning('Fiyat hatası: $_marketError'),
+        if (_marketError != null && !_marketService.isLive) _warning('Fiyat hatası: $_marketError'),
         if (_walletError != null) _warning('Cüzdan hatası: $_walletError'),
         Expanded(
           child: RefreshIndicator(
@@ -370,7 +446,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             style: const TextStyle(fontSize: 11, color: Colors.white54)),
         ]),
         const SizedBox(height: 6),
-        const Text('TRY fiyatları · Yaklaşık 90 saniyede yenilenir', style: TextStyle(color: Colors.white54, fontSize: 12)),
+        Row(children: [
+          Icon(
+            _marketService.isLive ? Icons.sensors : Icons.sync,
+            size: 15,
+            color: _marketService.isLive ? const Color(0xFF43D9A3) : Colors.orangeAccent,
+          ),
+          const SizedBox(width: 6),
+          Expanded(child: Text(
+            _shownFeedStatus,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: _marketService.isLive ? const Color(0xFF43D9A3) : Colors.white60,
+              fontSize: 12,
+            ),
+          )),
+        ]),
         const SizedBox(height: 10),
         for (final coin in ordered) _coinTile(coin),
       ],
