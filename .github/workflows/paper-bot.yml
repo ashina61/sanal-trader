@@ -1,0 +1,76 @@
+name: Free Scheduled Paper Bot
+
+on:
+  schedule:
+    - cron: "2-59/5 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/paper-bot.yml"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "run, pause, resume or reset server paper wallet"
+        type: choice
+        options: [run, pause, resume, reset]
+        default: run
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sanaltrader-server-paper-wallet
+  cancel-in-progress: false
+
+jobs:
+  virtual-paper-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout trusted engine
+        uses: actions/checkout@v4
+
+      - name: Test wallet and market safety
+        run: python3 -m unittest discover -s backend/tests -v
+
+      - name: Restore independent server paper wallet
+        shell: bash
+        env:
+          STATE_FILE: ${{ runner.temp }}/paper-state.json
+        run: |
+          if git ls-remote --exit-code --heads origin bot-data >/dev/null 2>&1; then
+            git fetch --depth=1 origin bot-data
+            git show FETCH_HEAD:state.json > "$STATE_FILE"
+          else
+            echo "First run: separate virtual 650 TRY wallet."
+          fi
+
+      - name: Run public-price simulation
+        env:
+          STATE_FILE: ${{ runner.temp }}/paper-state.json
+          RUN_MODE: ${{ github.event.inputs.mode || 'run' }}
+        run: python3 backend/paper_bot.py --state "$STATE_FILE" --mode "$RUN_MODE"
+
+      - name: Commit result to independent bot-data branch
+        shell: bash
+        env:
+          STATE_FILE: ${{ runner.temp }}/paper-state.json
+        run: |
+          git config user.name "SanalTrader Paper Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin bot-data >/dev/null 2>&1; then
+            git fetch --depth=1 origin bot-data
+            git checkout -B bot-data FETCH_HEAD
+          else
+            git checkout --orphan bot-data
+            git rm -rf . >/dev/null 2>&1 || true
+            git clean -fdx >/dev/null 2>&1 || true
+          fi
+          cp "$STATE_FILE" state.json
+          git add state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "paper-bot: simulated cycle"
+            git push origin HEAD:bot-data
+          fi
