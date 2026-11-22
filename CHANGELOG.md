@@ -1,3 +1,9 @@
+## 2026-11-22 — Groq bağlantı tanılama iyileştirmesi
+
+- İşlemsiz AI sağlık testi artık API yanıtındaki yalnızca HTTP hata kodunu gösterir; gizli anahtarı veya hassas hata gövdesini yayımlamaz.
+- GPT-OSS-20B bağlantısı `reasoning_effort: low` ve 1024 çıktı token sınırıyla güncellendi.
+- AI API'si yanıt vermezse strateji motoru mevcut sanal risk kurallarıyla çalışmayı sürdürür.
+
 ## 2026-11-22 — AI gerçek bağlantı kontrolü ve dış zamanlayıcı
 
 - İşlemsiz Groq bağlantı sınaması bağımsız GitHub Actions akışına eklendi; cüzdanı/işlem geçmişini değiştirmez.

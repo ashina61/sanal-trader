@@ -14,7 +14,8 @@ def _ask_groq(context, api_key, model):
     payload = {
         "model": model,
         "temperature": 0.1,
-        "max_completion_tokens": 800,
+        "max_completion_tokens": 1024,
+        "reasoning_effort": "low",
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content":
@@ -99,6 +100,8 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
                          "model": model, "symbol": name, "reason": reason}
     except Exception as exc:
         # No key, HTTP response, private raw message or prompt is logged.
-        detail = type(exc).__name__
+        http_status = getattr(exc, "code", None)
+        detail = (f"HTTP {http_status}" if http_status is not None
+                  else type(exc).__name__)
         return plan, {"status": "FALLBACK", "provider": "Groq",
                       "model": model, "reason": "AI unavailable/invalid: " + detail}

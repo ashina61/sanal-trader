@@ -47,7 +47,11 @@ jobs:
               if not isinstance(response, dict) or response.get("decision") != "WAIT":
                   raise ValueError("AI must WAIT without candidates")
           except Exception as exc:
-              print("::error::Groq health check failed: " + type(exc).__name__)
+              # Log HTTP status only: no response body, key, or org metadata.
+              http_code = getattr(exc, "code", None)
+              detail = (f"HTTP {http_code}" if http_code is not None
+                        else type(exc).__name__)
+              print("::error::Groq health check failed: " + detail)
               raise SystemExit(1)
           print("GROQ_AI_OK: accepted no-trade health probe; model JSON response validated")
           print("NO PAPER ORDERS PLACED; NO WALLET OR STATE CHANGED")

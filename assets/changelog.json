@@ -13,7 +13,8 @@
         "Cloudflare üzerinden gerçek 7/24 çalışmanın başlaması için Cloudflare hesabında bir defalık deploy ve GITHUB_DISPATCH_TOKEN kurulumu gereklidir.",
         "Worker HTTP /health salt okunurdur; herkese açık iş tetikleme ucu yoktur.",
         "Node.js birim testleri ve yeni scheduler CI akışı eklendi.",
-        "Önceki sunucu kasa, işlemler, pozisyonlar ve Groq ayarı korunur; GitHub schedule yedek olarak kalır."
+        "Önceki sunucu kasa, işlemler, pozisyonlar ve Groq ayarı korunur; GitHub schedule yedek olarak kalır.",
+        "Groq API tanılama durum kodu güvenli biçimde gösterilir; GPT-OSS düşük düşünme eforuyla çağrılır."
       ]
     },
     {
