@@ -1,3 +1,8 @@
+## 2026-11-22 — Zamanlayıcı görünümü regresyon testleri ve sürüm
+
+- Bot ekranındaki GitHub son schedule bilgisinin eski sunucu kayıtlarından uydurulmadığı Flutter testleriyle doğrulanır.
+- Uygulama paket sürümü `0.9.6+13` olarak yükseltildi.
+
 ## 2026-11-22 — GitHub schedule kanıtı ve mobil görünürlük
 
 - GitHub bot ekranında son otomatik tetik veya 'henüz doğrulanmadı' durumu ve son gerçek çalıştırma türü gösterilir.

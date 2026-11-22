@@ -81,6 +81,46 @@ void main() {
       throwsFormatException);
   });
 
+  test('Last real schedule status is optional and never faked', () {
+    final original = ServerPaperSnapshot.fromJson(paperState());
+    expect(original.lastScheduledTriggerAt, isNull);
+    expect(original.lastTriggerEvent, isNull);
+
+    final pushed = paperState();
+    pushed['lastTriggerEvent'] = 'push';
+    pushed['lastTriggerAt'] = '2026-11-22T20:30:00Z';
+    var snapshot = ServerPaperSnapshot.fromJson(pushed);
+    expect(snapshot.lastTriggerEvent, 'push');
+    expect(snapshot.lastScheduledTriggerAt, isNull);
+
+    pushed['lastScheduledTriggerAt'] = '2026-11-22T20:35:00Z';
+    pushed['lastTriggerEvent'] = 'schedule';
+    snapshot = ServerPaperSnapshot.fromJson(pushed);
+    expect(snapshot.lastScheduledTriggerAt, DateTime.utc(2026, 11, 22, 20, 35));
+    expect(snapshot.lastTriggerEvent, 'schedule');
+  });
+
+  testWidgets('Server panel reports missing cron truthfully', (tester) async {
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final state = paperState();
+    state['lastTriggerEvent'] = 'push';
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      body: SingleChildScrollView(child: ServerPaperCard(
+        snapshot: ServerPaperSnapshot.fromJson(state),
+        loading: false, error: null,
+        onRefresh: () {}, onOpenTrades: () {},
+      )),
+    )));
+    expect(find.textContaining('henüz doğrulanmadı'), findsOneWidget);
+    expect(find.textContaining('kod güncellemesi'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   test('Server status detects stale data and errors', () {
     final state = paperState();
     state['lastSuccessAt'] =

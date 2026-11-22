@@ -11,7 +11,9 @@
         "Bot gerçek tetikleme olayını ve son otomatik schedule tarihini kaydeder; push ya da manuel tetik otomatik çalışmaymış gibi gösterilmez.",
         "Eski sanal kasa şemasıyla uyumluluk testleri eklendi; bakiye ve işlem geçmişi korunur.",
         "Bot ekranında GitHub zamanlayıcısının son gerçek tetiklenme zamanı veya doğrulanmadığı ve son çalıştırma kaynağı gösterilir.",
-        "Bağımsız GitHub Cron Diagnostic (No Trades) iş akışı saat 11 ve 41'de GitHub schedule olayını gözlemler; sanal işlemlere ve cüzdana dokunmaz."
+        "Bağımsız GitHub Cron Diagnostic (No Trades) iş akışı saat 11 ve 41'de GitHub schedule olayını gözlemler; sanal işlemlere ve cüzdana dokunmaz.",
+        "Flutter entegrasyon ve widget testleri son schedule alanı olmayan eski kayıtların doğru işlendiğini kontrol eder.",
+        "Uygulama sürüm numarası 0.9.6+13 olarak güncellendi."
       ]
     },
     {
