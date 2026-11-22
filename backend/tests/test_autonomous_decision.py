@@ -143,6 +143,26 @@ class AutonomousDecisionTests(unittest.TestCase):
         quotes["BTCUSDT"]["priceTry"] *= .975
         self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
 
+    def test_long_trailing_protection_on_observed_peak_pullback(self):
+        state, latest = market_prices([100 + i * .4 for i in range(168)])
+        execute(state, NOW - dt.timedelta(hours=3), "BTCUSDT",
+                "buy", 50, 100, "previous long")
+        latest["BTCUSDT"]["priceTry"] = 103
+        state["peakMarksTry"] = {"BTCUSDT": 106}
+        plan = assess_decision(state, latest, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertIn("takip eden kâr koruması", plan["reason"])
+
+    def test_short_trailing_protection_on_observed_low_reversal(self):
+        state, latest = market_prices([200 - i * .5 for i in range(168)])
+        open_short(state, NOW - dt.timedelta(hours=3), "BTCUSDT",
+                   50, 100, "previous short")
+        latest["BTCUSDT"]["priceTry"] = 97
+        state["troughMarksTry"] = {"BTCUSDT": 95}
+        plan = assess_decision(state, latest, NOW)
+        self.assertEqual(plan["action"], "COVER")
+        self.assertIn("takip eden kâr koruması", plan["reason"])
+
     def test_money_or_risk_limit_selects_wait(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
         state["todayOrders"] = 8

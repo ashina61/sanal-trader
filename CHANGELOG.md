@@ -1,3 +1,10 @@
+## 2026-11-23 — Büyüme odaklı sanal performans ve kâr koruması
+
+- Sunucu botu artık başarılı döngülerde yalnızca gerçek piyasa gözlemlerine dayalı kasa grafiği (son 576 gözlem), net sanal büyüme, net kapanan sonuç, ücretler ve zirveden gerileme verilerini saklar.
+- LONG ve SHORT sanal pozisyonlarda gerçek gözlemlenmiş zirve/dip sonrası yeterli kârı geri vermemek için takip eden kâr koruması uygulanır; sabit stop-loss ve kâr al kuralları önceliklidir.
+- Yeni sanal emirler eskisi gibi veri tazeliği, günlük limit, nakit rezervi ve maruziyet sınırlarına bağlıdır; garanti edilen kâr veya uydurma işlem yoktur.
+- Önceki 650 TL sanal kasa ve tüm açık pozisyonlar korunur.
+
 ## 2026-11-22 — Rotasyonun AI durumundan doğru ayrılması
 
 - Botun teknik portföy rotasyonu satışı artık "koruyucu zarar-kes" gibi gösterilmez. İşlem emri mevcut kuralların onayladığı sanal çıkıştır; AI bu çıkışı durdurmaz.

@@ -6,7 +6,8 @@ from pathlib import Path
 
 from backend.paper_bot import (
     FEE, MIN_ORDER, as_date, closes, cycle, eligible, equity, execute,
-    fresh_state, indicators, load, pick, quotes, record_trigger, save, stamp,
+    fresh_state, indicators, load, pick, quotes, record_trigger,
+    record_performance, update_price_extremes, save, stamp,
 )
 
 UTC = dt.timezone.utc
@@ -163,6 +164,30 @@ class PaperBotTests(unittest.TestCase):
             restored = load(path)
             self.assertIsNone(restored["lastScheduledTriggerAt"])
             self.assertEqual(restored["cashTry"], 650.0)
+
+    def test_growth_stats_use_actual_observations_and_closed_results(self):
+        state = fresh_state()
+        state["equityTry"] = 654
+        record_performance(state, NOW)
+        self.assertEqual(state["performance"]["netTry"], 4)
+        self.assertIsNone(state["performance"]["winRatePct"])
+        self.assertEqual(len(state["equityHistory"]), 1)
+        record_performance(state, NOW + dt.timedelta(seconds=60))
+        self.assertEqual(len(state["equityHistory"]), 1)
+        state["equityTry"] = 648
+        record_performance(state, NOW + dt.timedelta(minutes=5))
+        self.assertEqual(len(state["equityHistory"]), 2)
+        self.assertGreater(state["performance"]["drawdownPct"], 0)
+
+    def test_profit_peak_is_an_observed_price_not_invented(self):
+        state = fresh_state()
+        execute(state, NOW, "BTCUSDT", "buy", 65, 100, "test")
+        update_price_extremes(state, {"BTCUSDT": {"priceTry": 103}})
+        update_price_extremes(state, {"BTCUSDT": {"priceTry": 102}})
+        self.assertEqual(state["peakMarksTry"]["BTCUSDT"], 103)
+        execute(state, NOW, "BTCUSDT", "sell", 65 / 100 * 102, 102, "test")
+        update_price_extremes(state, {})
+        self.assertEqual(state["peakMarksTry"], {})
 
     def test_pause_and_resume_modes_persist_state(self):
         state = fresh_state()

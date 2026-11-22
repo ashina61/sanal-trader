@@ -55,7 +55,8 @@ def fresh_state():
                 tracked=0, cycles=0, decisionPlan=None,
                 aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"},
                 lastTriggerEvent=None, lastTriggerAt=None,
-                lastScheduledTriggerAt=None)
+                lastScheduledTriggerAt=None, peakMarksTry={},
+                troughMarksTry={}, equityHistory=[], performance={})
 
 def load(path):
     if not path.exists():
@@ -72,6 +73,12 @@ def load(path):
     obj.setdefault("lastTriggerEvent", None)
     obj.setdefault("lastTriggerAt", None)
     obj.setdefault("lastScheduledTriggerAt", None)
+    obj.setdefault("peakMarksTry", {})
+    obj.setdefault("troughMarksTry", {})
+    obj.setdefault("equityHistory", [])
+    obj.setdefault("performance", {})
+    if not isinstance(obj["peakMarksTry"], dict) or not isinstance(obj["troughMarksTry"], dict) or not isinstance(obj["equityHistory"], list):
+        raise ValueError("Invalid virtual performance history")
     if not isinstance(obj["directionStats"], dict):
         raise ValueError("Invalid virtual outcome learning state")
     if not isinstance(obj["shorts"], dict):
@@ -360,6 +367,12 @@ def assess_decision(state, latest, t):
         elif adverse <= -.08:
             exits.append((100 - adverse, pair, "cover", amount,
                           f"SHORT kâr al: düşüş %{abs(adverse)*100:.1f}", technical))
+        elif (state.get("troughMarksTry", {}).get(pair) is not None
+              and 1 - state["troughMarksTry"][pair] / entry >= .035
+              and adverse <= -.008
+              and current / state["troughMarksTry"][pair] - 1 >= .018):
+            exits.append((91, pair, "cover", amount,
+                          "SHORT takip eden kâr koruması: dipten dönüş", technical))
         elif cooled(pair) and technical and technical["score"] >= .50:
             exits.append((80 + technical["score"], pair, "cover", amount,
                           "Yükseliş trendi SHORT pozisyonla ters düştü", technical))
@@ -379,6 +392,12 @@ def assess_decision(state, latest, t):
         elif move >= .08:
             exits.append((100 + move, pair, "sell", amount,
                           f"Spot kâr al: yükseliş %{move*100:.1f}", technical))
+        elif (state.get("peakMarksTry", {}).get(pair) is not None
+              and state["peakMarksTry"][pair] / cost - 1 >= .035
+              and move >= .008
+              and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.018):
+            exits.append((91, pair, "sell", amount,
+                          "LONG takip eden kâr koruması: zirveden dönüş", technical))
         elif cooled(pair) and technical and technical["score"] < -.50:
             exits.append((80 - technical["score"], pair, "sell", amount,
                           "Momentum düşüşe döndü; açık LONG kapatılıyor", technical))
@@ -560,6 +579,66 @@ def pick(state, latest, t):
     return assess_decision(state, latest, t)["order"]
 
 
+def update_price_extremes(state, latest):
+    """Remember only genuinely observed marks for currently open positions."""
+    peaks = state.setdefault("peakMarksTry", {})
+    troughs = state.setdefault("troughMarksTry", {})
+    for pair in list(peaks):
+        if pair not in state["holdings"]:
+            peaks.pop(pair, None)
+    for pair in list(troughs):
+        if pair not in state.get("shorts", {}):
+            troughs.pop(pair, None)
+    for pair, pos in state["holdings"].items():
+        price = numeric(latest.get(pair, {}).get("priceTry"))
+        if price is None or price <= 0:
+            continue
+        old = numeric(peaks.get(pair))
+        if old is None or old <= 0:
+            old = pos["costTry"] / pos["quantity"]
+        peaks[pair] = max(old, price)
+    for pair, pos in state.get("shorts", {}).items():
+        price = numeric(latest.get(pair, {}).get("priceTry"))
+        if price is None or price <= 0:
+            continue
+        old = numeric(troughs.get(pair))
+        if old is None or old <= 0:
+            old = pos["entryPriceTry"]
+        troughs[pair] = min(old, price)
+
+
+def record_performance(state, t):
+    """Only observed simulated equity and closed-trade P&L, never forecasts."""
+    current = numeric(state.get("equityTry"))
+    initial = numeric(state.get("initialCashTry"))
+    if current is None or initial is None or initial <= 0:
+        return
+    peak = max(numeric(state.get("peakEquityTry")) or current, current)
+    state["peakEquityTry"] = peak
+    closed = [item for item in state.get("trades", [])
+              if isinstance(item, dict) and item.get("side") in ("sell", "cover")]
+    wins = sum(1 for item in closed
+               if (numeric(item.get("realizedPnlTry")) or 0) > 0)
+    state["performance"] = {
+        "netTry": round(current - initial, 4),
+        "returnPct": round((current / initial - 1) * 100, 3),
+        "drawdownPct": round(max(0, 1 - current / peak) * 100, 3),
+        "closedTrades": len(closed), "wins": wins,
+        "winRatePct": round(wins * 100 / len(closed), 1) if closed else None,
+        "feesTry": round(state.get("paidFeesTry", 0.0), 4),
+        "realizedTry": round(state.get("realizedTry", 0.0), 4),
+        "openPositions": len(state["holdings"]) + len(state.get("shorts", {})),
+    }
+    points = state.setdefault("equityHistory", [])
+    recent = (as_date(points[-1].get("at"))
+              if points and isinstance(points[-1], dict) else None)
+    if recent and (t - recent).total_seconds() < 120:
+        return
+    points.append({"at": stamp(t), "equityTry": round(current, 4),
+                   "cashTry": round(state["cashTry"], 4)})
+    state["equityHistory"] = points[-576:]
+
+
 def cycle(state, market, t):
     state = json.loads(json.dumps(state))
     state["lastRunAt"] = stamp(t)
@@ -632,6 +711,7 @@ def cycle(state, market, t):
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
         )
         before = equity(state, latest)
+        update_price_extremes(state, latest)
         state["peakEquityTry"] = max(before, state["peakEquityTry"])
         day = t.strftime("%Y-%m-%d")
         if state["day"] != day:
@@ -668,6 +748,7 @@ def cycle(state, market, t):
         state["marksTry"] = {
             pair: latest[pair]["priceTry"] for pair in active if pair in latest
         }
+        record_performance(state, t)
         state["lastSuccessAt"] = stamp(t)
         state["lastError"] = None
     except Exception as exc:
