@@ -459,48 +459,85 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _openCoin(CoinQuote quote) async {
+    if (_manualTradeOpen || _botBusy) return;
     final wallet = _portfolio;
     if (wallet == null) return;
     _manualTradeOpen = true;
-    final success = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => CoinDetailScreen(
-        quote: quote,
-        portfolio: wallet,
-        repository: widget.repository,
-      )),
-    );
-    _manualTradeOpen = false;
-    if (success == true) {
-      await _loadPortfolio();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sanal işlem tamamlandı.')),
+    try {
+      final success = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => CoinDetailScreen(
+          quote: quote,
+          portfolio: wallet,
+          repository: widget.repository,
+        )),
       );
+      if (success == true) {
+        await _loadPortfolio();
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Yerel sanal spot işlem tamamlandı.')),
+        );
+      }
+    } finally {
+      _manualTradeOpen = false;
     }
   }
 
   Future<void> _resetPortfolio() async {
-    final approved = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Portföyü sıfırla?'),
-        content: const Text('Sanal cüzdan ₺650 bakiyeye döner; işlem geçmişi ve botun öğrendikleri silinir. Bot kapatılır. Bu işlem geri alınamaz.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sıfırla')),
-        ],
-      ),
-    );
-    if (approved != true || !mounted) return;
+    // Never reset the local wallet while an automatic paper fill or a
+    // manual order is in flight. This operation does NOT touch the server.
+    if (_botBusy || _manualTradeOpen) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Devam eden sanal işlem bitmeden yerel kasa sıfırlanamaz.'),
+      ));
+      return;
+    }
+    _manualTradeOpen = true;
     try {
-      await widget.repository.reset();
-      await _botStore.clear();
-      if (mounted) setState(() {
-        _botState = BotState.initial();
-        _botMessage = 'Bot ve sanal portföy sıfırlandı.';
-      });
-      await _loadPortfolio();
-    } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sıfırlanamadı: $error')));
+      final approved = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Yalnızca yerel kasayı sıfırla?'),
+          content: const Text(
+            'Tarayıcıdaki yerel sanal cüzdan 650 TL’ye döner; '
+            'YEREL işlem geçmişi ve YEREL botun öğrendikleri silinir. '
+            'Ücretsiz sunucu botunun bakiyesi, LONG/SHORT pozisyonları '
+            've geçmişi KESİNLİKLE ETKİLENMEZ. '
+            'Bu yerel sıfırlama geri alınamaz.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Vazgeç'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Yerel Kasayı Sıfırla'),
+            ),
+          ],
+        ),
+      );
+      if (approved != true || !mounted) return;
+      try {
+        // Disable the local auto bot before mutating its local wallet.
+        await _botStore.save((_botState ?? BotState.initial())
+            .copyWith(enabled: false));
+        await widget.repository.reset();
+        await _botStore.clear();
+        if (!mounted) return;
+        setState(() {
+          _botState = BotState.initial();
+          _botMessage = 'Yalnızca yerel sanal cüzdan sıfırlandı.';
+        });
+        await _loadPortfolio();
+      } catch (error) {
+        if (mounted) {
+          setState(() => _botState = _botState?.copyWith(enabled: false));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Yerel sıfırlama tamamlanamadı: $error'),
+          ));
+        }
+      }
+    } finally {
+      _manualTradeOpen = false;
     }
   }
 
@@ -787,7 +824,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         const SizedBox(height: 18),
         PremiumUpdateTile(
-          version: '0.6.0',
+          version: '0.9.1',
           onTap: _openUpdates,
         ),
 

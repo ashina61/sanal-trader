@@ -2,6 +2,11 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- Manuel spot ve otomatik yerel emrin aynı anda çakışması ile sürmekte olan işlemin ortasında yerel kasa sıfırlanması engellendi.
+- Sıfırlama onayı yerel hesapla sınırlı olduğunu, sunucu botunun kasası ve SHORT pozisyonlarının korunacağını açıkça belirtiyor.
+- Coin detayında yerel spot işlem alanı ile sunucu 1x SHORT işlemleri ayrıldı.
+- Ana Panel'deki Güncelleme Geçmişi etiketi v0.9.1'e güncellendi.
+
 - Ortak sunucu snapshot/parsing, HTTP başarısızlığı, eski şema uyumu, LONG/SHORT görünümü ve geçmiş ekranında gerçek verinin yenilenmesi için testler eklendi.
 
 - Ortak sunucu işlem geçmişi için ValueListenable import eksikliği düzeltildi; Performans ekranı widget testi ortak sunucu durumu parametrelerine uyarlandı.

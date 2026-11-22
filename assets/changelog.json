@@ -16,7 +16,11 @@
         "Yerel portföyün var olan işlem kayıtları ve sunucu bot-data kasası sıfırlanmadı.",
         "Flutter testindeki portföy başlığı yeni yerel cüzdan etiketine uyumlu hâle getirildi.",
         "Flutter analizinde bulunan ValueListenable import eksikliği ve Performans sayfasının yeni sunucu parametrelerine uymayan test kurulumu düzeltildi.",
-        "Yeni ortak sunucu veri kaynağı, nakit/SHORT veri ayrımı, HTTP hata yönetimi, son çalışma gecikmesi ve hareketli işlem geçmişi için 9 Flutter birim ve widget testi eklendi."
+        "Yeni ortak sunucu veri kaynağı, nakit/SHORT veri ayrımı, HTTP hata yönetimi, son çalışma gecikmesi ve hareketli işlem geçmişi için 9 Flutter birim ve widget testi eklendi.",
+        "Yerel işlem detayına girerken otomatik botla eşzamanlı emir riski önlendi; ekran kapatıldığında koruma try/finally ile güvenilir biçimde çözülüyor.",
+        "Yerel cüzdan sıfırlama sürmekte olan emir sırasında engellendi; sunucu kasasına dokunulmadığı onay iletişiminde açıkça gösterildi.",
+        "Coin detaylarında işlemlerin yerel spot AL/SAT olduğu, SHORT'un ayrı sunucu botuyla izlendiği açıklaması eklendi.",
+        "Ana sayfadaki Güncelleme Geçmişi sürüm etiketi 0.6.0 yerine 0.9.1 ile eşitlendi."
       ]
     },
     {

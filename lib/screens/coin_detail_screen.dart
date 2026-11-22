@@ -132,7 +132,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             label: const Text('Botun teknik analizini gör'),
           ),
           const SizedBox(height: 20),
-          Text('Sanal işlem', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+          Text('Yerel sanal SPOT işlemi', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 7),
+          const Text('Buradaki AL/SAT yalnızca tarayıcıdaki yerel kasayı '
+              'etkiler. 1x SHORT işlemleri ayrı sunucu botunda görüntülenir.',
+            style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
           const SizedBox(height: 12),
           SegmentedButton<TradeSide>(
             segments: const [
