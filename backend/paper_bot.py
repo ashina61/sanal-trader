@@ -296,7 +296,7 @@ def execute(state, t, symbol, side, amount, price, reason):
            "priceTry": price, "quantity": quantity, "feeTry": fee,
            "realizedPnlTry": realized, "reason": reason}
     state["trades"] = ([rec] + state["trades"])[:100]
-    log(state, t, ("Sanal AL" if side == "buy" else "Sanal SAT") +
+    log(state, t, ("Sanal SPOT AL" if side == "buy" else "Sanal SPOT SAT") +
         f" {symbol}: {amount:.2f} TL; {reason}")
     return rec
 
@@ -429,14 +429,14 @@ def assess_decision(state, latest, t):
               and move >= .008
               and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.018):
             exits.append((91, pair, "sell", amount,
-                          "LONG takip eden kâr koruması: zirveden dönüş", technical))
+                          "SPOT takip eden kâr koruması: zirveden dönüş", technical))
         elif (cooled(pair) and quick(pair) is not None
               and quick(pair)["momentum1h"] <= -.75 and move > .002):
             exits.append((85, pair, "sell", amount,
-                          "15dk mumları: LONG kâr koruyan hızlı çıkış", technical))
+                          "15dk mumları: SPOT kâr koruyan hızlı çıkış", technical))
         elif cooled(pair) and technical and technical["score"] < -.50:
             exits.append((80 - technical["score"], pair, "sell", amount,
-                          "Momentum düşüşe döndü; açık LONG kapatılıyor", technical))
+                          "Momentum düşüşe döndü; açık SPOT satılıyor", technical))
 
     # EARLY EXPOSURE RELIEF: A portfolio at capacity may stay frozen for
     # hours even when a held coin has a confirmed 4h deterioration. Only
@@ -561,7 +561,7 @@ def assess_decision(state, latest, t):
                         tech["score"])
 
     if used >= total * .65:
-        return wait("Toplam LONG+SHORT maruziyeti %65 sınırında; "
+        return wait("Toplam SPOT+SHORT maruziyeti %65 sınırında; "
                     "uygun güvenli rotasyon adayı yok")
     if state["cashTry"] <= total * .30:
         return wait("Minimum %30 sanal nakit rezervi korunuyor")
@@ -663,7 +663,7 @@ def assess_decision(state, latest, t):
         for score, pair, side, amount, tech in candidates[:5]
     ]
     score, pair, side, amount, tech = candidates[0]
-    mode = "SPOT AL / LONG" if side == "buy" else "SANAL 1x SHORT"
+    mode = "SPOT AL" if side == "buy" else "SANAL 1x SHORT"
     return choose(
         pair, side, amount,
         f"{mode} · {plan['marketRegime']} piyasası · "

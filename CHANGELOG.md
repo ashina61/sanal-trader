@@ -1,3 +1,8 @@
+## 2026-11-23 — Sunucu karar gerekçelerinde Spot / SHORT netliği
+
+- İşlem motorunun sanal AL/SAT günlükleri, karar açıklamaları ve 15dk koruyucu çıkışları artık gerçek spot alım-satım adını kullanır. İç hesaplamada mevcut uzun yön istatistikleri aynı kalır.
+- Sunucu cüzdanı ve açık pozisyonlar değiştirilmedi.
+
 ## 2026-11-23 — Tek kasa arayüzünden eski demo mesajlarını kaldır
 
 - Bot ekranında kalan eski yerel bot/demodan bahseden metinler silindi; yalnızca bir sanal cüzdan ve arka plan botunun otomatik emirleri açıklanıyor.

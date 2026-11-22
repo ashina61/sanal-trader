@@ -13,7 +13,8 @@
         "15dk mumları nedeniyle yapılan erken risk azaltımı AI raporlarında zararı kesme ile karıştırılmaz; RISK_REDUCTION statüsü eklendi.",
         "Eski demo uygulama bileşenleri ana program ve kaynak ağacından temizlenmiş durumda. Tek sunucu sanal kasası ve geçmiş 9 işlem korundu.",
         "Flutter testleri ve Python AI karar testleri yeni etiketlerle güncellendi.",
-        "Bot ekranından artık eski yerel demo açıklamaları tamamen çıkarıldı. Tek sunucu kasası ve yalnızca sunucunun işlem yapabildiği açıkça belirtilir."
+        "Bot ekranından artık eski yerel demo açıklamaları tamamen çıkarıldı. Tek sunucu kasası ve yalnızca sunucunun işlem yapabildiği açıkça belirtilir.",
+        "İşlem motorunun kendi karar gerekçelerinde de SPOT AL/SAT yazılır; normal coin alımı artık sözlü olarak LONG kontratıyla karıştırılmaz."
       ]
     },
     {
