@@ -15,7 +15,9 @@
         "SHORT zarar kes (%6 ters yön), kâr alma (%8 düşüş), 1x teminat güvenliği ve trend dönüşü için sanal kapatma kuralları eklendi.",
         "Toplam portföy ve maruziyet hesapları LONG + SHORT'u birlikte değerlendiriyor; yeni işlem limiti koruyucu kapatmayı engellemiyor.",
         "Güçlü yükselişte LONG, daha sert doğrulanmış düşüşte SHORT adayları seçiliyor; BTC piyasa yönü ve oynaklık filtreleri uygulanıyor.",
-        "Aynı coinde aynı anda LONG ve SHORT açılmıyor. Tek emir %12, maksimum toplam maruziyet %65, nakit rezervi %30 korunuyor."
+        "Aynı coinde aynı anda LONG ve SHORT açılmıyor. Tek emir %12, maksimum toplam maruziyet %65, nakit rezervi %30 korunuyor.",
+        "SHORT fiyat düşüşüyle kâr, yükselişle zarar, giriş/çıkış komisyonu, teminat koruması, günlük sınır aşılsa da kapama ve eski kayıtların açılması için birim testleri eklendi.",
+        "Yapay düşüş verisiyle uçtan uca testte yalnızca sanal SHORT emir üretilmesi doğrulanacak."
       ]
     },
     {
