@@ -13,6 +13,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from backend.ai_brain import apply_ai_brain
+
 from backend.short_positions import (short_value, exposure, open_short,
     close_short, learn_closed_direction, direction_edge)
 
@@ -50,7 +52,8 @@ def fresh_state():
                 lastOrder={}, realizedTry=0.0, paidFeesTry=0.0, histories={},
                 lastSuccessAt=None, lastRunAt=None, lastError=None, marksTry={},
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
-                tracked=0, cycles=0, decisionPlan=None)
+                tracked=0, cycles=0, decisionPlan=None,
+                aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"})
 
 def load(path):
     if not path.exists():
@@ -470,6 +473,11 @@ def assess_decision(state, latest, t):
         primary = next(iter(plan["rejectReasons"].items()), None)
         detail = f" En sık neden: {primary[0]} ({primary[1]} coin)." if primary else ""
         return wait("Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı." + detail)
+    plan["aiChoices"] = [
+        {"symbol": pair, "action": "BUY" if side == "buy" else "SHORT",
+         "amountTry": amount, "score": round(score, 3)}
+        for score, pair, side, amount, tech in candidates[:5]
+    ]
     score, pair, side, amount, tech = candidates[0]
     mode = "SPOT AL / LONG" if side == "buy" else "SANAL 1x SHORT"
     return choose(
@@ -564,9 +572,15 @@ def cycle(state, market, t):
             state["day"] = day
             state["todayOrders"] = 0
         planned = assess_decision(state, latest, t)
+        planned, ai_meta = apply_ai_brain(
+            planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
+            model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
+        state["aiBrain"] = ai_meta
         state["decisionPlan"] = {
-            key: value for key, value in planned.items() if key != "order"
+            key: value for key, value in planned.items()
+            if key not in ("order", "aiChoices")
         }
+        state["decisionPlan"]["aiBrain"] = ai_meta
         state["decisionPlan"]["universe"] = len(eligible_pairs)
         state["decisionPlan"]["historyPairs"] = state["historyPairs"]
         choice = planned["order"]
