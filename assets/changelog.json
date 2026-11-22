@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.0",
+      "date": "2026-11-22",
+      "title": "LONG / SHORT sanal işlem motoru",
+      "details": [
+        "1x sanal teminatlı SHORT pozisyon açma, fiyatla değerleme ve alarak kapatma motoru eklendi.",
+        "SHORT fiyat düşüşünde kâr, yükselişinde zarar yazar; sanal komisyonları ve kapanış net sonucunu ayrı kaydeder.",
+        "Teminatı aşan aşırı fiyat hareketinde sanal kayıp pozisyona ayrılan teminatla sınırlanır; gerçek vadeli borsa borcu oluşmaz.",
+        "Önceki LONG sanal cüzdanları korunur. Gerçek borsa vadeli emri veya kaldıraçlı ürün bağlantısı kurulmaz."
+      ]
+    },
+    {
       "version": "0.8.0",
       "date": "2026-11-22",
       "title": "Ücretsiz tarayıcıdan bağımsız sanal işlem botu",

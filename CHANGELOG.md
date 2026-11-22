@@ -1,5 +1,11 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
+
+- Ayrı teminatlı 1x sanal SHORT aç/kapat, komisyonlu net sonuç ve portföy değerlemesi motoru eklendi.
+- Eski LONG cüzdanı silinmez. Spot fiyatlarla yapılan bu model gerçek vadeli kontrat, funding, borçlanma bedeli veya likidasyon motoru değildir.
+
+
 ## v0.8.0 — 2026-11-22: Ücretsiz zamanlanmış sunucu sanal botu
 
 - Tarayıcıdan bağımsız GitHub Actions botu yaklaşık 5 dakikada bir Binance public spot fiyatlarını kullanarak yalnızca sanal işlem denemeleri yapar.
