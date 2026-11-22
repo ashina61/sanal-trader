@@ -50,8 +50,7 @@ class MarketService {
     try {
       final quotes = await _fetchBinanceQuotes();
       for (final q in quotes) {
-        final old = _snapshots[q.id];
-        if (old == null || !old.updatedAt.isAfter(q.updatedAt)) _snapshots[q.id] = q;
+        _snapshots[q.id] = _preferNewerWithHistory(_snapshots[q.id], q);
       }
       _sourceStatus = 'Binance • güncel REST fiyatı';
       return quotes;
@@ -59,8 +58,7 @@ class MarketService {
       try {
         final quotes = await _fetchCoinGeckoQuotes();
         for (final q in quotes) {
-          final old = _snapshots[q.id];
-          if (old == null || !old.updatedAt.isAfter(q.updatedAt)) _snapshots[q.id] = q;
+          _snapshots[q.id] = _preferNewerWithHistory(_snapshots[q.id], q);
         }
         _sourceStatus = 'CoinGecko • yedek veri (canlı değil)';
         return quotes;
@@ -69,6 +67,24 @@ class MarketService {
         throw Exception('Binance: $binanceError • CoinGecko: $geckoError');
       }
     }
+  }
+
+  CoinQuote _preferNewerWithHistory(CoinQuote? older, CoinQuote candidate) {
+    if (older == null || !older.updatedAt.isAfter(candidate.updatedAt)) {
+      return candidate;
+    }
+    if (candidate.sparkline.length <= older.sparkline.length) return older;
+    return CoinQuote(
+      id: older.id, symbol: older.symbol, name: older.name,
+      priceTry: older.priceTry, change24h: older.change24h,
+      updatedAt: older.updatedAt,
+      sparkline: [
+        ...candidate.sparkline.take(candidate.sparkline.length - 1),
+        older.priceTry,
+      ],
+      volume24hUsdt: candidate.volume24hUsdt > 0
+          ? candidate.volume24hUsdt : older.volume24hUsdt,
+    );
   }
 
   Future<List<CoinQuote>> _fetchBinanceQuotes() async {

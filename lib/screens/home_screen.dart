@@ -165,6 +165,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           final old = _quotes[quote.id];
           if (old == null || !old.updatedAt.isAfter(quote.updatedAt)) {
             _quotes[quote.id] = quote;
+          } else if (quote.sparkline.length > old.sparkline.length) {
+            // History can arrive after fresher WebSocket ticks. Keep live price.
+            _quotes[quote.id] = CoinQuote(
+              id: old.id, symbol: old.symbol, name: old.name,
+              priceTry: old.priceTry, change24h: old.change24h,
+              updatedAt: old.updatedAt,
+              sparkline: [
+                ...quote.sparkline.take(quote.sparkline.length - 1),
+                old.priceTry,
+              ],
+              volume24hUsdt: quote.volume24hUsdt > 0
+                  ? quote.volume24hUsdt : old.volume24hUsdt,
+            );
           }
         }
         _marketFetchedAt = DateTime.now();
