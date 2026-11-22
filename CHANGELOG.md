@@ -1,3 +1,7 @@
+## 2026-11-23 — 15dk rotasyon regresyon düzeltmesi
+
+- İlk Python testinde bulunan rotasyon aday listesi / mantıksal gösterge isim çakışması düzeltildi. Her simülasyonda testler geçmeden canlı kasa üzerine yeni sürüm uygulanmayacak.
+
 ## 2026-11-23 — Emir kilidi ve kısa vadeli hızlandırma
 
 - Botun gerçekten işlemsiz kalma nedeni: 8 emir/gün sınırı dolmuştu ve risk motoru aday taramadan BEKLE diyordu. 16 kontrollü emir/gün sınırıyla düzeltildi.

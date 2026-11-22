@@ -501,10 +501,10 @@ def assess_decision(state, latest, t):
                     pnl_ratio = quote["priceTry"] / entry - 1
                     # Avoid panic-selling meaningful losses to chase a pump.
                     fast = quick(pair)
-                    fading = (tech["score"] <= .35 and tech["momentum6"] < 0)
+                    hourly_fading = (tech["score"] <= .35 and tech["momentum6"] < 0)
                     fast_fading = fast is not None and fast["momentum1h"] <= -.45
                     if (-.0075 <= pnl_ratio <= .015
-                            and (fading or fast_fading)
+                            and (hourly_fading or fast_fading)
                             and best_score - tech["score"] >= .50):
                         fading.append((tech["score"], pair, tech))
                 if fading:
