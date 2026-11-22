@@ -13,7 +13,9 @@
         "Önceki LONG sanal cüzdanları korunur. Gerçek borsa vadeli emri veya kaldıraçlı ürün bağlantısı kurulmaz.",
         "Sunucu sanal botu eski kayıtları bozmadan SHORT pozisyonları yükleyip fiyatlayabiliyor.",
         "SHORT zarar kes (%6 ters yön), kâr alma (%8 düşüş), 1x teminat güvenliği ve trend dönüşü için sanal kapatma kuralları eklendi.",
-        "Toplam portföy ve maruziyet hesapları LONG + SHORT'u birlikte değerlendiriyor; yeni işlem limiti koruyucu kapatmayı engellemiyor."
+        "Toplam portföy ve maruziyet hesapları LONG + SHORT'u birlikte değerlendiriyor; yeni işlem limiti koruyucu kapatmayı engellemiyor.",
+        "Güçlü yükselişte LONG, daha sert doğrulanmış düşüşte SHORT adayları seçiliyor; BTC piyasa yönü ve oynaklık filtreleri uygulanıyor.",
+        "Aynı coinde aynı anda LONG ve SHORT açılmıyor. Tek emir %12, maksimum toplam maruziyet %65, nakit rezervi %30 korunuyor."
       ]
     },
     {

@@ -2,6 +2,9 @@
 
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
+- Botun otomatik seçiminde güçlü düşüş trendi (teknik puan ≤ -0,70) için sanal SHORT, yükselişte LONG sinyali uygulanır.
+- Aynı coinde ters yönlü iki pozisyon engellenir; toplam maruziyet, nakit rezervi, BTC rejimi ve volatilite sınırları korunur.
+
 - SHORT ayrı sanal teminatı ve fiyat farkıyla portföy değerine katılır, eski cüzdanlar uyumlu yüklenir.
 - SHORT ters fiyat %6 zarar kes, %8 olumlu fiyat hareketinde kâr alma, teminat ve trend dönüşü kontrolü uygulanır.
 - LONG/SHORT toplam maruziyet hesaplanır; riskten çıkışlar günlük yeni emir sınırı aşıldığında da kontrol edilir.

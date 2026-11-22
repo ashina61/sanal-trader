@@ -317,27 +317,37 @@ def pick(state, latest, t):
     for pair, q in latest.items():
         if not cooled(pair):
             continue
+        # Never hold both long and short on the same reference asset.
+        if pair in state["holdings"] or pair in state.get("shorts", {}):
+            continue
         tech = indicators(state["histories"].get(pair, {}).get("prices", []))
-        if tech is None or tech["direction"] == "down" or tech["score"] < .55:
-            continue
-        if tech["volatility"] > 18:
-            continue
-        if pair != "BTCUSDT" and btc and btc["direction"] == "down":
+        if tech is None or tech["volatility"] > 18:
             continue
         price = q["priceTry"]
-        own = state["holdings"].get(pair, {}).get("quantity", 0) * price
         upper = min(total * .12, state["cashTry"] / (1 + FEE),
                     (state["cashTry"] - total * .30) / (1 + FEE),
-                    total * .25 - own, total * .65 - used_exposure)
+                    total * .25, total * .65 - used_exposure)
         riskfactor = .4 if tech["volatility"] > 9 else (
             .65 if tech["volatility"] > 6 else 1.0)
-        amt = math.floor(upper * riskfactor * 100) / 100
-        if amt >= MIN_ORDER:
-            choices.append((tech["score"], pair, amt, tech))
+        amount = math.floor(max(0, upper) * riskfactor * 100) / 100
+        if amount < MIN_ORDER:
+            continue
+        # The SHORT side needs stronger bearish evidence than LONG, while
+        # BTC's rising regime vetoes weaker altcoin bearish setups.
+        if tech["direction"] == "up" and tech["score"] >= .55:
+            if pair != "BTCUSDT" and btc and btc["direction"] == "down":
+                continue
+            choices.append((tech["score"], pair, "buy", amount, tech))
+        elif tech["direction"] == "down" and tech["score"] <= -.70:
+            if pair != "BTCUSDT" and btc and btc["direction"] == "up":
+                continue
+            choices.append((-tech["score"], pair, "short", amount, tech))
     if not choices:
         return None
-    score, pair, amt, tech = max(choices)
-    return pair, "buy", amt, f"Trend {tech['direction']}, puan {score:.2f}"
+    _, pair, side, amount, tech = max(choices, key=lambda item: item[0])
+    kind = "LONG" if side == "buy" else "SHORT"
+    return pair, side, amount, (
+        f"1x {kind}; trend {tech['direction']}, sinyal {tech['score']:.2f}")
 
 def cycle(state, market, t):
     state = json.loads(json.dumps(state))
