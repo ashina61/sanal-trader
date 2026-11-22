@@ -18,7 +18,9 @@
         "Aynı coinde aynı anda LONG ve SHORT açılmıyor. Tek emir %12, maksimum toplam maruziyet %65, nakit rezervi %30 korunuyor.",
         "SHORT fiyat düşüşüyle kâr, yükselişle zarar, giriş/çıkış komisyonu, teminat koruması, günlük sınır aşılsa da kapama ve eski kayıtların açılması için birim testleri eklendi.",
         "Yapay düşüş verisiyle uçtan uca testte yalnızca sanal SHORT emir üretilmesi doğrulanacak.",
-        "GitHub Actions zamanlayıcısının Python botunu paket modülü olarak başlatması sağlandı; sunucu modül erişim hatası düzeltildi."
+        "GitHub Actions zamanlayıcısının Python botunu paket modülü olarak başlatması sağlandı; sunucu modül erişim hatası düzeltildi.",
+        "Sunucu botu kartına açık LONG/SHORT pozisyon sayıları, kısa pozisyon teminatı, son kaydedilen fiyat ve sanal işlemlerde doğru yön etiketleri eklendi.",
+        "Uygulama sürümü 0.9.0+9 olarak güncellendi."
       ]
     },
     {

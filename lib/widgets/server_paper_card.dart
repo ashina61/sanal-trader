@@ -81,6 +81,14 @@ class _ServerPaperCardState extends State<ServerPaperCard> {
     return x == null ? '—' : formatTry(x);
   }
 
+  String _side(dynamic value) => switch (value) {
+    'buy' => 'LONG AÇ',
+    'sell' => 'LONG KAPAT',
+    'short' => 'SHORT AÇ',
+    'cover' => 'SHORT KAPAT',
+    _ => 'SANAL',
+  };
+
   @override
   Widget build(BuildContext context) {
     final state = _data;
@@ -91,7 +99,13 @@ class _ServerPaperCardState extends State<ServerPaperCard> {
     final enabled = state?['enabled'] == true;
     final healthy = enabled && fresh && state?['lastError'] == null;
     final list = state?['trades'];
-    final trades = list is List ? list.whereType<Map>().take(3).toList() : <Map>[];
+    final trades = list is List ? list.whereType<Map>().take(5).toList() : <Map>[];
+    final longs = state?['holdings'] is Map
+        ? state!['holdings'] as Map : const <String, dynamic>{};
+    final shorts = state?['shorts'] is Map
+        ? state!['shorts'] as Map : const <String, dynamic>{};
+    final marks = state?['marksTry'] is Map
+        ? state!['marksTry'] as Map : const <String, dynamic>{};
 
     return PremiumSurface(
       gradient: const LinearGradient(
@@ -156,6 +170,34 @@ class _ServerPaperCardState extends State<ServerPaperCard> {
             Expanded(child: _metric('Sanal işlem sayısı',
                 '${state['trades'] is List ? (state['trades'] as List).length : 0}')),
           ]),
+          const SizedBox(height: 12),
+          Row(children: [
+            Expanded(child: _metric('Açık LONG', '${longs.length}')),
+            Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
+          ]),
+          if (longs.isNotEmpty || shorts.isNotEmpty) ...[
+            const Divider(height: 22, color: PremiumColors.border),
+            const Text('Açık sanal pozisyonlar',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            for (final item in longs.entries.take(6))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Text('LONG ${item.key} · '
+                  '${item.value is Map ? _try((item.value as Map)['costTry']) : '—'} maliyet',
+                  style: const TextStyle(fontSize: 11,
+                    color: PremiumColors.emerald)),
+              ),
+            for (final item in shorts.entries.take(6))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Text('SHORT ${item.key} · '
+                  '${item.value is Map ? _try((item.value as Map)['marginTry']) : '—'} teminat'
+                  '${marks[item.key] is num ? ' · son fiyat ${_try(marks[item.key])}' : ''}',
+                  style: const TextStyle(fontSize: 11,
+                    color: PremiumColors.gold)),
+              ),
+          ],
           const SizedBox(height: 13),
           Text(last == null
               ? 'Henüz başarılı piyasa kontrolü yok'
@@ -176,7 +218,7 @@ class _ServerPaperCardState extends State<ServerPaperCard> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  '${item['side'] == 'buy' ? 'AL' : 'SAT'} '
+                  '${_side(item['side'])} '
                   '${item['symbol'] ?? '?'} · ${_try(item['grossTry'])}',
                   style: const TextStyle(fontSize: 11),
                 ),
@@ -210,6 +252,8 @@ class _ServerPaperCardState extends State<ServerPaperCard> {
           style: TextButton.styleFrom(foregroundColor: PremiumColors.gold),
         ),
         const Text(
+          'Sunucu botunda 1x sanal LONG/SHORT bulunur; gerçek '
+          'vadeli işlem, borç veya funding hesabı yoktur. '
           'Ücretsiz GitHub zamanlaması yaklaşık 5 dakikada bir çalışır; '
           'gecikme veya duraksama olabilir. Aç/Kapat komutları şimdilik '
           'GitHub Actions ekranındadır; aşağıdaki anahtar yalnızca yerel botu yönetir.',

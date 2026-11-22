@@ -47,7 +47,7 @@ def fresh_state():
                 initialCashTry=INITIAL, equityTry=INITIAL, peakEquityTry=INITIAL,
                 holdings={}, shorts={}, trades=[], journal=[], day="", todayOrders=0,
                 lastOrder={}, realizedTry=0.0, paidFeesTry=0.0, histories={},
-                lastSuccessAt=None, lastRunAt=None, lastError=None,
+                lastSuccessAt=None, lastRunAt=None, lastError=None, marksTry={},
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
                 tracked=0, cycles=0)
 
@@ -420,6 +420,11 @@ def cycle(state, market, t):
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 "güvenli sanal emir sinyali oluşmadı.")
         state["equityTry"] = equity(state, latest)
+        # Store last observed marks of open paper positions for Flutter.
+        active = set(state["holdings"]) | set(state.get("shorts", {}))
+        state["marksTry"] = {
+            pair: latest[pair]["priceTry"] for pair in active if pair in latest
+        }
         state["lastSuccessAt"] = stamp(t)
         state["lastError"] = None
     except Exception as exc:
