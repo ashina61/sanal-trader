@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.4",
+      "date": "2026-11-22",
+      "title": "Ücretsiz Groq yapay zekâ karar katmanı",
+      "details": [
+        "Sunucu sanal trading botuna opsiyonel Groq gpt-oss-20b karar katmanı eklendi; gerçek para veya borsa API bağlantısı yoktur.",
+        "AI sadece strateji motorunun önceden risk onayı verdiği ilk beş SPOT AL veya 1x SHORT adayından seçim yapabilir veya BEKLE diyebilir.",
+        "AI, stop-loss, kâr al ve teminat koruması kapsamında verilen satış/kapatma emirlerini engelleyemez.",
+        "Ücretsiz Groq API anahtarı GitHub Actions secrets içinde GROQ_API_KEY adıyla saklanır; uygulama arayüzünde veya depoda yayınlanmaz.",
+        "Anahtar yoksa veya AI hata verirse mevcut kural tabanlı işlem sistemi çalışmaya devam eder. AI durum ve seçim gerekçesi bot-data karar kaydına yazılır.",
+        "AI seçimi, yetersiz veri veya risk sınırları nedeniyle oluşan güvenli BEKLE kararını işlem açmaya dönüştüremez.",
+        "Yeni AI testleri eklendi; önceki sanal portföy, açık pozisyonlar ve işlemler korunmuştur.",
+        "GitHub Actions beş dakikalık schedule için kesintisiz çalışma garantisi vermez; başka altyapı sorunu ayrıca çözülmelidir."
+      ]
+    },
+    {
       "version": "0.9.3",
       "date": "2026-11-22",
       "title": "Bot çalışmıyor teşhisi ve zamanlama iyileştirmesi",
