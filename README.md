@@ -39,7 +39,7 @@ Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 - Geçmiş veriden eğitim başarılı değilse **bot yeni AL emri açmaz**; güvenli şekilde bekler. Kullanıcı Bot sekmesinden durdurabilir.
 - Canlı olarak yeni fiyatlar geldikçe sonraki fiyatla karşılaştırılmış tahminlere göre strateji ağırlıkları güncellenir. Sonuçlar bu tarayıcıda saklanır.
 - Piyasa sekmesinde coin arama ve gerçek USDT hacmine göre sıralama bulunur. Çok küçük tokenlerin TL fiyatı yeterli ondalık hassasiyette gösterilir.
-- Binance API/CORS/ağ/rate-limit sorunlarında liste 6 coinlik CoinGecko yedeğine dönebilir; sahte fiyat oluşturulmaz.
+- Binance API/CORS/ağ/rate-limit sorunlarında CoinGecko'nun piyasa değeri sıralamasındaki uygun, hacimli **en fazla 72 coinlik yedek listesi** denenir. Bu veri periyodik yenilenir; WebSocket kadar canlı değildir. Sahte fiyat oluşturulmaz.
 
 **Sınır:** Tarayıcı kapalıyken bot işlemez. 7/24 işlem ve cihazlar arası güvenilir öğrenme için sunucu tarafı altyapı gerekir.
 
