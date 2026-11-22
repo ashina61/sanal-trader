@@ -1,7 +1,7 @@
 name: sanal_trader
 publish_to: 'none'
 description: Gerçek kripto fiyatlarıyla, tamamen sanal parayla işlem yapma uygulaması.
-version: 0.9.6+13
+version: 0.9.7+14
 
 environment:
   sdk: '>=3.6.0 <4.0.0'

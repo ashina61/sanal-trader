@@ -11,6 +11,7 @@ import '../services/bot_training.dart';
 import '../services/walk_forward_backtest.dart';
 import 'bot_dashboard.dart';
 import '../widgets/server_paper_card.dart';
+import '../widgets/server_paper_overview.dart';
 import '../services/server_paper_repository.dart';
 import 'market_radar_screen.dart';
 import 'bot_performance_screen.dart';
@@ -72,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _loadPortfolio();
     _loadServer();
     _serverTimer = Timer.periodic(
-      const Duration(minutes: 2), (_) => _loadServer(),
+      const Duration(minutes: 1), (_) => _loadServer(),
     );
     _loadBot();
     _loadMarket();
@@ -729,14 +730,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
       children: [
-        _serverSummary(),
-        const SizedBox(height: 12),
-        const Text('YEREL / TARAYICI SANAL CÜZDANI',
-          style: TextStyle(color: PremiumColors.muted,
-              fontSize: 11, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 8),
-        _walletCard(),
-        const SizedBox(height: 24),
+        ServerPaperOverview(
+          snapshot: _serverSnapshot,
+          loading: _serverBusy,
+          error: _serverError,
+          onOpenBot: () => setState(() => _tab = 3),
+          onOpenTrades: _openServerTrades,
+          onRefresh: _loadServer,
+        ),
+        const SizedBox(height: 13),
+        Card(
+          color: PremiumColors.panel,
+          child: ExpansionTile(
+            initiallyExpanded: false,
+            title: const Text('Yerel demo kasası · ayrı hesap',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+            subtitle: const Text('Ana botun değerine eklenmez',
+              style: TextStyle(fontSize: 10, color: PremiumColors.muted)),
+            childrenPadding: const EdgeInsets.all(10),
+            children: [_walletCard()],
+          ),
+        ),
+        const SizedBox(height: 18),
         PremiumSectionTitle(
           title: 'Piyasa Takip Listesi',
           trailing: TextButton(
@@ -798,18 +813,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               color: PremiumColors.muted, fontSize: 11)),
         ]),
         const SizedBox(height: 23),
-        PremiumSectionTitle(
-          title: 'Uzman Bot',
-          trailing: const Text('ADAPTİF ANALİZ',
-            style: TextStyle(
-              color: PremiumColors.gold, fontWeight: FontWeight.w800,
-              fontSize: 10, letterSpacing: .4)),
-        ),
+        PremiumSectionTitle(title: 'Otonom Bot Kontrolü'),
         const SizedBox(height: 10),
-        PremiumBotOverview(
-          bot: _botState,
-          btc: btc,
-          onTap: () => setState(() => _tab = 3),
+        PremiumSurface(
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.smart_toy_outlined,
+              color: PremiumColors.gold),
+            title: const Text('Ana bot · Groq + sunucu',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+            subtitle: Text(
+              _serverSnapshot?.decisionPlan['reason']?.toString() ??
+                'Son sanal piyasa kararı bekleniyor',
+              maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: PremiumColors.muted,
+                fontSize: 11)),
+            trailing: const Icon(Icons.chevron_right,
+              color: PremiumColors.gold),
+            onTap: () => setState(() => _tab = 3),
+          ),
         ),
         const SizedBox(height: 22),
         PremiumSectionTitle(title: 'Teknik Göstergeler (BTC)'),
@@ -826,7 +848,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         const SizedBox(height: 18),
         PremiumUpdateTile(
-          version: '0.9.1',
+          version: '0.9.7',
           onTap: _openUpdates,
         ),
 
@@ -836,55 +858,62 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _holdingsList() {
     final wallet = _portfolio;
-    if (wallet == null) return ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
-      SizedBox(height: 60), Center(child: CircularProgressIndicator()),
-    ]);
-    final holdings = wallet.holdings.entries.where((entry) => entry.value.quantity > 0).toList();
+    final holdings = wallet?.holdings.entries
+        .where((entry) => entry.value.quantity > 0).toList() ?? [];
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
-        const PremiumSectionTitle(title: 'Yerel / Tarayıcı Portföyü'),
-        const SizedBox(height: 8),
-        _walletCard(),
-        const SizedBox(height: 18),
-        const PremiumSectionTitle(title: 'Varlıklarım'),
-        const SizedBox(height: 10),
-        const SizedBox(height: 8),
-        _infoLine('Kullanılabilir bakiye', formatTry(wallet.cashTry)),
-        _infoLine('Açık pozisyon maliyeti', formatTry(wallet.investedCostTry)),
-        _infoLine('Gerçekleşmiş kâr/zarar', formatTry(wallet.realizedPnlTry)),
-        const SizedBox(height: 10),
-        if (holdings.isEmpty) const Padding(
-          padding: EdgeInsets.only(top: 60),
-          child: Center(child: Text('Henüz coin almadın. Piyasa sekmesinden dene.', style: TextStyle(color: Colors.white54))),
+        ServerPaperPositionsPanel(
+          snapshot: _serverSnapshot,
+          onOpenTrades: _openServerTrades,
         ),
-        for (final item in holdings)
-          Card(
-            color: PremiumColors.panel,
-            child: ListTile(
-              title: Text(_quotes[item.key]?.symbol ?? item.key.toUpperCase()),
-              subtitle: Text('${formatQuantity(item.value.quantity)} adet · Maliyet ${formatTry(item.value.costTry)}'),
-              trailing: Text(_quotes[item.key] == null
-                  ? 'Fiyat yok'
-                  : !_quotes[item.key]!.isFresh
-                    ? 'Fiyat bayat'
-                    : formatTry(item.value.quantity * _quotes[item.key]!.priceTry)),
-              onTap: _quotes[item.key]?.isFresh != true
-                  ? null : () => _openCoin(_quotes[item.key]!),
-            ),
-          ),
-        const SizedBox(height: 24),
-        const PremiumSectionTitle(title: 'Sunucu Botunun Ayrı Sanal Kasası'),
-        const SizedBox(height: 9),
-        _serverSummary(),
-        const SizedBox(height: 7),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: _openServerTrades,
-            icon: const Icon(Icons.receipt_long_outlined),
-            label: const Text('Sunucu LONG/SHORT işlem kayıtları'),
+        const SizedBox(height: 12),
+        Card(
+          color: PremiumColors.panel,
+          child: ExpansionTile(
+            initiallyExpanded: false,
+            title: const Text('Yerel demo portföyü · ayrı hesap',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+            subtitle: const Text('Ana sunucu cüzdanından bağımsızdır',
+              style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
+            childrenPadding: const EdgeInsets.all(12),
+            children: [
+              if (wallet == null)
+                const Padding(padding: EdgeInsets.all(15),
+                  child: Center(child: CircularProgressIndicator())),
+              if (wallet != null) ...[
+                _walletCard(),
+                const SizedBox(height: 12),
+                _infoLine('Kullanılabilir bakiye', formatTry(wallet.cashTry)),
+                _infoLine('Açık pozisyon maliyeti',
+                  formatTry(wallet.investedCostTry)),
+                _infoLine('Gerçekleşmiş kâr/zarar',
+                  formatTry(wallet.realizedPnlTry)),
+                if (holdings.isEmpty)
+                  const Padding(padding: EdgeInsets.all(12),
+                    child: Text('Yerel demo pozisyonu yok.',
+                      style: TextStyle(color: PremiumColors.muted))),
+                for (final item in holdings)
+                  Card(color: PremiumColors.panelRaised,
+                    child: ListTile(
+                      title: Text(_quotes[item.key]?.symbol
+                          ?? item.key.toUpperCase()),
+                      subtitle: Text(
+                        '${formatQuantity(item.value.quantity)} adet · '
+                        'Maliyet ${formatTry(item.value.costTry)}'),
+                      trailing: Text(_quotes[item.key] == null
+                          ? 'Fiyat yok'
+                          : !_quotes[item.key]!.isFresh
+                              ? 'Fiyat bayat'
+                              : formatTry(item.value.quantity
+                                  * _quotes[item.key]!.priceTry)),
+                      onTap: _quotes[item.key]?.isFresh != true
+                          ? null : () => _openCoin(_quotes[item.key]!),
+                    ),
+                  ),
+              ],
+            ],
           ),
         ),
       ],

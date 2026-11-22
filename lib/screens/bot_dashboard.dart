@@ -69,6 +69,16 @@ class BotDashboard extends StatelessWidget {
           serverBotCard!,
           const SizedBox(height: 18),
         ],
+        Card(
+          color: PremiumColors.panel,
+          child: ExpansionTile(
+            initiallyExpanded: false,
+            title: const Text('Gelişmiş · yerel deneme botu',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+            subtitle: const Text('Ana sunucu botunu etkilemez',
+              style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
+            childrenPadding: const EdgeInsets.all(12),
+            children: [
         Text('Yerel Bot · Yalnızca Tarayıcı Açıkken', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         Card(
@@ -340,8 +350,12 @@ class BotDashboard extends StatelessWidget {
                 style: const TextStyle(fontSize: 11, color: PremiumColors.muted)),
             )),
         const SizedBox(height: 14),
-        const Text('Not: Bu site kapanınca bot durur; yeniden açıldığında yalnızca yeni fiyatlardan devam eder. Fiyat sağlayıcısı hata verirse işlem yapılmaz. Portföy ile bot verileri bu tarayıcıda saklanır.',
-            style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+        const Text('Bu eski yerel bot yalnızca tarayıcı açıkken çalışır. '
+          'Ana sunucu botu ve ana kasa etkilenmez.',
+          style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+            ],
+          ),
+        ),
       ],
     );
   }

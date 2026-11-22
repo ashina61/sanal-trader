@@ -1,3 +1,10 @@
+## 2026-11-23 — Arayüz tek ana sunucu botu etrafında toplandı
+
+- Panelde ana sanal kasa, sunucu botu performansı ve Groq AI kararları öncelikli; yerel demo cüzdanı ayrı, kapalı bölümde gösterilir.
+- Portföy sekmesi sunucu LONG/SHORT pozisyonlarını ilk sırada açar. Yerel cüzdan mevcut verileri silinmeden ikincil panele taşındı.
+- Bot sekmesindeki eski tarayıcı botu varsayılan kapalı gelişmiş bölüm altında; ana sunucu botundan ve kasasından bağımsız.
+- Sunucu senkronizasyonu uygulama açıkken dakikada bir yapılır. Gerçek sanal işlem veya kâr uydurulmaz.
+
 ## 2026-11-23 — Tek sanal bot ana kartı
 
 - Sunucu botu için ana ekran/kasa eğrisi/AI kararı/son işlem ve LONG/SHORT pozisyon kartları oluşturuldu. Tüm metrikler tek `ServerPaperSnapshot` üzerinden gelir.
