@@ -48,7 +48,7 @@ class BotDashboard extends StatelessWidget {
               Text(
                 active
                     ? (busy ? 'Piyasa inceleniyor...' : (lastStatus ?? 'Yeni veriler bekleniyor.'))
-                    : 'İlk açılışta kapalıdır. Başlatmak için onay gerekir.',
+                    : 'Bot durduruldu. İstediğin zaman yeniden başlatabilirsin.',
                 style: const TextStyle(fontSize: 13, color: Colors.white70),
               ),
               if (error != null) ...[

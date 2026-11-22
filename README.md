@@ -4,6 +4,17 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 
 > **Hiçbir yerde gerçek emir, borsa hesabı, para yatırma, para çekme veya cüzdan anahtarı yoktur.** Bu uygulama bir paper-trading simülatörüdür; yatırım tavsiyesi değildir.
 
+## Canlı piyasa ve otomatik bot
+
+**Canlı web:** https://ashina61.github.io/sanal-trader/
+
+- 6 coin için Binance public **WebSocket miniTicker** ve gerçek **USDT/TRY** piyasa kuru ile TL fiyatları güncellenir; işlem API anahtarı yoktur.
+- Açılışta Binance REST üzerinden 7 günlük saatlik geçmiş ve güncel fiyatlar alınır. Erişim sorunu olursa CoinGecko yedek kaynaktır. **İkisi de erişilemezse işlem yapılmaz**.
+- Kullanıcının bu talebiyle kişisel sanal bot **v2 ilk açılışında otomatik etkinleşir**. Bot sekmesindeki anahtardan istediğin zaman durdurabilirsin; durdurma kararı sonraki açılışlarda korunur.
+- Uygulama açıkken bot 45 saniyelik döngülerle yeni piyasa fırsatlarını değerlendirir. Her döngüde **en fazla bir sanal emir** verebilir; işlem yoksa sinyal ve risk sınırları beklenir.
+- Fiyatlar **canlı işlem garantisi değildir**; WebSocket bağlantısı kopabilir, piyasa verileri engellenebilir. Sitede **CANLI** veya yedek kaynak durumu gösterilir.
+- GitHub Pages **arka plan bot sunucusu değildir**. Tarayıcı kapanınca bot çalışmaz, kapalı kaldığı süre için geriye dönük işlem uydurulmaz.
+
 ## Sitede öğrenen bot (sanal işlemler)
 
 **Web:** https://ashina61.github.io/sanal-trader/

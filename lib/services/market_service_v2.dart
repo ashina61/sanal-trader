@@ -209,7 +209,6 @@ class MarketService {
   void _onMarketMessage(dynamic raw) {
     final tick = MarketMiniTick.parse(raw);
     if (tick == null) return;
-    _lastTickTime = DateTime.now().toUtc();
     _tickers[tick.symbol] = tick;
     final rate = _tickers['USDTTRY'];
     if (rate == null) return; // Never assume or fabricate a TRY exchange rate.
@@ -224,6 +223,7 @@ class MarketService {
       );
       if (quote == null) continue;
       _snapshots[quote.id] = quote;
+      _lastTickTime = DateTime.now().toUtc();
       if (!_liveEvents.isClosed) _liveEvents.add(
         LivePriceEvent(quote: quote, status: sourceStatus),
       );
