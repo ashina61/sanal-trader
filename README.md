@@ -19,6 +19,16 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 
 Bu MVP'de **limit emir, kaldıraç, haber/AI analizi, gerçek mum grafikleri, gerçek zamanlı WebSocket ve çok kullanıcılı yarışma YOKTUR**. Grafik, CoinGecko'nun 7 günlük fiyat serisinden çizilen çizgidir; canlı mum grafiği değildir.
 
+## Tarayıcıdan direkt çalıştır (GitHub Pages)
+
+**Web adresi (yayın etkinleştirildikten sonra):** https://ashina61.github.io/sanal-trader/
+
+GitHub'da bir kez **Settings → Pages → Build and deployment → Source: GitHub Actions** seç. Sonra **Actions → Publish SanalTrader Web → Run workflow**. Yayın tamamlanınca yukarıdaki web adresiyle aç. Sonraki `main` değişiklikleri otomatik olarak yeniden yayınlanır.
+
+İlk web sürümü **sadece sanal TL** kullanır. Firebase varsayılan olarak kapalıdır, portföy bu tarayıcıda saklanır. Fiyatların gelmesi üçüncü taraf API'nin erişilebilirliğine bağlıdır. **GitHub Pages yayını herkese açıktır**, oturum açma veya özel erişim kontrolü yoktur.
+
+Detaylar: [WEB_YAYIN.md](WEB_YAYIN.md).
+
 ## Şimdi Codespaces ile geliştiriyoruz (APK gerekmez)
 
 **Başlangıç:** GitHub'da **Code → Codespaces → Create codespace on main**. İlk kurulumdan sonra Codespaces terminalinden:
