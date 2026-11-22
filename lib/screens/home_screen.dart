@@ -180,6 +180,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ],
               volume24hUsdt: quote.volume24hUsdt > 0
                   ? quote.volume24hUsdt : old.volume24hUsdt,
+              candles: quote.candles.length > old.candles.length
+                  ? quote.candles : old.candles,
             );
           }
         }
