@@ -2,6 +2,8 @@
 
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
+- GitHub Actions Python backend paketinin modül kipinde başlatılmasına geçirildi; yalnızca zamanlanmış çalışmada görülen import hatası giderildi.
+
 - SHORT P/L, komisyon, teminat, ani fiyat sıçraması, eski cüzdan geçişi ve düşüş sinyalinden uçtan uca otomatik emir testleri eklendi.
 
 - Botun otomatik seçiminde güçlü düşüş trendi (teknik puan ≤ -0,70) için sanal SHORT, yükselişte LONG sinyali uygulanır.

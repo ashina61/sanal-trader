@@ -51,7 +51,7 @@ jobs:
         env:
           STATE_FILE: ${{ runner.temp }}/paper-state.json
           RUN_MODE: ${{ github.event.inputs.mode || 'run' }}
-        run: python3 backend/paper_bot.py --state "$STATE_FILE" --mode "$RUN_MODE"
+        run: python3 -m backend.paper_bot --state "$STATE_FILE" --mode "$RUN_MODE"
 
       - name: Commit result to independent bot-data branch
         shell: bash

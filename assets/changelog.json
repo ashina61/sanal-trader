@@ -17,7 +17,8 @@
         "Güçlü yükselişte LONG, daha sert doğrulanmış düşüşte SHORT adayları seçiliyor; BTC piyasa yönü ve oynaklık filtreleri uygulanıyor.",
         "Aynı coinde aynı anda LONG ve SHORT açılmıyor. Tek emir %12, maksimum toplam maruziyet %65, nakit rezervi %30 korunuyor.",
         "SHORT fiyat düşüşüyle kâr, yükselişle zarar, giriş/çıkış komisyonu, teminat koruması, günlük sınır aşılsa da kapama ve eski kayıtların açılması için birim testleri eklendi.",
-        "Yapay düşüş verisiyle uçtan uca testte yalnızca sanal SHORT emir üretilmesi doğrulanacak."
+        "Yapay düşüş verisiyle uçtan uca testte yalnızca sanal SHORT emir üretilmesi doğrulanacak.",
+        "GitHub Actions zamanlayıcısının Python botunu paket modülü olarak başlatması sağlandı; sunucu modül erişim hatası düzeltildi."
       ]
     },
     {
