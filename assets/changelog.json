@@ -11,7 +11,10 @@
         "Sanal ileri-test %0,1 işlem komisyonu ve işlem başına %0,05 varsayımsal kayma maliyeti içerir; sonuçlar gerçek sanal emirlerden ayrı tutulur.",
         "Aynı coinlerin işlem maliyetli al-tut karşılaştırması, örneklem sayısı ve gerileme ölçümleri hesaplanır.",
         "Eğitim testinde gelecekteki kapanışların alım sinyaline sızmaması kontrol edilir; sonuçlar kâr garantisi sayılmaz.",
-        "Yalnızca geçmiş veriden hesaplanan komisyonlu ileri-test sonuçları BotState'e ayrı kaydediliyor, uygulama açıldığında korunuyor; gerçek bot satış kârıyla karıştırılmıyor."
+        "Yalnızca geçmiş veriden hesaplanan komisyonlu ileri-test sonuçları BotState'e ayrı kaydediliyor, uygulama açıldığında korunuyor; gerçek bot satış kârıyla karıştırılmıyor.",
+        "Bot saatlik geçmiş mumları ilk eğitimden sonra da her saat güncelliyor, birikmiş teknik verinin bayatlaması engelleniyor.",
+        "Yeni kapanan mumlar aynı uzunlukta dahi olsa önceki canlı fiyat korunarak analize alınıyor.",
+        "Komisyonlu ileri-test sonuçları eğitimin ardından ve yaklaşık saatte bir yerel bota kaydediliyor; mevcut 650 TL sanal cüzdana emir gönderilmiyor."
       ]
     },
     {

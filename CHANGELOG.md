@@ -2,6 +2,9 @@
 
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
+- Saatlik piyasa geçmişi düzenli yenilenir; yeni saatlik kapanış eskisiyle aynı uzunlukta olsa bile tarihine göre yenilenir ve WebSocket anlık fiyatı korunur.
+- Bot yeni gerçek işlemlerden ayrı, yaklaşık saatte bir komisyonlu ileri-test çıktısını yerel olarak kaydeder.
+
 - Gerçekleşen sanal emirlerden tamamen bağımsız ileri-test istatistikleri BotState içinde yerel olarak saklanıyor.
 
 - Son 24 saatlik görülmemiş fiyat üzerinde yalnızca geçmişe bakan, %0,1 komisyon + %0,05 varsayımsal kayma içeren uzun pozisyon simülasyonu.

@@ -8,6 +8,7 @@ import '../services/portfolio_repository.dart';
 import '../services/bot_store.dart';
 import '../services/learning_bot.dart';
 import '../services/bot_training.dart';
+import '../services/walk_forward_backtest.dart';
 import 'bot_dashboard.dart';
 import 'market_radar_screen.dart';
 import 'bot_performance_screen.dart';
@@ -48,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _marketError;
   String? _walletError;
   DateTime? _marketFetchedAt;
+  DateTime? _lastHistoricalRefresh;
   int _tab = 0;
 
   @override
@@ -69,7 +71,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _refreshTimer?.cancel();
     _botTimer?.cancel();
     _refreshTimer = Timer.periodic(const Duration(minutes: 2), (_) {
-      if (!_marketService.isLive || _botState?.trainingVersion != 1) {
+      final dueHistory = _lastHistoricalRefresh == null ||
+          DateTime.now().difference(_lastHistoricalRefresh!) >
+              const Duration(hours: 1);
+      if (!_marketService.isLive ||
+          _botState?.trainingVersion != 1 || dueHistory) {
         _loadMarket();
       }
     });
@@ -156,7 +162,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadMarket() async {
-    if (_busy || (_marketService.isLive && _botState?.trainingVersion == 1)) return;
+    final historyDue = _lastHistoricalRefresh == null ||
+        DateTime.now().difference(_lastHistoricalRefresh!) >
+            const Duration(hours: 1);
+    if (_busy || (_marketService.isLive &&
+        _botState?.trainingVersion == 1 && !historyDue)) return;
     _busy = true;
     if (mounted) setState(() => _loadingMarket = _quotes.isEmpty);
     try {
@@ -167,8 +177,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           final old = _quotes[quote.id];
           if (old == null || !old.updatedAt.isAfter(quote.updatedAt)) {
             _quotes[quote.id] = quote;
-          } else if (quote.sparkline.length > old.sparkline.length) {
-            // History can arrive after fresher WebSocket ticks. Keep live price.
+          } else if (quote.sparkline.length > old.sparkline.length ||
+              (quote.candles.isNotEmpty &&
+               (old.candles.isEmpty ||
+                quote.candles.last.time.isAfter(old.candles.last.time)))) {
+            // Newer closed hourly history can arrive after a live spot tick.
+            // Keep the live price but replace outdated charts.
             _quotes[quote.id] = CoinQuote(
               id: old.id, symbol: old.symbol, name: old.name,
               priceTry: old.priceTry, change24h: old.change24h,
@@ -179,12 +193,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ],
               volume24hUsdt: quote.volume24hUsdt > 0
                   ? quote.volume24hUsdt : old.volume24hUsdt,
-              candles: quote.candles.length > old.candles.length
+              candles: quote.candles.isNotEmpty &&
+                  (old.candles.isEmpty ||
+                   quote.candles.last.time.isAfter(old.candles.last.time))
                   ? quote.candles : old.candles,
             );
           }
         }
         _marketFetchedAt = DateTime.now();
+        _lastHistoricalRefresh = DateTime.now();
         _shownFeedStatus = _marketService.sourceStatus;
         _marketError = null;
       });
@@ -289,7 +306,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           pricedWallet > starting.peakEquityTry) {
         starting = starting.copyWith(peakEquityTry: pricedWallet);
       }
-      if (starting.trainingVersion < 1) {
+      final needsTraining = starting.trainingVersion < 1;
+      if (needsTraining) {
         final training = trainHistoricalBot(_quotes.values);
         if (training == null) {
           if (mounted) setState(() {
@@ -311,6 +329,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _botState = starting;
           _botMessage = '${training.coins} coinin geçmişiyle eğitim tamamlandı.';
         });
+      }
+      // Revalidate at most hourly, using the already trained weights.
+      // Hypothetical test outcomes remain separate from actual paper trades.
+      final dueBacktest = needsTraining || starting.backtest == null ||
+          DateTime.now().toUtc().difference(starting.backtest!.evaluatedAt) >
+              const Duration(hours: 1);
+      if (dueBacktest) {
+        final result = walkForwardBacktest(
+          _quotes.values, weights: starting.weights,
+        );
+        if (result != null) {
+          starting = starting.copyWith(backtest: result);
+        }
       }
       final evolved = observeBot(starting, _quotes.values);
       final order = planBotOrder(

@@ -82,9 +82,16 @@ class MarketService {
   CoinQuote _preferNewerWithHistory(CoinQuote? older, CoinQuote candidate) {
     if (older == null) return candidate;
     final newer = older.updatedAt.isAfter(candidate.updatedAt) ? older : candidate;
-    final richer = older.candles.length >= candidate.candles.length ? older : candidate;
-    final history = older.sparkline.length >= candidate.sparkline.length
-        ? older.sparkline : candidate.sparkline;
+    final richer = candidate.candles.isNotEmpty &&
+        (older.candles.isEmpty ||
+         candidate.candles.last.time.isAfter(older.candles.last.time))
+        ? candidate : older;
+    final candidateHistoryNewer = candidate.candles.isNotEmpty &&
+        (older.candles.isEmpty ||
+         candidate.candles.last.time.isAfter(older.candles.last.time));
+    final history = candidateHistoryNewer ||
+        candidate.sparkline.length > older.sparkline.length
+        ? candidate.sparkline : older.sparkline;
     if (newer.candles.length >= richer.candles.length &&
         newer.sparkline.length >= history.length) return newer;
     return CoinQuote(
@@ -146,10 +153,9 @@ class MarketService {
       ..sort((a, b) => (_volumes[b] ?? 0).compareTo(_volumes[a] ?? 0));
     final trainingPairs = ranked.take(64).toSet();
     final history = <String, _HourlyHistory>{};
-    final shouldLoadHistory = !_historyReady &&
-        (_lastHistoryAttempt == null ||
-         DateTime.now().toUtc().difference(_lastHistoryAttempt!) >
-           const Duration(minutes: 10));
+    final shouldLoadHistory = _lastHistoryAttempt == null ||
+        DateTime.now().toUtc().difference(_lastHistoryAttempt!) >
+            Duration(minutes: _historyReady ? 60 : 10);
     if (shouldLoadHistory) {
       _lastHistoryAttempt = DateTime.now().toUtc();
       for (var i = 0; i < ranked.length && i < 64; i += 6) {
