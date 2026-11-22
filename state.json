@@ -1,6 +1,6 @@
 {
   "cashTry": 493.90406,
-  "cycles": 2,
+  "cycles": 3,
   "day": "2026-11-22",
   "enabled": true,
   "equityTry": 649.4822309741551,
@@ -4147,6 +4147,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T18:23:49Z",
+      "message": "Tekrarlanan kontrol atlandı."
+    },
+    {
       "at": "2026-11-22T18:21:29Z",
       "message": "Sanal AL BNBUSDT: 77.94 TL; Trend up, puan 0.90"
     },
@@ -4155,19 +4159,20 @@
       "message": "Sanal AL NEARUSDT: 78.00 TL; Trend up, puan 0.90"
     }
   ],
-  "lastDecision": "Sanal AL BNBUSDT: 77.94 TL; Trend up, puan 0.90",
+  "lastDecision": "Tekrarlanan kontrol atlandı.",
   "lastError": null,
   "lastOrder": {
     "BNBUSDT": "2026-11-22T18:21:29Z",
     "NEARUSDT": "2026-11-22T18:12:56Z"
   },
-  "lastRunAt": "2026-11-22T18:21:29Z",
+  "lastRunAt": "2026-11-22T18:23:49Z",
   "lastSuccessAt": "2026-11-22T18:21:29Z",
   "mode": "server-paper",
   "paidFeesTry": 0.15594,
   "peakEquityTry": 650.0,
   "realizedTry": 0.0,
   "schema": 1,
+  "shorts": {},
   "source": "Binance public spot REST",
   "todayOrders": 2,
   "tracked": 115,
