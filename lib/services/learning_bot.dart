@@ -241,7 +241,7 @@ BotOrder? planBotOrder({
 }) {
   if (!state.enabled || state.tradesFor(now ?? DateTime.now()) >= botMaxTradesPerDay) return null;
   final time = (now ?? DateTime.now()).toUtc();
-  final available = quotes.values.where((q) => q.isFresh && q.priceTry > 0 && q.priceTry.isFinite && botSignals(q).any((s) => s != 0)).toList();
+  final available = quotes.values.where((q) => q.isFresh && q.priceTry > 0 && q.priceTry.isFinite).toList();
   if (available.isEmpty) return null;
   bool cooled(CoinQuote q) {
     final last = state.lastTrades[q.id];
@@ -275,7 +275,7 @@ BotOrder? planBotOrder({
   if (!equity.isFinite || equity < botMinimumOrderTry) return null;
   final exposure = equity - wallet.cashTry;
   for (final q in available) {
-    if (!cooled(q)) continue;
+    if (!cooled(q) || !botSignals(q).any((signal) => signal != 0)) continue;
     final score = botScore(q, state.weights);
     if (score < botBuyThreshold) continue;
     final positionValue = (wallet.holdings[q.id]?.quantity ?? 0) * q.priceTry;
