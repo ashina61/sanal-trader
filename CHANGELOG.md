@@ -1,3 +1,13 @@
+## 2026-11-23 — v0.9.12 Gerçek 1dk karar, kota yerine sinyal, doğrulanmış öğrenme
+
+- Mevcut 650 TL sanal kasanın 4/4 zarar kapanışı ve komisyon kaybı sonrası botun günlük işlem kotası/yapay 60 dakika genel bekleme sınırları kaldırıldı.
+- Yeni girişler artık gerçek kapanmış 1 dakikalık / 15 dakikalık / saatlik sinyal ve komisyon güvenliğiyle değerlendirilir; gözlenmeyen fiyatlarda hayalî emir yok.
+- Tek coin için 10 dakikalık dönüş filtresi, %78 toplam maruziyet, %20 sanal nakit rezervi, fiyat doğrulaması ve portföy düşüş koruması devam eder. Düşük güvenli sinyalde BEKLE doğrudur.
+- 1dk sert düşüş/yükseliş *gözlendiğinde* SPOT veya SHORT riski hızlı sınırlanır; anlık fiyat arasındaki mumların tamamında emir açılmış gibi gösterilmez.
+- Açılışta sinyal kurulumu, kapatmada gerçek net sonuç `signalStats` istatistiklerine yazılır. Geçmişten uydurma işlem/etiket üretilmez; düşük örneklemde model ağırlığı yoktur.
+- Bot `workflow_dispatch` ile dışarıdan yaklaşık beş dakikada bir çalıştırılmaktadır; bu mimari gerçek zamanlı tick botu değildir.
+- Python testleri yeni karar kuralları için güncellendi. Eski sanal portföy ve gerçek geçmiş zararlar aynen korunur.
+
 ## 2026-11-23 — Komisyon hassasiyeti regresyon test düzeltmesi
 
 - Testte ret nedeni sözlüğünün anahtarına kısmi eşleşme yerine gerçek tam etiketle bakılıyor. Koruyucu işlem kuralı değiştirilmedi.

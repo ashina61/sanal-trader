@@ -6,7 +6,7 @@ from backend.signal_learning import (
 
 class SignalLearningTests(unittest.TestCase):
     def test_minute_signal_uses_real_closed_samples_and_observed_mark(self):
-        bars = [100 + i * .02 for i in range(60)]
+        bars = [100 + i * .15 for i in range(60)]
         signal = minute_signal(bars, bars[-1])
         self.assertIsNotNone(signal)
         self.assertGreater(signal["momentum5"], 0)

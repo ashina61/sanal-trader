@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.12",
+      "date": "2026-11-23",
+      "title": "Gerçek 1dk sinyal motoru ve öğrenen hızlı sanal kararlar",
+      "details": [
+        "Son canlı performans 647,37 TL, 16 işlem, dört zararlı kapanış ve yaklaşık 0,95 TL simüle komisyon olarak görüldü; kârlılık iddia edilmiyor.",
+        "Binance'in gerçekten kapanmış 1 dakikalık mumları hacimli/momentumlu coinler ve açık pozisyonlarda taranır. GitHub/Cloudflare tetikleme hâlâ yaklaşık beş dakikadır, bu yüzden gerçek zamanlı anlık işlem iddia edilmez.",
+        "Günlük 16 emir ve 6 yeni giriş kotası ile tüm coinlerde 60 dakikalık genel giriş bekleme kaldırıldı. Güçlü yeni coinde onaylı SPOT/SHORT sinyali geldikçe değerlendirilebilir.",
+        "1dk + 15dk + saatlik trend uyumu, hızlı pump/crash peşinden koşmama, komisyon üstü hareket kanıtı ve fiyat tazeliği kontrolleri devam ediyor.",
+        "Açık SPOT/SHORT pozisyonu için 1dk'da gözlemlenmiş sert ters fiyat hareketinde öncelikli koruma ve net kazançtaki dönüşte kâr koruması eklendi.",
+        "Her yeni işlem açılışına gerçek sinyal tipi yazılır; sadece gerçekten kapanan sanal işlem sonucundan breakout/trend/breakdown istatistikleri öğrenilir. İlk 5 sonuçtan önce etki sıfırdır ve daha sonra kısıtlı seçim ağırlığı sağlar.",
+        "Günlük emir kotasının yerine %78 azami toplam sanal maruziyet, en az %20 nakit rezervi, eski zarar durdurma ve komisyon kontrolleri risk korunumu olarak kalır.",
+        "Eski sanal bakiye, sekiz açık pozisyon, başlangıç 650 TL ve tüm geçmiş işlem kayıtları sıfırlanmaz. Hızlı katlama veya sürekli kâr garantisi yoktur."
+      ]
+    },
+    {
       "version": "0.9.11",
       "date": "2026-11-23",
       "title": "Komisyon farkındalığı ve zararlı işlem döngüsünü durdurma",

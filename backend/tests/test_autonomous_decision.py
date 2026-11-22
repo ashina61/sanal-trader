@@ -109,12 +109,13 @@ class AutonomousDecisionTests(unittest.TestCase):
         latest["AVAXUSDT"] = {"priceTry": strong[-1], "change24h": 8}
         return state, latest
 
-    def test_near_full_wallet_wont_rotate_at_loss_for_stronger_signal(self):
+    def test_near_full_wallet_never_forces_loss_sale_for_opportunity(self):
         state, quotes = self._near_capacity_rotation_setup()
         plan = assess_decision(state, quotes, NOW)
-        self.assertEqual(plan["action"], "WAIT")
+        self.assertEqual(plan["action"], "BUY")
+        self.assertEqual(plan["symbol"], "AVAXUSDT")
         self.assertEqual(len(state["trades"]), 6)
-        self.assertIn("pozisyon payı", plan["reason"])
+        self.assertNotIn("rotation", plan)
 
     def test_no_rotation_without_verified_stronger_entry_or_extra_fees(self):
         state, quotes = self._near_capacity_rotation_setup()
@@ -125,21 +126,19 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual(state["todayOrders"], 6)
         self.assertEqual(len(state["trades"]), 6)
 
-    def test_rotation_never_ignores_daily_limit_or_existing_rotation(self):
+    def test_day_count_no_longer_blocks_strong_new_coin_signal(self):
         state, quotes = self._near_capacity_rotation_setup()
-        state["todayOrders"] = 16
-        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
-        state["todayOrders"] = 6
-        state["trades"].insert(0, {
-            "at": NOW.isoformat(), "reason": "Portföy rotasyonu: prior",
-            "symbol": "ETHUSDT", "side": "sell",
-        })
-        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+        state["todayOrders"] = 250
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "BUY")
+        self.assertEqual(plan["symbol"], "AVAXUSDT")
 
-    def test_rotation_does_not_realize_large_paper_loss_to_force_a_trade(self):
+    def test_loss_position_not_force_sold_to_chase_new_signal(self):
         state, quotes = self._near_capacity_rotation_setup()
         quotes["BTCUSDT"]["priceTry"] *= .975
-        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+        plan = assess_decision(state, quotes, NOW)
+        self.assertNotEqual(plan["action"], "SELL")
+        self.assertEqual(len(state["trades"]), 6)
 
     def test_long_trailing_protection_on_observed_peak_pullback(self):
         state, latest = market_prices([100 + i * .4 for i in range(168)])
@@ -188,29 +187,51 @@ class AutonomousDecisionTests(unittest.TestCase):
                          plan["amountTry"], 101.2, plan["reason"])
         self.assertGreater(record["realizedPnlTry"], 0)
 
-    def test_entry_frequency_limited_while_protective_exits_continue(self):
+    def test_signals_not_blocked_by_global_time_or_daily_quota(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
-        state["trades"].insert(0, {
-            "at": (NOW - dt.timedelta(minutes=20)).isoformat(),
-            "side": "buy", "symbol": "XRPUSDT"})
-        self.assertIn("60 dakika",
-            assess_decision(state, quotes, NOW)["reason"])
+        state["todayOrders"] = 250
         state["trades"] = [
-            {"at": (NOW - dt.timedelta(hours=2)).isoformat(),
-             "side": "buy", "symbol": f"COIN{x}USDT"}
-            for x in range(6)
+            {"at": (NOW - dt.timedelta(minutes=3)).isoformat(),
+             "side": "buy", "symbol": "OTHERUSDT"}
         ]
-        self.assertIn("Günlük 6 yeni",
-            assess_decision(state, quotes, NOW)["reason"])
-        state["todayOrders"] = 16
-        state["trades"].append({"at": NOW.isoformat(),
-                               "side": "sell", "symbol": "BTCUSDT"})
-        self.assertIn("Günlük 16",
-            assess_decision(state, quotes, NOW)["reason"])
-        execute(state, NOW - dt.timedelta(hours=3),
-                "BTCUSDT", "buy", 50, 100, "prior spot")
-        quotes["BTCUSDT"]["priceTry"] = 90
-        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "SELL")
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "BUY")
+        state["peakEquityTry"] = 1000
+        self.assertIn("gerilemesi", assess_decision(state, quotes, NOW)["reason"])
+
+    def test_fresh_one_minute_signal_supports_quick_spot_buy(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        mark = quotes["BTCUSDT"]["priceTry"]
+        state["microSourceConfigured"] = True
+        state["micro"]["BTCUSDT"] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [mark - (60 - i) * .06 for i in range(60)],
+        }
+        state["todayOrders"] = 200
+        decision = assess_decision(state, quotes, NOW)
+        self.assertEqual(decision["action"], "BUY")
+        self.assertEqual(decision["symbol"], "BTCUSDT")
+        self.assertIn(decision["setupTag"], ("breakout", "trend"))
+        self.assertGreater(decision["candidates"][0]["momentum5mPct"], 0)
+
+    def test_missing_actual_minute_bars_blocks_new_risk(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        state["microSourceConfigured"] = True
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertEqual(plan["rejectReasons"]["Gerçek 1dk onayı yok"], 1)
+
+    def test_sharp_observed_minute_crash_closes_spot_without_waiting(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        execute(state, NOW - dt.timedelta(minutes=2),
+                "BTCUSDT", "buy", 50, 100, "previous paper spot")
+        quotes["BTCUSDT"]["priceTry"] = 98
+        state["micro"]["BTCUSDT"] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [104 - i * .08 for i in range(60)],
+        }
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertIn("1dk ani düşüş", plan["reason"])
 
     def test_extreme_15m_pump_is_rejected_to_avoid_chasing(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
@@ -294,11 +315,10 @@ class AutonomousDecisionTests(unittest.TestCase):
         # Even if exposure is full, favorable 15m data means WAIT, not churn.
         self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
 
-    def test_money_or_risk_limit_selects_wait(self):
+    def test_drawdown_protection_survives_removed_daily_entry_quota(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
-        state["todayOrders"] = 16
-        self.assertIn("16", assess_decision(state, quotes, NOW)["reason"])
-        state["todayOrders"] = 0
+        state["todayOrders"] = 100
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "BUY")
         state["peakEquityTry"] = 1000
         self.assertIn("gerilemesi", assess_decision(state, quotes, NOW)["reason"])
 
