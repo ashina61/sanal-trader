@@ -9,7 +9,8 @@
       "details": [
         "Gerçek sanal kasa ölçümleri ve son 576 gerçek fiyat gözleminden oluşan hesap tarihçesi eklendi.",
         "LONG ve SHORT için gözlemlenmiş fiyat zirve/dipleri üzerinden takip eden kâr koruma sinyali eklendi.",
-        "Risk ve stop korumaları korunur; 650 TL kasa ve işlem geçmişi değiştirilmez."
+        "Risk ve stop korumaları korunur; 650 TL kasa ve işlem geçmişi değiştirilmez.",
+        "Ana sanal kasa için tek kaynaklı performans ve açık LONG/SHORT pozisyon kartları oluşturuldu; zaman serisinde sahte veri gösterilmez."
       ]
     },
     {

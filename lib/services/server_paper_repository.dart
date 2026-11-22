@@ -74,6 +74,16 @@ class ServerPaperSnapshot {
   Map<String, dynamic> get shorts => _map('shorts');
   Map<String, dynamic> get marksTry => _map('marksTry');
   Map<String, dynamic> get directionStats => _map('directionStats');
+  Map<String, dynamic> get performance => _map('performance');
+
+  /// Only real, persisted virtual-wallet observations.
+  List<Map<String, dynamic>> get equityHistory {
+    final raw = _raw['equityHistory'];
+    if (raw is! List) return const [];
+    return raw.whereType<Map>().map(
+      (entry) => Map<String, dynamic>.from(entry),
+    ).toList(growable: false);
+  }
   /// Server-supplied evidence from the most recent autonomous decision.
   /// Older bot-data snapshots safely show an empty analysis.
   Map<String, dynamic> get decisionPlan => _map('decisionPlan');

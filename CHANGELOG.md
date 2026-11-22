@@ -1,3 +1,8 @@
+## 2026-11-23 — Tek sanal bot ana kartı
+
+- Sunucu botu için ana ekran/kasa eğrisi/AI kararı/son işlem ve LONG/SHORT pozisyon kartları oluşturuldu. Tüm metrikler tek `ServerPaperSnapshot` üzerinden gelir.
+- Yerel cüzdanın değerleri sunucu parasına eklenmez. Gözlem geçmişi olmayan kayıtlarda grafik uydurulmaz.
+
 ## 2026-11-23 — Büyüme odaklı sanal performans ve kâr koruması
 
 - Sunucu botu artık başarılı döngülerde yalnızca gerçek piyasa gözlemlerine dayalı kasa grafiği (son 576 gözlem), net sanal büyüme, net kapanan sonuç, ücretler ve zirveden gerileme verilerini saklar.
