@@ -109,6 +109,7 @@ class ServerPaperCard extends StatelessWidget {
       'WAIT' => 'AI BEKLE DEDİ',
       'FALLBACK' => 'AI HATASI · KURAL MOTORU AKTİF',
       'PROTECTIVE_EXIT' => 'KORUYUCU EMİR · AI ATLANDI',
+      'ROTATION_EXIT' => 'PORTFÖY ROTASYONU · TEKNİK ÇIKIŞ',
       'NO_CANDIDATE' => 'AI ADAY BEKLİYOR',
       _ => 'AI BAĞLI DEĞİL · KURAL MOTORU AKTİF',
     };

@@ -16,7 +16,8 @@
         "Uygulama sürüm numarası 0.9.6+13 olarak güncellendi.",
         "Pozisyon maruziyeti %60 üstündeyken, en az 90 dakikalık zayıflayan SPOT pozisyon yalnızca doğrulanmış güçlü yeni aday varsa, günde en çok bir kez kontrollü sanal rotasyon için kapatılabilir.",
         "Rotasyonda %0,75'ten büyük zararda zorunlu satış yapılmaz; beklenmedik gerçek para işlemi yoktur, tek döngüde otomatik yeniden alım yapılmaz.",
-        "Rotasyon, satış kârı garantisi yerine riskli aşırı işlem sıklığını sınırlayan regresyon testleriyle doğrulanır."
+        "Rotasyon, satış kârı garantisi yerine riskli aşırı işlem sıklığını sınırlayan regresyon testleriyle doğrulanır.",
+        "Portföy rotasyonu satışları Bot ekranında AI koruyucu emirlerinden ayrı teknik çıkış durumu olarak görünür."
       ]
     },
     {

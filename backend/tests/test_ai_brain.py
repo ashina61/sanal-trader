@@ -79,6 +79,14 @@ class AiBrainTests(unittest.TestCase):
             self.assertEqual(plan["order"], BASE["order"])
             self.assertEqual(meta["status"], "FALLBACK")
 
+    def test_rotation_sell_is_not_misreported_as_stop_loss(self):
+        plan = dict(BASE, action="SELL",
+                    order=("BTCUSDT", "sell", 48, "Portföy rotasyonu"),
+                    rotation={"exit": "BTCUSDT", "candidate": "ETHUSDT"})
+        result, meta = apply_ai_brain(plan, STATE, "fake", ask_fn=lambda _: 0)
+        self.assertEqual(result["order"], plan["order"])
+        self.assertEqual(meta["status"], "ROTATION_EXIT")
+
     def test_protective_exits_bypass_ai(self):
         plan = dict(BASE, action="SELL", order=("BTCUSDT", "sell", 48, "stop"))
         result, meta = apply_ai_brain(plan, STATE, "fake", ask_fn=lambda _: 0)

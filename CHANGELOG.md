@@ -1,3 +1,8 @@
+## 2026-11-22 — Rotasyonun AI durumundan doğru ayrılması
+
+- Botun teknik portföy rotasyonu satışı artık "koruyucu zarar-kes" gibi gösterilmez. İşlem emri mevcut kuralların onayladığı sanal çıkıştır; AI bu çıkışı durdurmaz.
+- Regresyon testi eklendi; kayıtlı açık pozisyonlar ve mevcut sanal işlem geçmişi aynen korunur.
+
 ## 2026-11-22 — Portföy doluluk kilidi ve sanal rotasyon
 
 - %65 maruziyet sınırı portföyde altı SPOT pozisyon açılınca yeni girişleri durduruyordu. %60+ maruziyette, yalnızca en az 90 dakikalık, hafif zarar/kâr bölgesinde momentum kaybeden SPOT pozisyonu ve daha güçlü yeni aday varsa bir kez/UTC gün kontrollü rotasyon satışına izin verildi.
