@@ -15,6 +15,7 @@ class BotDashboard extends StatelessWidget {
     required this.wallet,
     required this.busy,
     required this.onEnabledChanged,
+    this.onOpenPerformance,
     this.error,
     this.lastStatus,
   });
@@ -24,6 +25,7 @@ class BotDashboard extends StatelessWidget {
   final Portfolio? wallet;
   final bool busy;
   final ValueChanged<bool> onEnabledChanged;
+  final VoidCallback? onOpenPerformance;
   final String? error;
   final String? lastStatus;
 
@@ -80,6 +82,41 @@ class BotDashboard extends StatelessWidget {
               if (error != null) ...[
                 const SizedBox(height: 8),
                 Text(error!, style: const TextStyle(fontSize: 12, color: PremiumColors.gold)),
+              ],
+            ]),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          color: PremiumColors.panel,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Gerçekleşmiş sanal işlemden öğrenme',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(child: _stat('Bot net kapanmış kârı',
+                  formatTry(bot?.profitLearning.realizedTry ?? 0))),
+                Expanded(child: _stat('Kapanan sanal satış',
+                  '${bot?.profitLearning.closedTrades ?? 0}')),
+                Expanded(child: _stat('Kazanan işlem',
+                  bot?.profitLearning.winRate == null ? 'Yok'
+                    : '%${(100 * bot!.profitLearning.winRate!).toStringAsFixed(0)}')),
+              ]),
+              const SizedBox(height: 8),
+              const Text(
+                'Bot yalnızca gerçekleşen sanal satışlardan, '
+                'komisyon sonrası net sonucu öğrenir.',
+                style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
+              if (onOpenPerformance != null) ...[
+                const SizedBox(height: 8),
+                Align(alignment: Alignment.centerRight, child:
+                  TextButton.icon(
+                    onPressed: onOpenPerformance,
+                    icon: const Icon(Icons.query_stats, size: 17),
+                    label: const Text('Performans merkezini aç'),
+                  )),
               ],
             ]),
           ),

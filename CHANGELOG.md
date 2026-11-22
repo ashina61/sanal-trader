@@ -2,6 +2,8 @@
 
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
+- Bot paneline gerçekleşmiş sanal işlem kârı, kazanma oranı ve Performans Merkezi kısayolu eklendi.
+
 - Alt navigasyon Panel / Radar / Portföy / Bot / Kâr sekmeleri oldu; geçmiş işlemler menüden veya performans sayfasından erişiliyor.
 - Botun sanal emir sonucundan dönen gerçek işlem kaydı, net gerçekleşmiş kâr öğrenmesine bağlandı. Uydurma emirlerden kazanma oranı üretilmiyor.
 
