@@ -52,7 +52,7 @@ class ServerPaperSummaryTile extends StatelessWidget {
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SUNUCU · AYRI SANAL KASA', style: TextStyle(
+                  const Text('ANA SANAL KASA · SUNUCU BOTU', style: TextStyle(
                     color: PremiumColors.gold, fontSize: 10,
                     fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
@@ -173,8 +173,8 @@ class ServerPaperCard extends StatelessWidget {
             fontSize: 11, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         const Text(
-          'Bu hesap tarayıcıdaki yerel bot cüzdanından AYRIDIR. '
-          'Aynı 650 TL iki farklı sanal test hesabıdır.',
+          'Otonom botun tek ana sanal kasası budur. '
+          'Eski yerel demo hesap ana bakiyeye eklenmez.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
         if (error != null) ...[
           const SizedBox(height: 8),

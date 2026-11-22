@@ -83,6 +83,23 @@ class BotPerformanceScreen extends StatelessWidget {
                   Expanded(child: _metric('SHORT pozisyon',
                     '${serverSnapshot!.shorts.length}')),
                 ]),
+                if (serverSnapshot!.performance.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Expanded(child: _metric('Net büyüme (%)',
+                      serverSnapshot!.performance['returnPct'] is num
+                      ? '%${(serverSnapshot!.performance['returnPct'] as num).toStringAsFixed(2)}'
+                      : '—')),
+                    Expanded(child: _metric('Zirveden gerileme',
+                      serverSnapshot!.performance['drawdownPct'] is num
+                      ? '%${(serverSnapshot!.performance['drawdownPct'] as num).toStringAsFixed(2)}'
+                      : '—')),
+                    Expanded(child: _metric('Kazanma oranı',
+                      serverSnapshot!.performance['winRatePct'] is num
+                      ? '%${(serverSnapshot!.performance['winRatePct'] as num).toStringAsFixed(1)}'
+                      : 'Henüz yok')),
+                  ]),
+                ],
                 const SizedBox(height: 13),
                 const Text('Gerçekleşmiş sanal LONG / SHORT kapanışları',
                   style: TextStyle(color: PremiumColors.gold,
@@ -120,7 +137,17 @@ class BotPerformanceScreen extends StatelessWidget {
               ],
             ),
           ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 16),
+        Card(
+          color: PremiumColors.panel,
+          child: ExpansionTile(
+            initiallyExpanded: false,
+            title: const Text('Yerel deneme sonuçları · ayrı hesap',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+            subtitle: const Text('Ana botun sanal performansına eklenmez',
+              style: TextStyle(fontSize: 10, color: PremiumColors.muted)),
+            childrenPadding: const EdgeInsets.all(12),
+            children: [
         const PremiumSectionTitle(title: 'Yerel / Tarayıcı Botunun Sonuçları'),
         const SizedBox(height: 10),
         PremiumSurface(
@@ -248,10 +275,12 @@ class BotPerformanceScreen extends StatelessWidget {
           label: const Text('Tüm sanal işlem geçmişini aç'),
         ),
         const SizedBox(height: 12),
-        const Text('Öğrenme kâr garantisi değildir. '
-          'Sınırlı örneklemdeki başarı, başka piyasa koşullarında '
-          'tekrarlanmayabilir. Tarayıcı kapalıyken bot çalışmaz.',
+        const Text('Yerel denemede öğrenme kâr garantisi değildir. '
+          'Tarayıcı kapalıyken bu yerel bot durur.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+            ],
+          ),
+        ),
       ],
     );
   }

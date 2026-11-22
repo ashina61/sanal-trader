@@ -29,6 +29,12 @@ void main() {
       ),
     )));
     expect(find.text('Performans Merkezi'), findsOneWidget);
+    final demoToggle = find.text('Yerel deneme sonuçları · ayrı hesap');
+    expect(demoToggle, findsOneWidget);
+    await tester.scrollUntilVisible(demoToggle, 180,
+      scrollable: find.byType(Scrollable).first);
+    await tester.tap(demoToggle);
+    await tester.pumpAndSettle();
     expect(find.text('Kapanan bot satışları'), findsOneWidget);
     final emptyState = find.textContaining('Bot henüz sanal satış kapatmadı');
     // The performance page is a lazy scrolling ListView: the section is

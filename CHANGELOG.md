@@ -1,3 +1,10 @@
+## 2026-11-23 — Kâr ekranı ve sunucu botu etiketleri tekleştirildi
+
+- Kâr ekranında sunucu botunun gerçekleşen sanal getirisi, açık LONG/SHORT, komisyonlu kapanan sonuçları, zirveden gerilemesi ve kazanma oranı öne çıkarıldı.
+- Eski tarayıcı deneme performansı ayrı bir açılır bölümde tutulur; ana bot performansına eklenmez.
+- Sunucu özet kartı 'ANA SANAL KASA · SUNUCU BOTU' olarak adlandırıldı; kullanıcı iki 650 TL hesabını tek kasaymış gibi görmez.
+- Flutter ekran testleri yenilendi, kayıtlı gerçek sanal işlemler korunuyor.
+
 ## 2026-11-23 — Groq net getiri hedefi ve arayüz regresyon testleri
 
 - Groq beynine onaylı adayların gerçek 6 saatlik momentum/oynaklık verileri ile kayıtlı net performans, kapanan işlemlerin gerçek net kâr/zararı ve %0,2 sanal gidiş-geliş komisyonu iletilir.

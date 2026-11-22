@@ -232,8 +232,8 @@ void main() {
         onTap: () => opened = true,
       )),
     ));
-    expect(find.text('SUNUCU · AYRI SANAL KASA'), findsOneWidget);
-    await tester.tap(find.text('SUNUCU · AYRI SANAL KASA'));
+    expect(find.text('ANA SANAL KASA · SUNUCU BOTU'), findsOneWidget);
+    await tester.tap(find.text('ANA SANAL KASA · SUNUCU BOTU'));
     expect(opened, isTrue);
     expect(tester.takeException(), isNull);
   });
