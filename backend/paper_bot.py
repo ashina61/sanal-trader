@@ -415,6 +415,12 @@ def assess_decision(state, latest, t):
         elif adverse >= .045:
             exits.append((120 + adverse, pair, "cover", amount,
                           f"SHORT zarar kes: ters hareket %{adverse*100:.1f}", technical))
+        elif (minute(pair) is not None
+              and minute(pair)["momentum5"] >= 1.5
+              and minute(pair)["momentum15"] >= 1.5
+              and adverse >= .012):
+            exits.append((115, pair, "cover", amount,
+                          "SHORT gözlenen 1dk ani ters yükseliş koruması", technical))
         elif adverse <= -.035:
             exits.append((100 - adverse, pair, "cover", amount,
                           f"SHORT kâr al: düşüş %{abs(adverse)*100:.1f}", technical))
@@ -424,6 +430,11 @@ def assess_decision(state, latest, t):
               and current / state["troughMarksTry"][pair] - 1 >= .009):
             exits.append((91, pair, "cover", amount,
                           "SHORT takip eden kâr koruması: dipten dönüş", technical))
+        elif (minute(pair) is not None
+              and minute(pair)["momentum5"] >= .65
+              and adverse <= -.006):
+            exits.append((94, pair, "cover", amount,
+                          "SHORT gözlenen 1dk kâr koruyan dönüş", technical))
         elif (cooled(pair) and quick(pair) is not None
               and quick(pair)["momentum1h"] >= .75 and adverse <= -.006):
             exits.append((85, pair, "cover", amount,
@@ -446,6 +457,12 @@ def assess_decision(state, latest, t):
         if move <= -.045:
             exits.append((120 - move, pair, "sell", amount,
                           f"Spot zarar kes: düşüş %{abs(move)*100:.1f}", technical))
+        elif (minute(pair) is not None
+              and minute(pair)["momentum5"] <= -1.5
+              and minute(pair)["momentum15"] <= -1.5
+              and move <= -.012):
+            exits.append((115, pair, "sell", amount,
+                          "SPOT gözlenen 1dk ani düşüş koruması", technical))
         elif move >= .035:
             exits.append((100 + move, pair, "sell", amount,
                           f"Spot kâr al: yükseliş %{move*100:.1f}", technical))
@@ -455,6 +472,11 @@ def assess_decision(state, latest, t):
               and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.009):
             exits.append((91, pair, "sell", amount,
                           "SPOT takip eden kâr koruması: zirveden dönüş", technical))
+        elif (minute(pair) is not None
+              and minute(pair)["momentum5"] <= -.65
+              and move >= .006):
+            exits.append((94, pair, "sell", amount,
+                          "SPOT gözlenen 1dk kâr koruyan dönüş", technical))
         elif (cooled(pair) and quick(pair) is not None
               and quick(pair)["momentum1h"] <= -.75 and move >= .006):
             exits.append((85, pair, "sell", amount,
