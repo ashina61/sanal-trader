@@ -32,7 +32,8 @@
         "Yerel SharedPreferences sanal kasasına aynı uygulama sekmesindeki eşzamanlı manuel/bot emirlerinin kayıtları birbirinin üzerine yazmasını önleyen sıralı işlem kuyruğu eklendi.",
         "Yerel yükleme ve sıfırlama emir kuyruğuyla senkronize; farklı tarayıcı sekmeleri arasında atomik işlem garantisi verilmez.",
         "Yerel botun yeni kurulumda kapalı olması, eski açık/kapalı tercihini koruma, eşzamanlı emir toplamı ve sıralı sıfırlama davranışı için yeni testler eklendi.",
-        "SharedPreferencesAsync testlerinde eski SharedPreferences.setMockInitialValues kullanımı kaldırıldı; resmi InMemorySharedPreferencesAsync sahte platformu eklendi ve izole test verisi sağlandı."
+        "SharedPreferencesAsync testlerinde eski SharedPreferences.setMockInitialValues kullanımı kaldırıldı; resmi InMemorySharedPreferencesAsync sahte platformu eklendi ve izole test verisi sağlandı.",
+        "GitHub Actions ücretsiz sunucu botu için karmaşık cron aralığı yerine standart */5 sözdizimine geçildi. GitHub zamanlanmış tetiklemeleri garanti etmediği için son başarılı çalışma saatinin izlenmesi zorunlu."
       ]
     },
     {

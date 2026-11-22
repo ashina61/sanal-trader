@@ -2,6 +2,8 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- GitHub Actions cron tanımı standart `*/5 * * * *` hâline getirildi. Zamanlanmış ilk gerçek tetikleme henüz doğrulanmadı; GitHub işleri geciktirebilir veya atlayabilir.
+
 - SharedPreferencesAsync testleri resmi in-memory platform sahte uygulaması üzerinden çalıştırılıyor; eski setMockInitialValues yeni API ile uyumlu değildi.
 
 - Yerel bot otomatik açılma/migrasyon ve aynı sekmede eşzamanlı sanal emir/sıfırlama sırasını koruyan yeni otomatik testler eklendi.
