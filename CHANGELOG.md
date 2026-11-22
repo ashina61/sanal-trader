@@ -1,5 +1,14 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
+
+- Tek bir read-only sunucu botu bağlantısı Panel, Portföy, Bot ve Kâr ekranları arasında paylaştırıldı; ayrı 650 TL yerel cüzdan korunuyor.
+- Sunucu botunun tüm kayıtlı LONG/SHORT işlemleri yeni tam işlem geçmişinde görülebilir; ekran açıkken yenilenen durum bildirilir.
+- Yeni kurulumda tarayıcıdaki yerel otomatik bot açık gelmez; eski kullanıcı tercihi olduğu gibi taşınır.
+- Sunucu veri erişim hataları ve eski kayıtlar net biçimde işaretlenir; sunucu kasası yerel verilere karıştırılmaz.
+- Sunucu ve yerel pozisyonların ayrımını açıklayan ekran başlıkları ve mobil testler güncellendi.
+
+
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
 - SHORT kapanış kâr öğrenmesinde referans alınan teminat değişkeni düzeltilerek testte görülen çalışma hatası giderildi.

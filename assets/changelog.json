@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.1",
+      "date": "2026-11-22",
+      "title": "Uygulama bağlantıları ve veri bütünlüğü denetimi",
+      "details": [
+        "Panel, Portföy, Bot ve Kâr ekranları tek paylaşılan salt-okunur sunucu sanal cüzdan görüntüsüne bağlandı.",
+        "Sunucunun LONG/SHORT açık pozisyonları, net sonuçları ve tüm kayıtlı işlem geçmişi ayrı görünür hâle geldi; yerel cüzdanın bakiyesiyle karıştırılmıyor.",
+        "Sunucu işlem geçmişi açıkken güncellenen veriler artık aynı ekranı yeniden oluşturuyor; sabit ilk görüntü kullanılmıyor.",
+        "Yeni kurulumlarda yerel tarayıcı botunun otomatik çalışması kapatıldı; daha önce kaydedilmiş açık/kapalı tercihi korunuyor.",
+        "Yerel ve sunucu cüzdanlarının ayrı olduğu Panel, Portföy, Bot, Kâr ve işlem geçmişi başlıklarında açıkça belirtildi.",
+        "Sunucu bağlantısı kesilirse en son okunabilen kayıt tutuluyor fakat hata/güncellik durumu da gösteriliyor; sıfır bakiye uydurulmuyor.",
+        "Yerel portföyün var olan işlem kayıtları ve sunucu bot-data kasası sıfırlanmadı.",
+        "Flutter testindeki portföy başlığı yeni yerel cüzdan etiketine uyumlu hâle getirildi."
+      ]
+    },
+    {
       "version": "0.9.0",
       "date": "2026-11-22",
       "title": "LONG / SHORT sanal işlem motoru",

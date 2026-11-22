@@ -67,7 +67,7 @@ class BotDashboard extends StatelessWidget {
           serverBotCard!,
           const SizedBox(height: 18),
         ],
-        Text('Öğrenen sanal bot', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        Text('Yerel Bot · Yalnızca Tarayıcı Açıkken', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         Card(
           color: PremiumColors.panelRaised,

@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'learning_bot.dart';
 
-/// Persist local paper trading state. Autostart v2 is a one-time user request;
-/// after that, the ON/OFF switch and reset persist without forced re-enabling.
+/// Local test bot requires explicit opt-in on fresh installs.
+/// Existing ON/OFF preference and paper trades are preserved on migration.
 class BotStore {
   BotStore({SharedPreferencesAsync? prefs}) : _prefs = prefs ?? SharedPreferencesAsync();
   static const _key = 'sanal_trader_learning_bot_v2';
@@ -23,8 +23,9 @@ class BotStore {
     BotState state;
     if (old != null) {
       try {
-        state = BotState.fromJson(Map<String, dynamic>.from(jsonDecode(old) as Map))
-            ; // Preserve previous ON/OFF preference on migration.
+        state = BotState.fromJson(
+          Map<String, dynamic>.from(jsonDecode(old) as Map),
+        ); // Preserve the previous ON/OFF preference.
       } catch (_) {
         state = BotState.initial(); // Do not enable corrupt migrated state.
       }

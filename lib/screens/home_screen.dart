@@ -40,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   DateTime? _lastBotRun;
   final _botStore = BotStore();
   final _serverRepo = ServerPaperRepository();
+  final ValueNotifier<ServerPaperSnapshot?> _serverLive = ValueNotifier(null);
   ServerPaperSnapshot? _serverSnapshot;
   String? _serverError;
   bool _serverBusy = false;
@@ -157,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _botTimer?.cancel();
     _serverTimer?.cancel();
     _serverRepo.dispose();
+    _serverLive.dispose();
     _uiTimer?.cancel();
     _liveSubscription?.cancel();
     _marketService.dispose();
@@ -172,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() {
         _serverSnapshot = result;
+        _serverLive.value = result;
         _serverError = null;
       });
     } catch (error) {
@@ -188,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _openServerTrades() => Navigator.push(context, MaterialPageRoute<void>(
     builder: (_) => ServerPaperTradesScreen(
-      snapshot: _serverSnapshot,
+      snapshots: _serverLive,
       onRefresh: _loadServer,
     ),
   ));

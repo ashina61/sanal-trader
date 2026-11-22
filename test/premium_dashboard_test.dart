@@ -22,7 +22,7 @@ void main() {
         ),
       )),
     ));
-    expect(find.text('TOPLAM SANAL PORTFÖY'), findsOneWidget);
+    expect(find.text('YEREL SANAL PORTFÖY'), findsOneWidget);
     expect(find.textContaining('650'), findsWidgets);
     expect(find.textContaining('1.248.730'), findsNothing);
     expect(tester.takeException(), isNull);

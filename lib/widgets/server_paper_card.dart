@@ -262,15 +262,17 @@ class ServerPaperCard extends StatelessWidget {
 /// Complete persisted SERVER history, never local browser trade records.
 class ServerPaperTradesScreen extends StatelessWidget {
   const ServerPaperTradesScreen({
-    super.key, required this.snapshot, required this.onRefresh,
+    super.key, required this.snapshots, required this.onRefresh,
   });
-  final ServerPaperSnapshot? snapshot;
+  final ValueListenable<ServerPaperSnapshot?> snapshots;
   final VoidCallback onRefresh;
 
   @override
-  Widget build(BuildContext context) {
-    final trades = snapshot?.trades ?? [];
-    return Scaffold(
+  Widget build(BuildContext context) => ValueListenableBuilder<ServerPaperSnapshot?>(
+    valueListenable: snapshots,
+    builder: (context, snapshot, _) {
+      final trades = snapshot?.trades ?? [];
+      return Scaffold(
       appBar: AppBar(
         title: const Text('Sunucu sanal işlem geçmişi'),
         actions: [
@@ -338,5 +340,6 @@ class ServerPaperTradesScreen extends StatelessWidget {
         ),
       ),
     );
-  }
+    },
+  );
 }
