@@ -108,7 +108,7 @@ class BotPerformanceScreen extends StatelessWidget {
             else ...[
               Row(children: [
                 Expanded(child: _metric('Simülasyon getirisi',
-                  '%${bt!.strategyReturnPct.toStringAsFixed(2)}')),
+                  '%${bt.strategyReturnPct.toStringAsFixed(2)}')),
                 Expanded(child: _metric('Aynı dönemde al-tut',
                   '%${bt.buyHoldReturnPct.toStringAsFixed(2)}')),
               ]),
@@ -126,7 +126,7 @@ class BotPerformanceScreen extends StatelessWidget {
               'Maliyetler %0,1 komisyon + %0,05 kayma / emir yönü.',
               style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
           ]),
-        )),
+        ),
         const SizedBox(height: 17),
         PremiumSectionTitle(
           title: 'Coin Bazında Öğrenme',

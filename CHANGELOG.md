@@ -2,6 +2,8 @@
 
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
+- Kâr ekranındaki ileri-test kartı bileşen kapanış hatası düzeltildi ve gereksiz null-assertion uyarısı kaldırıldı.
+
 - İleri-test: yetersiz veri, yatay piyasa komisyonu, geri dönüş, eğitimden holdout'a veri sızmaması ve JSON kayıt testleri eklendi.
 - Bot ve Kâr ekranlarında ileri-test kartları null güvenli biçimde gösteriliyor.
 

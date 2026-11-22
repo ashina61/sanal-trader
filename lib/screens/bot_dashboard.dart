@@ -180,7 +180,7 @@ class BotDashboard extends StatelessWidget {
               else ...[
                 Row(children: [
                   Expanded(child: _stat('Strateji getirisi',
-                    '%${bt!.strategyReturnPct.toStringAsFixed(2)}')),
+                    '%${bt.strategyReturnPct.toStringAsFixed(2)}')),
                   Expanded(child: _stat('Al-tut karşılığı',
                     '%${bt.buyHoldReturnPct.toStringAsFixed(2)}')),
                   Expanded(child: _stat('Maks. gerileme',
