@@ -38,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _botError;
   String? _botMessage;
   final _quotes = <String, CoinQuote>{};
+  final _searchController = TextEditingController();
+  String _marketSearch = '';
   Portfolio? _portfolio;
   Timer? _refreshTimer;
   bool _loadingMarket = true;
@@ -135,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _uiTimer?.cancel();
     _liveSubscription?.cancel();
     _marketService.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -466,8 +469,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_loadingMarket && _quotes.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
-    final ordered = MarketService.coinIds
-        .map((id) => _quotes[id]).whereType<CoinQuote>().toList();
+    final ordered = _quotes.values.toList()
+      ..sort((a, b) => b.volume24hUsdt.compareTo(a.volume24hUsdt));
+    final query = _marketSearch.toLowerCase();
+    final filtered = ordered.where((coin) =>
+        coin.symbol.toLowerCase().contains(query) ||
+        coin.name.toLowerCase().contains(query)).toList();
     if (ordered.isEmpty) {
       return ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
         SizedBox(height: 80),
@@ -482,6 +489,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       children: [
         Row(children: [
           Text('Kripto piyasası', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(width: 8),
+          Text('${ordered.length} coin', style: const TextStyle(color: Colors.white54, fontSize: 12)),
           const Spacer(),
           Text(_marketFetchedAt == null ? '' : 'Alındı: ${TimeOfDay.fromDateTime(_marketFetchedAt!).format(context)}',
             style: const TextStyle(fontSize: 11, color: Colors.white54)),
@@ -505,7 +514,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           )),
         ]),
         const SizedBox(height: 10),
-        for (final coin in ordered) _coinTile(coin),
+        TextField(
+          controller: _searchController,
+          onChanged: (text) => setState(() => _marketSearch = text.trim()),
+          decoration: const InputDecoration(
+            hintText: 'Altcoin ara (BTC, SOL, ADA...)',
+            prefixIcon: Icon(Icons.search),
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (filtered.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: Text('Bu aramaya uygun coin bulunamadı.')),
+          ),
+        for (final coin in filtered) _coinTile(coin),
       ],
     );
   }
@@ -528,7 +553,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             const SizedBox(width: 10),
             Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(quote.symbol, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-              Text(quote.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.white54)),
+              Text(
+                quote.volume24hUsdt >= 1000000
+                  ? '${(quote.volume24hUsdt / 1000000).toStringAsFixed(1)}M USDT hacim'
+                  : quote.name,
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: Colors.white54),
+              ),
             ])),
             Expanded(flex: 2, child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
