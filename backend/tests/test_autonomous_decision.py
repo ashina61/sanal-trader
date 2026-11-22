@@ -109,14 +109,12 @@ class AutonomousDecisionTests(unittest.TestCase):
         latest["AVAXUSDT"] = {"priceTry": strong[-1], "change24h": 8}
         return state, latest
 
-    def test_near_full_wallet_can_sell_fading_spot_for_stronger_signal(self):
+    def test_near_full_wallet_wont_rotate_at_loss_for_stronger_signal(self):
         state, quotes = self._near_capacity_rotation_setup()
         plan = assess_decision(state, quotes, NOW)
-        self.assertEqual(plan["action"], "SELL")
-        self.assertEqual(plan["symbol"], "BTCUSDT")
-        self.assertEqual(plan["rotation"]["candidate"], "AVAXUSDT")
-        self.assertIn("Portföy rotasyonu", plan["reason"])
+        self.assertEqual(plan["action"], "WAIT")
         self.assertEqual(len(state["trades"]), 6)
+        self.assertIn("pozisyon payı", plan["reason"])
 
     def test_no_rotation_without_verified_stronger_entry_or_extra_fees(self):
         state, quotes = self._near_capacity_rotation_setup()
@@ -163,6 +161,69 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual(plan["action"], "COVER")
         self.assertIn("takip eden kâr koruması", plan["reason"])
 
+    def test_small_loss_does_not_trigger_forced_rotation_or_early_sale(self):
+        state, quotes = self._near_capacity_rotation_setup()
+        quotes["BTCUSDT"]["priceTry"] *= .992
+        state["intraday"]["BTCUSDT"] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [
+                quotes["BTCUSDT"]["priceTry"] * (1.035 - i*.00032)
+                for i in range(95)
+            ] + [quotes["BTCUSDT"]["priceTry"]],
+        }
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertEqual(len(state["trades"]), 6)
+
+    def test_small_observed_profit_trailing_close_is_fee_positive(self):
+        state, latest = market_prices([100 + i * .4 for i in range(168)])
+        execute(state, NOW - dt.timedelta(hours=3), "BTCUSDT",
+                "buy", 50, 100, "prior paper spot")
+        state["peakMarksTry"] = {"BTCUSDT": 102.3}
+        latest["BTCUSDT"]["priceTry"] = 101.2
+        plan = assess_decision(state, latest, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertIn("kâr koruması", plan["reason"])
+        record = execute(state, NOW, "BTCUSDT", "sell",
+                         plan["amountTry"], 101.2, plan["reason"])
+        self.assertGreater(record["realizedPnlTry"], 0)
+
+    def test_entry_frequency_limited_while_protective_exits_continue(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        state["trades"].insert(0, {
+            "at": (NOW - dt.timedelta(minutes=20)).isoformat(),
+            "side": "buy", "symbol": "XRPUSDT"})
+        self.assertIn("60 dakika",
+            assess_decision(state, quotes, NOW)["reason"])
+        state["trades"] = [
+            {"at": (NOW - dt.timedelta(hours=2)).isoformat(),
+             "side": "buy", "symbol": f"COIN{x}USDT"}
+            for x in range(6)
+        ]
+        self.assertIn("Günlük 6 yeni",
+            assess_decision(state, quotes, NOW)["reason"])
+        state["todayOrders"] = 16
+        state["trades"].append({"at": NOW.isoformat(),
+                               "side": "sell", "symbol": "BTCUSDT"})
+        self.assertIn("Günlük 16",
+            assess_decision(state, quotes, NOW)["reason"])
+        execute(state, NOW - dt.timedelta(hours=3),
+                "BTCUSDT", "buy", 50, 100, "prior spot")
+        quotes["BTCUSDT"]["priceTry"] = 90
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "SELL")
+
+    def test_extreme_15m_pump_is_rejected_to_avoid_chasing(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        mark = quotes["BTCUSDT"]["priceTry"]
+        state["intraday"]["BTCUSDT"] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [mark * (1 - .006 * (95 - i)) for i in range(95)]
+                      + [mark],
+        }
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertIn("Aşırı hızlı", plan["rejectReasons"])
+
     def test_eight_orders_no_longer_blocks_valid_new_entry(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
         state["todayOrders"] = 8
@@ -187,8 +248,8 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertGreater(found["momentum1h"], 0)
 
     def test_full_portfolio_can_release_declining_held_coin(self):
-        # No fake profits: one observed weak 4h trend + a modest real loss
-        # may free capital before the hard -6% stop.
+        # Confirmed steep 4h weakness with meaningful loss may
+        # exit before hard -4.5% stop, not at every minor fluctuation.
         weak = [100 + i * .10 for i in range(168)]
         state = fresh_state()
         quotes = {}
@@ -200,15 +261,15 @@ class AutonomousDecisionTests(unittest.TestCase):
             execute(state, NOW - dt.timedelta(hours=3),
                     pair, "buy", 78, weak[-1], "existing paper long")
             quotes[pair] = {"priceTry": weak[-1], "change24h": 1}
-        # Cut a monitored weak position at -0.8%, with an observed
-        # fast 4h decline. No forced replacement order.
+        # Realistic -2.8% paper decline, strongly negative 1h/4h data.
+        # No forced replacement entry or invented profitable order.
         pair = "ADAUSDT"
         entry = state["holdings"][pair]["costTry"] / state["holdings"][pair]["quantity"]
-        current = entry * .992
+        current = entry * .972
         quotes[pair]["priceTry"] = current
         state["intraday"][pair] = {
             "fetchedAt": NOW.isoformat(),
-            "prices": [current * (1.035 - i * .0003) for i in range(95)] +
+            "prices": [current * (1.06 - i * .00045) for i in range(95)] +
                       [current * 1.0001],
         }
         plan = assess_decision(state, quotes, NOW)

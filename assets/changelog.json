@@ -3,6 +3,20 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.11",
+      "date": "2026-11-23",
+      "title": "Komisyon farkındalığı ve zararlı işlem döngüsünü durdurma",
+      "details": [
+        "Canlı tek sanal kasanın 16 emir, 4 zararlı kapanış ve 0,95 TL toplam simüle komisyon verileri incelendi; sorun aşırı alım/zararlı rotasyondu.",
+        "Zararına portföy rotasyonu engellendi. Erken risk azaltımı yalnızca belirgin yaklaşık %2,5–%4,5 kayıp ve gerçek 15dk + 4s kötüleşme onayında değerlendirilir; 1/gün.",
+        "Yeni alım/short işlemleri en az 60 dakika aralıkla ve günde en fazla 6 kez açılır. Aynı anda en çok 6 pozisyon, en fazla %60 pozisyon payı ve minimum %38 nakit rezervi hedeflenir.",
+        "Şüpheli hızlı pump, sert ters momentum veya yüksek oynaklıkta yeni işleme girilmez. Gerçek 15dk sinyal verisi varsa giriş onayı aranır.",
+        "Pozitif işlemler için daha erişilebilir %3,5 kâr alma ve gözlenen küçük net kârı koruyan takip sistemi. Sert kayıpta %4,5 stop ve öncelikli zarar/teminat korumaları sürüyor.",
+        "Mevcut tüm sanal pozisyonlar, 650 TL başlangıç ve geçmiş emirler korunur; geçmiş kayıplar silinmez. Kâra geçiş garantisi yoktur.",
+        "Yeni regresyon testleri küçük zarar rotasyonu, taze girişler arası soğuma, gün içi giriş üst limiti, daha küçük gerçekleşen kâr ve 15dk pump filtrelerini kapsar."
+      ]
+    },
+    {
       "version": "0.9.10",
       "date": "2026-11-23",
       "title": "Normal spot alım-satımı SHORT'tan net ayır",

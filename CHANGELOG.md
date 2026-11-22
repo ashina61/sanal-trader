@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.11 Komisyon sonrası kazanç için işlem kalitesine dönüş
+
+- Son canlı sanal kasa denetiminde: 16 sanal işlem, 4 zararlı kapanış, -1,91 TL gerçekleşmiş zarar, toplam 0,95 TL komisyon ve 647,60 TL toplam kasa ölçüldü. Bunlar sonuçların anlık görüntüsüdür, geleceğin tahmini değildir.
+- Strateji zararlı rotasyona ve sırf küçük fiyat düşüşlerinde zarar kesmeye ağırlık vererek aynı kayıp-komisyon döngüsüne girmişti. Zararda rotasyon kaldırıldı; erken risk azaltımı ağır ve çoklu zaman diliminde doğrulanmış kötüleşmeyle sınırlı.
+- Yeni girişler: 60dk genel soğuma, en fazla 6/gün, en fazla 6 açık pozisyon, en fazla %60 maruziyet, minimum %38 nakit rezervi, güçlü saatlik ve 15dk sinyal doğrulaması.
+- Sermaye koruması: %4,5 sert stop; gözlenen %1,5 tepe sonrası yaklaşık %0,9 geri dönüşte, girişin üzerinde anlamlı kâr kalıyorsa iz süren çıkış; %3,5 sabit kâr alma. 1x sanal SHORT da bu korumaları kullanır.
+- Yüksek volatilite, aşırı hızlı 15dk pump ve zayıf trend/komisyon adayları elenir. Öncelikli koruyucu kapanışlar günlük limitten etkilenmez.
+- Geçmiş sanal işlemler, açık pozisyonlar ve 650 TL başlangıç referansı kesinlikle korunur. Kâra geçileceği garanti edilemez.
+
 ## 2026-11-23 — İki işlemlik olumsuz örneklemin AI'yi kilitlemesini önle
 
 - Groq birkaç geçmiş zararlı sanal işlemi tüm adayların iptal gerekçesi yapmamalı; 20 kapanış altı örneklemin güvenilir tahmin olmadığı AI sistem bağlamında açıkça belirtildi.
