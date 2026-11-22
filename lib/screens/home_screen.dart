@@ -255,7 +255,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               'Sürekli kâr ya da her döngüde işlem garantisi yoktur.',
               style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
           ]),
-        ),
       ),
     ],
   );

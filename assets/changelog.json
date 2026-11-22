@@ -16,7 +16,8 @@
         "Yerel demo botunun ve yerel portföyün uygulamada başlatılması, gösterilmesi ve al/sat yapılması kaldırıldı; sadece sunucu sanal kasası kaldı.",
         "Yeni Kasa, Radar, Bot ve Kâr ekranları yalnızca aynı ServerPaperRepository verilerini kullanır.",
         "Yüklü kullanıcı cihazındaki eski yerel depolama değiştirilmiyor ancak hiçbir ekranda kullanılmıyor.",
-        "Uygulama 0.9.8+15 sürümüne yükseltildi."
+        "Uygulama 0.9.8+15 sürümüne yükseltildi.",
+        "Tek kasa bot ekranının ilk Flutter Analyze bulgusu (fazla kapanış parantezi) düzeltildi."
       ]
     },
     {

@@ -1,3 +1,7 @@
+## 2026-11-23 — Tek kasa ekranı Flutter sözdizimi düzeltmesi
+
+- Yeni Bot sekmesinin kapanış parantezindeki fazlalık Flutter Analyze tarafından tespit edilip düzeltildi; derleme ve widget testleriyle doğrulanır.
+
 ## 2026-11-23 — Tek beyin, tek kasa: yerel demo tamamen uygulamadan çıkarıldı
 
 - Ana uygulama artık **tek** sunucu sanal cüzdanı açar. Yerel deneme motoru, yerel portföy, Firebase/local hesap oluşturma, manuel browser AL/SAT, sıfırlama ve yerel bot döngüsü uygulama başlangıcından ve ekranlardan çıkarıldı.
