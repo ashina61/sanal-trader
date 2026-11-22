@@ -14,7 +14,9 @@
         "Piyasa taraması hacmi yeterli en fazla 240 güncel Binance USDT spot çiftini seçiyor; dinamik keşif 6 saatte bir yenileniyor.",
         "Canlı fiyatlar tek Binance !miniTicker@arr akışıyla işleniyor; yüzlerce sembol için ayrı WebSocket açılmıyor.",
         "En likit 64 sembol için saatlik geçmiş eğitim verisi deneniyor; eski sanal pozisyonların sembolleri listeden düşürülmüyor.",
-        "Geçersiz veya bayat USDT/TRY dönüşüm verisiyle otomatik işlem fiyatı oluşturulmuyor."
+        "Geçersiz veya bayat USDT/TRY dönüşüm verisiyle otomatik işlem fiyatı oluşturulmuyor.",
+        "Yeni Piyasa Radarı ekranında hacim, en çok yükselenler, düşenler ve teknik adaylar filtreleri ile coin arama eklendi.",
+        "Yeni Performans Merkezi sanal portföy değerini, komisyon dahil gerçekleşmiş bot kârını, kazanma oranını ve coin bazlı gerçek sonuçları ayırarak gösteriyor."
       ]
     },
     {

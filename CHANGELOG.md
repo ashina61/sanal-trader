@@ -2,6 +2,9 @@
 
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
+- Yeni Radar sayfası: hacim, yükselenler, düşenler, teknik adaylar ve anlık arama.
+- Yeni Performans sayfası: açık portföy değeri ve yalnızca kapanan sanal bot emirlerinden hesaplanan net kâr, komisyon, kazanma oranı ve coine göre sonuçlar.
+
 - Hacim filtreli Binance USDT spot evreni 72'den 240 sembole genişletildi; 6 saatlik yenileme, eski pozisyon sembollerini koruma ve 64 sembollük tarihsel eğitim taraması eklendi.
 - Çoklu abonelikli uzun URL yerine Binance'in tüm piyasa mini-ticker WebSocket akışı ve toplu mesaj ayrıştırıcısı kullanılıyor.
 - USDT/TRY dönüşüm oranı 2 dakikadan daha eskiyse taze piyasa fiyatı oluşturulmuyor.
