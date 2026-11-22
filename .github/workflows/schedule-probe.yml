@@ -1,0 +1,27 @@
+name: GitHub Cron Diagnostic (No Trades)
+
+on:
+  schedule:
+    # Never accesses the paper wallet or Groq, 2 probes per hour.
+    - cron: "11,41 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schedule-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Record actual event kind (no wallet, no orders)
+        env:
+          TRIGGER_EVENT: ${{ github.event_name }}
+        run: |
+          echo "GitHub event: $TRIGGER_EVENT"
+          echo "UTC timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if [ "$TRIGGER_EVENT" = "schedule" ]; then
+            echo "GITHUB_SCHEDULE_DELIVERED=true"
+          else
+            echo "GITHUB_SCHEDULE_DELIVERED=false"
+          fi

@@ -1,3 +1,8 @@
+## 2026-11-22 — GitHub schedule kanıtı ve mobil görünürlük
+
+- GitHub bot ekranında son otomatik tetik veya 'henüz doğrulanmadı' durumu ve son gerçek çalıştırma türü gösterilir.
+- Ayrıca cüzdanı hiç okumayan ve sanal emir üretmeyen bağımsız `GitHub Cron Diagnostic (No Trades)` workflow'u eklendi; her saat 11. ve 41. dakikalarda gerçek schedule sinyali kontrol eder.
+
 ## 2026-11-22 — GitHub-only gerçek cron tanısı
 
 - Botun 5 dakikalık cron tetikleyicisi `2-57/5 * * * *` biçimiyle yeniden kaydedildi.

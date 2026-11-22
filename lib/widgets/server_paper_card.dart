@@ -123,6 +123,20 @@ class ServerPaperCard extends StatelessWidget {
     final candidates = plan['candidates'] is List
         ? (plan['candidates'] as List).whereType<Map>().take(5).toList()
         : <Map>[];
+    final cronAt = state?.lastScheduledTriggerAt?.toLocal();
+    final cronText = cronAt == null
+        ? 'GitHub otomatik zamanlayıcı: henüz doğrulanmadı'
+        : 'GitHub otomatik zamanlayıcı: son tetik '
+          '${cronAt.day.toString().padLeft(2, '0')}.'
+          '${cronAt.month.toString().padLeft(2, '0')} '
+          '${cronAt.hour.toString().padLeft(2, '0')}:'
+          '${cronAt.minute.toString().padLeft(2, '0')}';
+    final triggerText = switch (state?.lastTriggerEvent) {
+      'schedule' => 'otomatik zamanlayıcı',
+      'push' => 'kod güncellemesi',
+      'workflow_dispatch' => 'manuel / dış tetik',
+      _ => null,
+    };
     return PremiumSurface(
       gradient: const LinearGradient(
         colors: [Color(0xFF164034), Color(0xFF0D1E1B)],
@@ -251,6 +265,15 @@ class ServerPaperCard extends StatelessWidget {
                   '${updated.minute.toString().padLeft(2,'0')}',
               style: const TextStyle(
                 fontSize: 11, color: PremiumColors.muted)),
+          const SizedBox(height: 5),
+          Text(cronText, style: const TextStyle(
+            fontSize: 10, color: PremiumColors.muted)),
+          if (triggerText != null) ...[
+            const SizedBox(height: 3),
+            Text('Son çalıştırma türü: $triggerText',
+              style: const TextStyle(
+                fontSize: 10, color: PremiumColors.muted)),
+          ],
           const SizedBox(height: 12),
           Card(
             color: PremiumColors.panel,

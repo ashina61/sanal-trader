@@ -52,6 +52,13 @@ class ServerPaperSnapshot {
 
   DateTime? get lastSuccessAt => _date('lastSuccessAt');
   DateTime? get lastRunAt => _date('lastRunAt');
+  DateTime? get lastTriggerAt => _date('lastTriggerAt');
+  DateTime? get lastScheduledTriggerAt => _date('lastScheduledTriggerAt');
+  String? get lastTriggerEvent {
+    final value = _raw['lastTriggerEvent'];
+    return value == 'schedule' || value == 'push' ||
+        value == 'workflow_dispatch' ? value as String : null;
+  }
   bool isHealthyAt(DateTime time) {
     final last = lastSuccessAt;
     return enabled && error == null && last != null &&
