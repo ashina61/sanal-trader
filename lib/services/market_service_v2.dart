@@ -5,8 +5,15 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/coin_quote.dart';
+import '../models/price_candle.dart';
 import 'live_market_data.dart';
 import 'market_universe.dart';
+
+class _HourlyHistory {
+  const _HourlyHistory(this.closes, this.candles);
+  final List<double> closes;
+  final List<PriceCandle> candles;
+}
 
 /// Public market data only. No account keys, trade endpoints or deposits.
 class LivePriceEvent {
@@ -72,20 +79,23 @@ class MarketService {
   }
 
   CoinQuote _preferNewerWithHistory(CoinQuote? older, CoinQuote candidate) {
-    if (older == null || !older.updatedAt.isAfter(candidate.updatedAt)) {
-      return candidate;
-    }
-    if (candidate.sparkline.length <= older.sparkline.length) return older;
+    if (older == null) return candidate;
+    final newer = older.updatedAt.isAfter(candidate.updatedAt) ? older : candidate;
+    final richer = older.candles.length >= candidate.candles.length ? older : candidate;
+    final history = older.sparkline.length >= candidate.sparkline.length
+        ? older.sparkline : candidate.sparkline;
+    if (newer.candles.length >= richer.candles.length &&
+        newer.sparkline.length >= history.length) return newer;
     return CoinQuote(
-      id: older.id, symbol: older.symbol, name: older.name,
-      priceTry: older.priceTry, change24h: older.change24h,
-      updatedAt: older.updatedAt,
-      sparkline: [
-        ...candidate.sparkline.take(candidate.sparkline.length - 1),
-        older.priceTry,
-      ],
+      id: newer.id, symbol: newer.symbol, name: newer.name,
+      priceTry: newer.priceTry, change24h: newer.change24h,
+      updatedAt: newer.updatedAt,
+      sparkline: history.length > 1
+          ? [...history.take(history.length - 1), newer.priceTry]
+          : history,
       volume24hUsdt: candidate.volume24hUsdt > 0
           ? candidate.volume24hUsdt : older.volume24hUsdt,
+      candles: richer.candles,
     );
   }
 
@@ -142,7 +152,7 @@ class MarketService {
     final ranked = _trackedPairs.keys.toList()
       ..sort((a, b) => (_volumes[b] ?? 0).compareTo(_volumes[a] ?? 0));
     final trainingPairs = ranked.take(36).toSet();
-    final history = <String, List<double>>{};
+    final history = <String, _HourlyHistory>{};
     final shouldLoadHistory = !_historyReady &&
         (_lastHistoryAttempt == null ||
          DateTime.now().toUtc().difference(_lastHistoryAttempt!) >
@@ -155,7 +165,7 @@ class MarketService {
           MapEntry(pair, await _fetchHourlyHistory(pair, rateTick.close))));
         history.addEntries(fetched);
       }
-      _historyReady = history.values.where((prices) => prices.length >= 96).length >= 3;
+      _historyReady = history.values.where((prices) => prices.closes.length >= 96).length >= 3;
     }
 
     final quotes = <CoinQuote>[];
@@ -169,7 +179,8 @@ class MarketService {
         pairs: _trackedPairs, volumes: _volumes,
       );
       if (q == null) continue;
-      final chart = history[pair] ?? old?.sparkline ?? const <double>[];
+      final chart = history[pair]?.closes ?? old?.sparkline ?? const <double>[];
+      final bars = history[pair]?.candles ?? old?.candles ?? const <PriceCandle>[];
       quotes.add(CoinQuote(
         id: q.id,
         symbol: q.symbol,
@@ -179,6 +190,7 @@ class MarketService {
         updatedAt: q.updatedAt,
         sparkline: trainingPairs.contains(pair) ? chart : const <double>[],
         volume24hUsdt: q.volume24hUsdt,
+        candles: trainingPairs.contains(pair) ? bars : const <PriceCandle>[],
       ));
     }
     if (quotes.isEmpty) throw Exception('Binance fiyatları boş döndü');
@@ -200,21 +212,27 @@ class MarketService {
     );
   }
 
-  Future<List<double>> _fetchHourlyHistory(String symbol, double tryRate) async {
+  Future<_HourlyHistory> _fetchHourlyHistory(String symbol, double tryRate) async {
+    const empty = _HourlyHistory(<double>[], <PriceCandle>[]);
     try {
       final uri = Uri.https('data-api.binance.vision', '/api/v3/klines', {
         'symbol': symbol, 'interval': '1h', 'limit': '168',
       });
       final response = await _client.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return [];
+      if (response.statusCode != 200) return empty;
       final raw = jsonDecode(response.body);
-      if (raw is! List) return [];
-      return raw.whereType<List>().map((row) {
-        if (row.length < 5) return 0.0;
-        return (double.tryParse('${row[4]}') ?? 0) * tryRate;
-      }).where((p) => p.isFinite && p > 0).toList();
+      if (raw is! List) return empty;
+      final bars = raw
+          .map((row) => PriceCandle.fromBinanceKline(row, tryRate))
+          .whereType<PriceCandle>().toList()
+        ..sort((a, b) => a.time.compareTo(b.time));
+      // Only truly closed exchange candles are used for pattern and volume study.
+      return _HourlyHistory(
+        bars.map((bar) => bar.close).toList(),
+        bars,
+      );
     } catch (_) {
-      return []; // No fabricated historical candles on API failure.
+      return empty; // Never fabricate OHLCV candles.
     }
   }
 

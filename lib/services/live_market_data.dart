@@ -101,5 +101,6 @@ CoinQuote? marketQuoteFromTicks({
     updatedAt: current,
     sparkline: chart,
     volume24hUsdt: volumes?[coin.symbol] ?? previous?.volume24hUsdt ?? 0,
+    candles: previous?.candles ?? const [],
   );
 }

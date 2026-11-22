@@ -1,3 +1,5 @@
+import 'price_candle.dart';
+
 class CoinQuote {
   const CoinQuote({
     required this.id,
@@ -8,6 +10,7 @@ class CoinQuote {
     required this.updatedAt,
     required this.sparkline,
     this.volume24hUsdt = 0,
+    this.candles = const <PriceCandle>[],
   });
 
   final String id;
@@ -18,6 +21,7 @@ class CoinQuote {
   final DateTime updatedAt;
   final List<double> sparkline;
   final double volume24hUsdt;
+  final List<PriceCandle> candles;
 
   bool get isFresh {
     final elapsed = DateTime.now().toUtc().difference(updatedAt.toUtc());
