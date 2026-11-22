@@ -14,6 +14,8 @@ import urllib.request
 from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
+from backend.signal_learning import (minute_signal, setup_for, signal_bias,
+    record_open, record_close)
 
 from backend.short_positions import (short_value, exposure, open_short,
     close_short, learn_closed_direction, direction_edge)
@@ -63,7 +65,8 @@ def fresh_state():
                 aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"},
                 lastTriggerEvent=None, lastTriggerAt=None,
                 lastScheduledTriggerAt=None, intraday={}, peakMarksTry={},
-                troughMarksTry={}, equityHistory=[], performance={})
+                troughMarksTry={}, equityHistory=[], performance={},
+                micro={}, signalStats={}, openSignals={})
 
 def load(path):
     if not path.exists():
@@ -81,8 +84,12 @@ def load(path):
     obj.setdefault("lastTriggerAt", None)
     obj.setdefault("lastScheduledTriggerAt", None)
     obj.setdefault("intraday", {})
-    if not isinstance(obj["intraday"], dict):
-        raise ValueError("Invalid intraday paper cache")
+    obj.setdefault("micro", {})
+    obj.setdefault("signalStats", {})
+    obj.setdefault("openSignals", {})
+    if any(not isinstance(obj[field], dict) for field in
+           ("intraday", "micro", "signalStats", "openSignals")):
+        raise ValueError("Invalid minute/learning paper cache")
     obj.setdefault("peakMarksTry", {})
     obj.setdefault("troughMarksTry", {})
     obj.setdefault("equityHistory", [])
@@ -157,6 +164,10 @@ class Market:
     def candles_fast(self, symbol):
         return self.request("/api/v3/klines",
                             {"symbol": symbol, "interval": "15m", "limit": 96})
+
+    def candles_minute(self, symbol):
+        return self.request("/api/v3/klines",
+                            {"symbol": symbol, "interval": "1m", "limit": 65})
 
 def quotes(raw, t):
     if not isinstance(raw, list):
@@ -352,6 +363,14 @@ def assess_decision(state, latest, t):
         if when is None or when > t or (t - when).total_seconds() > 1500:
             return None
         return fast_momentum(
+            record.get("prices", []), latest.get(pair, {}).get("priceTry"))
+
+    def minute(pair):
+        record = state.get("micro", {}).get(pair, {})
+        fetched = as_date(record.get("fetchedAt"))
+        if fetched is None or fetched > t or (t - fetched).total_seconds() > 420:
+            return None
+        return minute_signal(
             record.get("prices", []), latest.get(pair, {}).get("priceTry"))
 
     def current_tech(pair):
@@ -869,6 +888,36 @@ def cycle(state, market, t):
         state["intradayPairs"] = sum(
             len(fast_cache.get(pair, {}).get("prices", [])) >= 20
             for pair in fast_symbols)
+
+        # Closed one-minute candles: observed only at the GitHub run cadence.
+        # No claim of fills between the observed ticks.
+        minute_cache = state.setdefault("micro", {})
+        minute_symbols = {v["symbol"] for v in eligible_pairs[:20]}
+        minute_symbols.update(v["symbol"] for v in movers_up[:8])
+        minute_symbols.update(v["symbol"] for v in movers_down[:8])
+        minute_symbols.update(state["holdings"])
+        minute_symbols.update(state.get("shorts", {}))
+        minute_symbols.intersection_update(latest)
+        minute_provider = getattr(market, "candles_minute", None)
+        state["microSourceConfigured"] = minute_provider is not None
+        if minute_provider:
+            for pair in sorted(minute_symbols):
+                try:
+                    prices = closes(minute_provider(pair), t, rate)
+                    if len(prices) >= 35:
+                        minute_cache[pair] = {
+                            "fetchedAt": stamp(t), "prices": prices[-65:]}
+                    else:
+                        minute_cache.pop(pair, None)
+                except Exception:
+                    # Never generate fake minute signals or reuse stale data.
+                    minute_cache.pop(pair, None)
+        for pair in list(minute_cache):
+            if pair not in minute_symbols:
+                minute_cache.pop(pair, None)
+        state["minutePairs"] = sum(
+            len(minute_cache.get(pair, {}).get("prices", [])) >= 35
+            for pair in minute_symbols)
         state["tracked"] = len(eligible_pairs)
         state["screened"] = len(latest)
         state["historyPairs"] = sum(
@@ -894,6 +943,8 @@ def cycle(state, market, t):
         state["decisionPlan"]["universe"] = len(eligible_pairs)
         state["decisionPlan"]["historyPairs"] = state["historyPairs"]
         state["decisionPlan"]["intradayPairs"] = state.get("intradayPairs", 0)
+        state["decisionPlan"]["minutePairs"] = state.get("minutePairs", 0)
+        state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = 16
         state["decisionPlan"]["dailyNewEntryLimit"] = MAX_DAILY_NEW_ENTRIES
@@ -903,11 +954,17 @@ def cycle(state, market, t):
             pair, side, gross, reason = choice
             price = latest[pair]["priceTry"]
             if side == "short":
-                open_short(state, t, pair, gross, price, reason)
+                executed = open_short(state, t, pair, gross, price, reason)
             elif side == "cover":
-                close_short(state, t, pair, price, reason)
+                executed = close_short(state, t, pair, price, reason)
             else:
-                execute(state, t, pair, side, gross, price, reason)
+                executed = execute(state, t, pair, side, gross, price, reason)
+            if side in ("buy", "short"):
+                record_open(state, pair, side,
+                            planned.get("setupTag") or "hourly",
+                            gross, stamp(t))
+            else:
+                record_close(state, pair, executed["realizedPnlTry"])
         else:
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 + planned["reason"])
