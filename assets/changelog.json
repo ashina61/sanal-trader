@@ -12,7 +12,11 @@
         "15 dakikalık kısa trend tersine dönmüşse yüksek saatlik sinyal bile alımı durdurur; hızlı dönüşlerde koruyucu çıkışlar değerlendirilir.",
         "Günde en çok üç risk-korumalı portföy rotasyonu ve aralarında en az 90 dakika sınırı bulunur.",
         "Ana 1 saatlik trend, %65 maruziyet, %30 nakit rezervi, ücretler, koruyucu kapanışlar ve mevcut 650 TL sanal kasa korunur.",
-        "15dk rotasyon testinde görülen list/boolean isim çakışması düzeltildi."
+        "15dk rotasyon testinde görülen list/boolean isim çakışması düzeltildi.",
+        "Yerel demo botunun ve yerel portföyün uygulamada başlatılması, gösterilmesi ve al/sat yapılması kaldırıldı; sadece sunucu sanal kasası kaldı.",
+        "Yeni Kasa, Radar, Bot ve Kâr ekranları yalnızca aynı ServerPaperRepository verilerini kullanır.",
+        "Yüklü kullanıcı cihazındaki eski yerel depolama değiştirilmiyor ancak hiçbir ekranda kullanılmıyor.",
+        "Uygulama 0.9.8+15 sürümüne yükseltildi."
       ]
     },
     {

@@ -1,41 +1,16 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'widgets/premium_dashboard.dart';
-import 'services/cloud_portfolio_repository.dart';
-import 'services/local_portfolio_repository.dart';
-import 'services/portfolio_repository.dart';
 
-const _enableFirebase = bool.fromEnvironment('ENABLE_FIREBASE', defaultValue: false);
-
-Future<void> main() async {
+/// One autonomous brain, one server-side 650 TRY paper wallet.
+/// No local wallet or browser-bound bot is created by the live application.
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    final PortfolioRepository repo = _enableFirebase
-        ? await CloudPortfolioRepository.create()
-        : LocalPortfolioRepository();
-    runApp(TradingApp(repository: repo, cloudMode: _enableFirebase));
-  } catch (error) {
-    // Firebase yapılandırması başarısızsa yerel kayıtla karıştırma.
-    runApp(MaterialApp(
-      theme: ThemeData.dark(),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Firebase bağlantı hatası')),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: SelectableText('Firebase başlatılamadı:\n\n$error\n\n'
-              'Önce flutterfire configure --platforms=android çalıştır, '
-              'Authentication > Anonymous ve Cloud Firestore özelliklerini etkinleştir. '
-              'Veya --dart-define=ENABLE_FIREBASE=true parametresini kaldırıp yerel modda başlat.'),
-        ),
-      ),
-    ));
-  }
+  runApp(const TradingApp());
 }
 
 class TradingApp extends StatelessWidget {
-  const TradingApp({super.key, required this.repository, required this.cloudMode});
-  final PortfolioRepository repository;
-  final bool cloudMode;
+  const TradingApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +64,7 @@ class TradingApp extends StatelessWidget {
           indicatorColor: PremiumColors.goldDim,
         ),
       ),
-      home: HomeScreen(repository: repository, cloudMode: cloudMode),
+      home: const HomeScreen(),
     );
   }
 }

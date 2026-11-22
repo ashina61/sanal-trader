@@ -1,3 +1,11 @@
+## 2026-11-23 — Tek beyin, tek kasa: yerel demo tamamen uygulamadan çıkarıldı
+
+- Ana uygulama artık **tek** sunucu sanal cüzdanı açar. Yerel deneme motoru, yerel portföy, Firebase/local hesap oluşturma, manuel browser AL/SAT, sıfırlama ve yerel bot döngüsü uygulama başlangıcından ve ekranlardan çıkarıldı.
+- Kasa / Radar / Bot / Kâr sekmeleri tek sunucu sanal durumunu okur. Radar sadece sunucu botunun onayladığı gerçek teknik adayları gösterir; sahte kullanıcı al/sat düğmesi yoktur.
+- Başarılı sanal işlemlerin tamamı sunucunun mevcut bot-data kayıtlarında kalır; sunucu kasası asla resetlenmez.
+- Önceden kullanılmış cihazlardaki eski yerel depolama bu güncellemeyle silinmez, fakat hiç açılmaz ve finansal toplamı etkilemez.
+- Ana ekran yenileme ve son karar/işlem geçmişi aynı sunucu kaynaklarına bağlandı. Eski Flutter demo modülleri çalıştırılmıyor.
+
 ## 2026-11-23 — 15dk rotasyon regresyon düzeltmesi
 
 - İlk Python testinde bulunan rotasyon aday listesi / mantıksal gösterge isim çakışması düzeltildi. Her simülasyonda testler geçmeden canlı kasa üzerine yeni sürüm uygulanmayacak.

@@ -462,8 +462,8 @@ class ServerPaperTradesScreen extends StatelessWidget {
               const PremiumSectionTitle(title: 'Sunucu Botu · Kayıtlar'),
               const SizedBox(height: 8),
               const Text(
-                'Bu işlemler yalnızca ücretsiz sunucu botunun '
-                'ayrı 650 TL sanal kasasına aittir.',
+                'Bu kayıtlar uygulamanın tek sanal kasasına aittir. '
+                'Gerçek borsada işlem yapılmaz.',
                 style: TextStyle(color: PremiumColors.muted, fontSize: 12),
               ),
               const SizedBox(height: 13),

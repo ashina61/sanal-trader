@@ -4,7 +4,7 @@ import 'formatters.dart';
 import 'premium_dashboard.dart';
 
 /// One prominent, read-only overview of the actual background paper wallet.
-/// The separate browser wallet is never added to this total.
+/// This is the only live application wallet; no browser trading runs.
 class ServerPaperOverview extends StatelessWidget {
   const ServerPaperOverview({
     super.key, required this.snapshot, required this.loading,
@@ -153,7 +153,7 @@ class ServerPaperOverview extends StatelessWidget {
             label: const Text('İşlemler'))),
         ]),
         const SizedBox(height: 7),
-        const Text('Sadece sunucu sanal kasasıdır; yerel demo dahil değil. '
+        const Text('Tek sanal kasadır. '
           'Kâr garantisi yoktur.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
       ]),
