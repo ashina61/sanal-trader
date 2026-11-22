@@ -5,7 +5,7 @@
     "status": "NO_CANDIDATE"
   },
   "cashTry": 226.8325703463813,
-  "cycles": 22,
+  "cycles": 23,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "WAIT",
@@ -9197,6 +9197,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T21:21:44Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T21:20:15Z",
       "message": "114 coin tarandı; Günlük 8 sanal emir sınırı; yeni pozisyon açılmadı"
     },
@@ -9296,11 +9300,11 @@
     "NEARUSDT": "2026-11-22T18:12:56Z",
     "PUMPUSDT": "2026-11-22T19:45:48Z"
   },
-  "lastRunAt": "2026-11-22T21:20:15Z",
+  "lastRunAt": "2026-11-22T21:21:44Z",
   "lastScheduledTriggerAt": null,
   "lastSuccessAt": "2026-11-22T21:20:15Z",
-  "lastTriggerAt": "2026-11-22T21:20:15Z",
-  "lastTriggerEvent": "workflow_dispatch",
+  "lastTriggerAt": "2026-11-22T21:21:44Z",
+  "lastTriggerEvent": "push",
   "marksTry": {
     "AEROUSDT": 21.367542,
     "BNBUSDT": 28249.9959,
