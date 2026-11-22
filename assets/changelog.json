@@ -20,7 +20,8 @@
         "Yerel işlem detayına girerken otomatik botla eşzamanlı emir riski önlendi; ekran kapatıldığında koruma try/finally ile güvenilir biçimde çözülüyor.",
         "Yerel cüzdan sıfırlama sürmekte olan emir sırasında engellendi; sunucu kasasına dokunulmadığı onay iletişiminde açıkça gösterildi.",
         "Coin detaylarında işlemlerin yerel spot AL/SAT olduğu, SHORT'un ayrı sunucu botuyla izlendiği açıklaması eklendi.",
-        "Ana sayfadaki Güncelleme Geçmişi sürüm etiketi 0.6.0 yerine 0.9.1 ile eşitlendi."
+        "Ana sayfadaki Güncelleme Geçmişi sürüm etiketi 0.6.0 yerine 0.9.1 ile eşitlendi.",
+        "Türkçe karakterli JSON içeren sahte HTTP yanıtı testinde latin1 varsayımı yerine UTF-8 bayt kodlaması kullanıldı; gerçek sunucu JSON okumasıyla uyumlu."
       ]
     },
     {

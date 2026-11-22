@@ -100,7 +100,10 @@ void main() {
       expect(request.method, 'GET');
       expect(request.url.host, 'raw.githubusercontent.com');
       requests++;
-      return http.Response(jsonEncode(paperState(withShort: true)), 200);
+      return http.Response.bytes(
+        utf8.encode(jsonEncode(paperState(withShort: true))), 200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
     });
     final repo = ServerPaperRepository(client: client);
     final state = await repo.load();
