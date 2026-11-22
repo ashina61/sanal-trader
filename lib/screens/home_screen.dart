@@ -9,6 +9,7 @@ import '../services/bot_store.dart';
 import '../services/learning_bot.dart';
 import '../services/bot_training.dart';
 import 'bot_dashboard.dart';
+import 'update_history_screen.dart';
 import '../widgets/formatters.dart';
 import '../widgets/mini_chart.dart';
 import 'coin_detail_screen.dart';
@@ -385,6 +386,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           SizedBox(width: 8), Text('SanalTrader', style: TextStyle(fontWeight: FontWeight.w800)),
         ]),
         actions: [
+          IconButton(
+            tooltip: 'Güncelleme geçmişi',
+            onPressed: () => Navigator.push(context, MaterialPageRoute<void>(
+              builder: (_) => const UpdateHistoryScreen(),
+            )),
+            icon: const Icon(Icons.update),
+          ),
           IconButton(tooltip: 'Fiyatları yenile', onPressed: _refresh, icon: const Icon(Icons.refresh)),
           PopupMenuButton<String>(
             onSelected: (value) { if (value == 'reset') _resetPortfolio(); },

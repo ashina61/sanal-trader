@@ -1,7 +1,7 @@
 name: sanal_trader
 publish_to: 'none'
 description: Gerçek kripto fiyatlarıyla, tamamen sanal parayla işlem yapma uygulaması.
-version: 0.1.0+1
+version: 0.4.0+4
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
@@ -24,3 +24,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/changelog.json
