@@ -1,6 +1,6 @@
 {
   "cashTry": 259.96035,
-  "cycles": 9,
+  "cycles": 10,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "BUY",
@@ -9034,6 +9034,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T19:46:35Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T19:45:48Z",
       "message": "Sanal AL PUMPUSDT: 77.84 TL; SPOT AL / LONG · YÜKSELİŞ piyasası · sinyal +1.00, 6s momentum %+2.3, oynaklık %4.7"
     },
@@ -9079,7 +9083,7 @@
     "NEARUSDT": "2026-11-22T18:12:56Z",
     "PUMPUSDT": "2026-11-22T19:45:48Z"
   },
-  "lastRunAt": "2026-11-22T19:45:48Z",
+  "lastRunAt": "2026-11-22T19:46:35Z",
   "lastSuccessAt": "2026-11-22T19:45:48Z",
   "marksTry": {
     "BNBUSDT": 28170.5382,
