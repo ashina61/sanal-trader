@@ -24,12 +24,12 @@ class BotStore {
     if (old != null) {
       try {
         state = BotState.fromJson(Map<String, dynamic>.from(jsonDecode(old) as Map))
-            .copyWith(enabled: true);
+            ; // Preserve previous ON/OFF preference on migration.
       } catch (_) {
         state = BotState.initial(); // Do not enable corrupt migrated state.
       }
     } else {
-      state = BotState.initial().copyWith(enabled: true);
+      state = BotState.initial(); // Explicit opt-in, never two bots by default.
     }
     await save(state);
     return state;

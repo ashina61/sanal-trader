@@ -111,13 +111,13 @@ class PremiumPortfolioCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            const Expanded(child: Text('TOPLAM SANAL PORTFÖY',
+            const Expanded(child: Text('YEREL SANAL PORTFÖY',
               style: TextStyle(color: Color(0xFFCADDD4), fontSize: 11,
                   fontWeight: FontWeight.w700, letterSpacing: 1.05))),
             const Icon(Icons.verified_user_outlined,
               color: PremiumColors.gold, size: 16),
             const SizedBox(width: 5),
-            Text(cloudMode ? 'BULUT DEMO' : 'SANAL MOD',
+            Text(cloudMode ? 'FIREBASE DEMO' : 'YEREL DEMO',
               style: const TextStyle(color: PremiumColors.gold, fontSize: 9,
                 fontWeight: FontWeight.w800, letterSpacing: .5)),
           ]),
@@ -338,7 +338,7 @@ class PremiumBotOverview extends StatelessWidget {
           const Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Uzman Bot', style: TextStyle(
+              Text('Yerel Uzman Bot', style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w900)),
               Text('Öğrenen sanal işlem asistanı',
                 style: TextStyle(color: PremiumColors.muted, fontSize: 11)),

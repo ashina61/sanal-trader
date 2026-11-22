@@ -11,6 +11,7 @@ import '../services/bot_training.dart';
 import '../services/walk_forward_backtest.dart';
 import 'bot_dashboard.dart';
 import '../widgets/server_paper_card.dart';
+import '../services/server_paper_repository.dart';
 import 'market_radar_screen.dart';
 import 'bot_performance_screen.dart';
 import 'update_history_screen.dart';
@@ -38,6 +39,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _manualTradeOpen = false;
   DateTime? _lastBotRun;
   final _botStore = BotStore();
+  final _serverRepo = ServerPaperRepository();
+  ServerPaperSnapshot? _serverSnapshot;
+  String? _serverError;
+  bool _serverBusy = false;
+  Timer? _serverTimer;
   BotState? _botState;
   bool _botBusy = false;
   String? _botError;
@@ -63,6 +69,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       const Duration(seconds: 2), (_) => _flushLiveUpdates(),
     );
     _loadPortfolio();
+    _loadServer();
+    _serverTimer = Timer.periodic(
+      const Duration(minutes: 2), (_) => _loadServer(),
+    );
     _loadBot();
     _loadMarket();
     _startTimer();
@@ -131,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _marketService.startLive();
       _startTimer();
+      _loadServer();
       if (!_marketService.isLive) _loadMarket();
     } else {
       _marketService.stopLive();
@@ -144,11 +155,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _refreshTimer?.cancel();
     _botTimer?.cancel();
+    _serverTimer?.cancel();
+    _serverRepo.dispose();
     _uiTimer?.cancel();
     _liveSubscription?.cancel();
     _marketService.dispose();
     super.dispose();
   }
+
+  Future<void> _loadServer() async {
+    if (_serverBusy || !mounted) return;
+    _serverBusy = true;
+    setState(() {});
+    try {
+      final result = await _serverRepo.load();
+      if (!mounted) return;
+      setState(() {
+        _serverSnapshot = result;
+        _serverError = null;
+      });
+    } catch (error) {
+      if (mounted) {
+        // Preserve the last good snapshot but clearly report stale/failed
+        // refreshes. Never replace server data with local bot state.
+        setState(() => _serverError = error.toString());
+      }
+    } finally {
+      _serverBusy = false;
+      if (mounted) setState(() {});
+    }
+  }
+
+  void _openServerTrades() => Navigator.push(context, MaterialPageRoute<void>(
+    builder: (_) => ServerPaperTradesScreen(
+      snapshot: _serverSnapshot,
+      onRefresh: _loadServer,
+    ),
+  ));
+
+  Widget _serverSummary() => ServerPaperSummaryTile(
+    snapshot: _serverSnapshot,
+    loading: _serverBusy,
+    error: _serverError,
+    onTap: () => setState(() => _tab = 3),
+  );
 
   Future<void> _loadPortfolio() async {
     try {
@@ -402,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _refresh() async {
     _flushLiveUpdates();
-    await Future.wait([_loadMarket(), _loadPortfolio()]);
+    await Future.wait([_loadMarket(), _loadPortfolio(), _loadServer()]);
   }
 
   Future<void> _openCoin(CoinQuote quote) async {
@@ -457,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _openTrades() => Navigator.push(context, MaterialPageRoute<void>(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('Sanal işlem geçmişi')),
+          appBar: AppBar(title: const Text('Yerel sanal işlem geçmişi')),
           body: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 840),
@@ -500,14 +550,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               if (value == 'reset') _resetPortfolio();
               if (value == 'updates') _openUpdates();
               if (value == 'trades') _openTrades();
+              if (value == 'server_trades') _openServerTrades();
             },
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'updates',
                 child: Text('Güncelleme geçmişi')),
               PopupMenuItem(value: 'trades',
-                child: Text('Sanal işlem geçmişi')),
+                child: Text('Yerel işlem geçmişi')),
+              PopupMenuItem(value: 'server_trades',
+                child: Text('Sunucu işlem geçmişi')),
               PopupMenuItem(value: 'reset',
-                child: Text('Sanal portföyü sıfırla')),
+                child: Text('Yalnızca yerel sanal kasayı sıfırla')),
             ],
           ),
         ],
@@ -546,7 +599,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       lastStatus: _botMessage,
                       onEnabledChanged: _setBotEnabled,
                       onRetrain: _retrainBot,
-                      serverBotCard: const ServerPaperCard(),
+                      serverBotCard: ServerPaperCard(
+                        snapshot: _serverSnapshot,
+                        loading: _serverBusy,
+                        error: _serverError,
+                        onRefresh: _loadServer,
+                        onOpenTrades: _openServerTrades,
+                      ),
                       onOpenPerformance: () => setState(() => _tab = 4),
                     ),
                     _ => BotPerformanceScreen(
@@ -554,6 +613,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       quotes: _quotes,
                       bot: _botState,
                       onViewTrades: _openTrades,
+                      serverSnapshot: _serverSnapshot,
+                      serverBusy: _serverBusy,
+                      serverError: _serverError,
+                      onViewServerTrades: _openServerTrades,
                     ),
                   },
                 ),
@@ -624,6 +687,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
       children: [
+        _serverSummary(),
+        const SizedBox(height: 12),
+        const Text('YEREL / TARAYICI SANAL CÜZDANI',
+          style: TextStyle(color: PremiumColors.muted,
+              fontSize: 11, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
         _walletCard(),
         const SizedBox(height: 24),
         PremiumSectionTitle(
@@ -733,8 +802,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
+        const PremiumSectionTitle(title: 'Yerel / Tarayıcı Portföyü'),
+        const SizedBox(height: 8),
         _walletCard(),
-        const SizedBox(height: 22),
+        const SizedBox(height: 18),
         const PremiumSectionTitle(title: 'Varlıklarım'),
         const SizedBox(height: 10),
         const SizedBox(height: 8),
@@ -756,6 +827,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: _quotes[item.key] == null ? null : () => _openCoin(_quotes[item.key]!),
             ),
           ),
+        const SizedBox(height: 24),
+        const PremiumSectionTitle(title: 'Sunucu Botunun Ayrı Sanal Kasası'),
+        const SizedBox(height: 9),
+        _serverSummary(),
+        const SizedBox(height: 7),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: _openServerTrades,
+            icon: const Icon(Icons.receipt_long_outlined),
+            label: const Text('Sunucu LONG/SHORT işlem kayıtları'),
+          ),
+        ),
       ],
     );
   }
@@ -774,7 +858,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
-        Text('İşlem geçmişi', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        Text('Yerel işlem geçmişi', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
         if (trades.isEmpty) const Padding(
           padding: EdgeInsets.only(top: 60),

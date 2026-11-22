@@ -4,6 +4,8 @@ import '../models/portfolio.dart';
 import '../services/learning_bot.dart';
 import '../widgets/formatters.dart';
 import '../widgets/premium_dashboard.dart';
+import '../services/server_paper_repository.dart';
+import '../widgets/server_paper_card.dart';
 
 /// Distinguishes *realized* virtual-trade performance from predictive accuracy.
 class BotPerformanceScreen extends StatelessWidget {
@@ -13,11 +15,19 @@ class BotPerformanceScreen extends StatelessWidget {
     required this.quotes,
     required this.bot,
     required this.onViewTrades,
+    required this.serverSnapshot,
+    required this.serverBusy,
+    required this.serverError,
+    required this.onViewServerTrades,
   });
   final Portfolio? wallet;
   final Map<String, CoinQuote> quotes;
   final BotState? bot;
   final VoidCallback onViewTrades;
+  final ServerPaperSnapshot? serverSnapshot;
+  final bool serverBusy;
+  final String? serverError;
+  final VoidCallback onViewServerTrades;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +53,50 @@ class BotPerformanceScreen extends StatelessWidget {
           'Gerçek para değil; yalnızca tamamlanan sanal emirler ve '
           'güncel piyasa fiyatı ile hesaplanan sonuçlar.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 12)),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        const PremiumSectionTitle(title: 'Sunucu Botu · Gerçek Sanal Test Sonuçları'),
+        const SizedBox(height: 9),
+        ServerPaperSummaryTile(
+          snapshot: serverSnapshot,
+          loading: serverBusy,
+          error: serverError,
+          onTap: onViewServerTrades,
+        ),
+        const SizedBox(height: 10),
+        if (serverSnapshot != null)
+          PremiumSurface(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Expanded(child: _metric('Sunucu net kapanmış kâr',
+                    formatTry(serverSnapshot!.realizedTry))),
+                  Expanded(child: _metric('Sunucu toplam değişimi',
+                    formatTry(serverSnapshot!.pnlTry))),
+                ]),
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(child: _metric('LONG pozisyon',
+                    '${serverSnapshot!.holdings.length}')),
+                  Expanded(child: _metric('SHORT pozisyon',
+                    '${serverSnapshot!.shorts.length}')),
+                ]),
+                const SizedBox(height: 9),
+                const Text('Bu sunucu sonuçları aşağıdaki yerel bot '
+                    'istatistiklerine EKLENMEZ. Ayrı sanal hesaplardır.',
+                  style: TextStyle(color: PremiumColors.muted,
+                    fontSize: 11)),
+                TextButton.icon(
+                  onPressed: onViewServerTrades,
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  label: const Text('Sunucu işlem geçmişi'),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 22),
+        const PremiumSectionTitle(title: 'Yerel / Tarayıcı Botunun Sonuçları'),
+        const SizedBox(height: 10),
         PremiumSurface(
           gradient: const LinearGradient(colors: [
             Color(0xFF133E33), Color(0xFF101D1A),
