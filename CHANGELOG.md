@@ -1,5 +1,15 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.9.3 — 2026-11-22: Zamanlama ve işlem yapmama nedenleri
+
+- Kayıtlarda son başarılı sunucu fiyat kontrolü 22.29 TR iken saat 22.42'ye kadar planlı beş dakikalık iş görünmedi. GitHub Actions cron saati `3-58/5` biçimine alındı; **GitHub yine gecikme/atlama yapabilir**, kesintisiz sunucu değildir.
+- Sanal botun teknik taraması 24 likit coin yerine ilk 36 yüksek hacimli coin, ek olarak 10 yükselen ve 10 düşen uygun coin ile genişletildi.
+- Sunucu karar motoru uygun teknik sinyal çıkmadığında numaralı gerekçelerini ve piyasa evreni / grafik sayısı / detaylı incelenen sayısını saklar. Bot kartında BEKLE'nin nedenleri gösterilir.
+- Art arda çok yakın tetiklenen bot işlerinde güncel karar metni mükerrer görev mesajı ile ezilmez.
+- İşlem ve risk sınırları, önceki sanal pozisyonlar ve yalnızca public veri kullanımı değişmedi.
+
+
+
 ## v0.9.2 — 2026-11-22: Otonom AL / SAT / LONG / SHORT karar motoru
 
 - Flutter'daki Karar Merkezi son sunucu kararını ve adayları açılır panelde gösterir; eski bot-data şeması ile mobil dar ekranda yeni testler eklendi.

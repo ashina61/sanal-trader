@@ -2,8 +2,9 @@ name: Free Scheduled Paper Bot
 
 on:
   schedule:
-    # Standard five-minute schedule. GitHub may delay or skip runs.
-    - cron: "*/5 * * * *"
+    # Shift away from :00 busy minute; GitHub may delay/skip cron anyway.
+    # Editing cron can also reactivate a previously disabled schedule.
+    - cron: "3-58/5 * * * *"
   push:
     branches: [main]
     paths:

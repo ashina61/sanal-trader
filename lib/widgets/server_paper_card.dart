@@ -263,13 +263,39 @@ class ServerPaperCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Row(children: [
-                  Expanded(child: _metric('Değerlendirilen',
+                  Expanded(child: _metric('Piyasa evreni',
+                    '${plan['universe'] is num ? plan['universe'] : state.tracked} coin')),
+                  Expanded(child: _metric('Teknik analiz',
                     '${plan['reviewed'] is num ? plan['reviewed'] : '—'} coin')),
+                  Expanded(child: _metric('Grafik bulunan',
+                    '${plan['historyPairs'] is num ? plan['historyPairs'] : '—'} coin')),
+                ]),
+                const SizedBox(height: 8),
+                Row(children: [
                   Expanded(child: _metric('Seçilen',
                     plan['symbol']?.toString() ?? 'İşlem yok')),
                   Expanded(child: _metric('Sanal emir',
                     _money(plan['amountTry']))),
                 ]),
+                if (plan['rejectReasons'] is Map &&
+                    (plan['rejectReasons'] as Map).isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('İşlem açılmama nedenleri',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                  ),
+                  const SizedBox(height: 5),
+                  for (final reason in (plan['rejectReasons'] as Map).entries.take(6))
+                    Padding(padding: const EdgeInsets.only(bottom: 3),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('${reason.key}: ${reason.value} coin',
+                          style: const TextStyle(
+                            fontSize: 10, color: PremiumColors.muted)),
+                      ),
+                    ),
+                ],
                 if (candidates.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   const Align(

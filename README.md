@@ -4,6 +4,12 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 
 > **Hiçbir yerde gerçek emir, borsa hesabı, para yatırma, para çekme veya cüzdan anahtarı yoktur.** Bu uygulama bir paper-trading simülatörüdür; yatırım tavsiyesi değildir.
 
+## Bot neden işlem açmıyor?
+
+Botun `Bot → Sunucu Botu → Otonom Karar Merkezi` ekranı artık **yeterli fiyat geçmişi bulunan coinleri**, sinyal filtrelerinden geçenleri ve ret nedenlerini ayrı ayrı gösterir. `BEKLE` kararı bir hata değil, bazen uygun net getiri/risk şartı bulunmamasının sonucudur. Sunucunun **son başarılı piyasa kontrol saatinin** de güncel olması gerekir.
+
+Ücretsiz sunucu GitHub Actions cron'unun 5 dakikalık takvimle tetiklenmesi **garanti değildir**. Son kayıt 20 dakikayı aştıysa `Free Scheduled Paper Bot` iş akışında `Run workflow → run` komutuyla güvenli bir manuel sanal kontrol başlatılabilir. `pause` ve `resume` durum değiştirir; `reset` ise **ayrı sunucu sanal kasasını sıfırlar, test sırasında kullanmayın**. Uygulamadaki yerel bot farklı kasadır.
+
 ## Güncelleme Geçmişi
 
 Uygulamanın üst menüsündeki **güncelleme simgesini** açarak bütün sürümlerin geçmişini görebilirsin. Notlar `assets/changelog.json` dosyasından gelir; geliştirici ayrıntıları `CHANGELOG.md` dosyasında tutulur. Yeni kaynak kod değişiklikleri aynı committe bu iki dosyaya da yazılmazsa GitHub Actions kontrolü başarısız olur.

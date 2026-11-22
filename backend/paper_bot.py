@@ -276,6 +276,7 @@ def assess_decision(state, latest, t):
         "at": stamp(t), "action": "WAIT", "symbol": None, "amountTry": None,
         "score": None, "marketRegime": "VERİ BEKLENİYOR",
         "reason": "Güncel veri bekleniyor", "reviewed": 0,
+        "screened": len(latest), "rejectReasons": {},
         "candidates": [], "order": None,
     }
     def wait(reason):
@@ -395,31 +396,47 @@ def assess_decision(state, latest, t):
         return wait("Minimum %30 sanal nakit rezervi korunuyor")
 
     candidates = []
+    reasons = {}
+    def rejected(label):
+        reasons[label] = reasons.get(label, 0) + 1
     for pair, quote in latest.items():
         if pair in state["holdings"] or pair in state.get("shorts", {}):
+            rejected("Zaten açık pozisyon")
             continue
         if not cooled(pair):
+            rejected("30 dk bekleme")
             continue
         tech = current_tech(pair)
-        if tech is None or tech["volatility"] > 18:
+        if tech is None:
+            rejected("Yetersiz / eski mum")
+            continue
+        if tech["volatility"] > 18:
+            rejected("Aşırı oynaklık")
             continue
         plan["reviewed"] += 1
-        # The recent observed movement must exceed both sides' assumed
-        # 0.1% fees plus a buffer. Not a profitability prediction.
+        # The observed movement must exceed round-trip 0.2% fees plus
+        # a safety buffer. Trading without a signal is not learning.
         if abs(tech["momentum6"]) < .6:
+            rejected("Zayıf 6s momentum")
             continue
         if pair != "BTCUSDT" and btc is None:
+            rejected("BTC grafik verisi yok")
             continue
         mode = None
         if tech["direction"] == "up" and tech["score"] >= .55:
             if pair == "BTCUSDT" or btc["direction"] != "down":
                 mode = "buy"
+            else:
+                rejected("BTC rejimi")
         elif tech["direction"] == "down" and tech["score"] <= -.70:
             if pair == "BTCUSDT" or btc["direction"] != "up":
                 mode = "short"
+            else:
+                rejected("BTC rejimi")
+        else:
+            rejected("Zayıf trend/sinyal")
         if mode is None:
             continue
-
         upper = min(
             total * .12, state["cashTry"] / 1.001,
             (state["cashTry"] - total * .30) / 1.001,
@@ -429,11 +446,14 @@ def assess_decision(state, latest, t):
                  .65 if tech["volatility"] > 6 else 1.0)
         amount = math.floor(max(0.0, upper) * scale * 100) / 100
         if amount < MIN_ORDER:
+            rejected("Kullanılabilir sanal tutar")
             continue
         direction = "long" if mode == "buy" else "short"
         score = ((tech["score"] if mode == "buy" else -tech["score"])
                  + direction_edge(state, direction))
         candidates.append((score, pair, mode, amount, tech))
+    plan["rejectReasons"] = dict(sorted(reasons.items(),
+                                     key=lambda item: (-item[1], item[0])))
 
     candidates.sort(key=lambda item: (-item[0], item[1]))
     plan["candidates"] = [
@@ -447,7 +467,9 @@ def assess_decision(state, latest, t):
         for score, pair, side, _, tech in candidates[:5]
     ]
     if not candidates:
-        return wait("Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı")
+        primary = next(iter(plan["rejectReasons"].items()), None)
+        detail = f" En sık neden: {primary[0]} ({primary[1]} coin)." if primary else ""
+        return wait("Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı." + detail)
     score, pair, side, amount, tech = candidates[0]
     mode = "SPOT AL / LONG" if side == "buy" else "SANAL 1x SHORT"
     return choose(
@@ -479,7 +501,11 @@ def cycle(state, market, t):
         return state
     last = as_date(state.get("lastSuccessAt"))
     if last and (t - last).total_seconds() < 150:
-        log(state, t, "Tekrarlanan kontrol atlandı.")
+        # A near-duplicate push/cron event is not a new trading decision.
+        # Preserve the prior decision and only record a heartbeat.
+        state["journal"] = ([{"at": stamp(t), "message":
+            "Tekrarlanan kontrol atlandı; önceki karar korundu."}] +
+            state.get("journal", []))[:40]
         return state
     try:
         lookup, rate = quotes(market.tickers(), t)
@@ -488,8 +514,14 @@ def cycle(state, market, t):
         eligible_pairs.sort(key=lambda x: x["volume"], reverse=True)
         if not eligible_pairs:
             raise ValueError("No liquid spot quotes")
-        # Whole market discovered; only most liquid and held coins need candle calls.
-        selected_pairs = {v["symbol"] for v in eligible_pairs[:24]}
+        # Scan more than the first 24 liquid symbols. Recent gainers and
+        # losers provide broader LONG / SHORT opportunities; all still pass
+        # volume, volatility, history, and risk filters before any paper order.
+        selected_pairs = {v["symbol"] for v in eligible_pairs[:36]}
+        movers_up = sorted(eligible_pairs, key=lambda x: x["change"], reverse=True)
+        movers_down = sorted(eligible_pairs, key=lambda x: x["change"])
+        selected_pairs.update(x["symbol"] for x in movers_up[:10])
+        selected_pairs.update(x["symbol"] for x in movers_down[:10])
         selected_pairs.update(x for x in CORE if x in lookup)
         selected_pairs.update(state["holdings"].keys())
         selected_pairs.update(state.get("shorts", {}).keys())
@@ -521,6 +553,10 @@ def cycle(state, market, t):
             if symbol not in selected_pairs:
                 cache.pop(symbol, None)
         state["tracked"] = len(eligible_pairs)
+        state["screened"] = len(latest)
+        state["historyPairs"] = sum(
+            1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
+        )
         before = equity(state, latest)
         state["peakEquityTry"] = max(before, state["peakEquityTry"])
         day = t.strftime("%Y-%m-%d")
@@ -531,6 +567,8 @@ def cycle(state, market, t):
         state["decisionPlan"] = {
             key: value for key, value in planned.items() if key != "order"
         }
+        state["decisionPlan"]["universe"] = len(eligible_pairs)
+        state["decisionPlan"]["historyPairs"] = state["historyPairs"]
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice

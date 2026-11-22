@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.3",
+      "date": "2026-11-22",
+      "title": "Bot çalışmıyor teşhisi ve zamanlama iyileştirmesi",
+      "details": [
+        "GitHub bot-data kaydında son çalışma 22 Kasım 2026 22:29 (TR), kontrol 22:42'de; git push tetiklemeleri mevcutken 5 dakikalık schedule çalışmaları görülmedi.",
+        "GitHub Actions 5 dakikalık zamanlaması yoğun saat başından kaydırılıp cron 3-58/5 olarak güncellendi. Bu ücretsiz hizmette gecikme/atlama olasılığı sürer; saat garantisi yoktur.",
+        "Teknik tarama yalnızca en hacimli 24 coin yerine ilk 36 hacimli coin ve en yüksek/en düşük 24 saat değişime sahip 10'ar coin üzerinden genişletildi; tüm giriş risk filtreleri korunur.",
+        "Sunucu botu BEKLE kararında nedeni sayısal dökümle verir: mevcut pozisyon, 30 dakika bekleme, eksik grafik, volatilite, momentum, trend, BTC rejimi ve işlem boyutu.",
+        "Karar Merkezi artık piyasa evrenindeki toplam uygun coin, ayrıntılı incelenen coin ve yeterli mum geçmişi olan coin sayılarını farklı gösterir.",
+        "Birbirine çok yakın tekrar çalışan işlerde gerçek son karar ve nedeni kaybolmaz; yalnızca tekrarlanan çalıştırma günlüğü eklenir.",
+        "Yeni 0.9.3 Flutter sürümü eklendi; botun 650 TL sanal kasası ve mevcut pozisyonları sıfırlanmadı.",
+        "Bot hiçbir sinyal yokken sahte işlem açmaz. Cronun gelecekte çalışıp çalışmadığı ayrıca doğrulanmalıdır."
+      ]
+    },
+    {
       "version": "0.9.2",
       "date": "2026-11-22",
       "title": "Otonom AL/SAT/LONG/SHORT Karar Merkezi",
