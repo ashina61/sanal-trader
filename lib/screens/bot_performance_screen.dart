@@ -22,6 +22,7 @@ class BotPerformanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ledger = bot?.profitLearning;
+    final bt = bot?.backtest;
     final equity = wallet?.fullMarketValue(
       quotes.map((id, q) => MapEntry(id, q.priceTry)));
     final pnl = equity == null ? null : equity - initialCashTry;
@@ -101,22 +102,22 @@ class BotPerformanceScreen extends StatelessWidget {
               style: TextStyle(color: PremiumColors.gold, fontSize: 11,
                 fontWeight: FontWeight.w800)),
             const SizedBox(height: 10),
-            if (bot?.backtest == null)
+            if (bt == null)
               const Text('Yeterli saatlik fiyat geçmişi ve bot eğitimi bekleniyor.',
                 style: TextStyle(color: PremiumColors.muted, fontSize: 12))
             else ...[
               Row(children: [
                 Expanded(child: _metric('Simülasyon getirisi',
-                  '%${bot!.backtest!.strategyReturnPct.toStringAsFixed(2)}')),
+                  '%${bt!.strategyReturnPct.toStringAsFixed(2)}')),
                 Expanded(child: _metric('Aynı dönemde al-tut',
-                  '%${bot.backtest!.buyHoldReturnPct.toStringAsFixed(2)}')),
+                  '%${bt.buyHoldReturnPct.toStringAsFixed(2)}')),
               ]),
               const SizedBox(height: 12),
               Row(children: [
                 Expanded(child: _metric('Test işlemleri',
-                  '${bot.backtest!.closedTrades}')),
+                  '${bt.closedTrades}')),
                 Expanded(child: _metric('En kötü geri çekilme',
-                  '%${bot.backtest!.maxDrawdownPct.toStringAsFixed(1)}')),
+                  '%${bt.maxDrawdownPct.toStringAsFixed(1)}')),
               ]),
             ],
             const SizedBox(height: 9),

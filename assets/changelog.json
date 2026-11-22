@@ -16,7 +16,9 @@
         "Yeni kapanan mumlar aynı uzunlukta dahi olsa önceki canlı fiyat korunarak analize alınıyor.",
         "Komisyonlu ileri-test sonuçları eğitimin ardından ve yaklaşık saatte bir yerel bota kaydediliyor; mevcut 650 TL sanal cüzdana emir gönderilmiyor.",
         "Bot ve Kâr ekranlarına ayrı geçmiş ileri-test kartları eklendi: maliyetli strateji getirisi, aynı dönemin al-tut karşılaştırması, işlem sayısı ve gerileme.",
-        "İleri-test simülasyonları gerçek sanal portföyün ₺650 bakiyesine yazılmaz; gerçek satış kârı ayrı tutulur."
+        "İleri-test simülasyonları gerçek sanal portföyün ₺650 bakiyesine yazılmaz; gerçek satış kârı ayrı tutulur.",
+        "Komisyonlu ileri-test için eksik veri, yatay piyasa, tersine dönüş, eğitim-test ayrımı ve bot kayıt serileştirmesi otomatik testleri eklendi.",
+        "İleri-test ekranlarında null güvenliği ve küçük ekran uyumluluğu iyileştirildi."
       ]
     },
     {

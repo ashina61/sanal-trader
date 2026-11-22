@@ -2,6 +2,9 @@
 
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
+- İleri-test: yetersiz veri, yatay piyasa komisyonu, geri dönüş, eğitimden holdout'a veri sızmaması ve JSON kayıt testleri eklendi.
+- Bot ve Kâr ekranlarında ileri-test kartları null güvenli biçimde gösteriliyor.
+
 - Bot ve Kâr ekranlarında gerçek işlemlerden ayrı, maliyetli geçmiş strateji denemesinin getirisi, al-tut kıyası, işlem sayısı ve en yüksek gerilemesi gösteriliyor.
 
 - Saatlik piyasa geçmişi düzenli yenilenir; yeni saatlik kapanış eskisiyle aynı uzunlukta olsa bile tarihine göre yenilenir ve WebSocket anlık fiyatı korunur.

@@ -34,6 +34,7 @@ class BotDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bot = state;
+    final bt = bot?.backtest;
     final active = bot?.enabled ?? false;
     final weight = bot?.weights ?? const [1 / 3, 1 / 3, 1 / 3];
     final accuracy = (bot?.evaluated ?? 0) == 0 ? 'Henüz ölçülmedi' :
@@ -173,27 +174,27 @@ class BotDashboard extends StatelessWidget {
                 'Gerçek sanal cüzdan işlemi değildir.',
                 style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
               const SizedBox(height: 12),
-              if (bot?.backtest == null)
+              if (bt == null)
                 const Text('Eğitim tamamlandığında test hesaplanır.',
                   style: TextStyle(color: PremiumColors.muted))
               else ...[
                 Row(children: [
                   Expanded(child: _stat('Strateji getirisi',
-                    '%${bot!.backtest!.strategyReturnPct.toStringAsFixed(2)}')),
+                    '%${bt!.strategyReturnPct.toStringAsFixed(2)}')),
                   Expanded(child: _stat('Al-tut karşılığı',
-                    '%${bot.backtest!.buyHoldReturnPct.toStringAsFixed(2)}')),
+                    '%${bt.buyHoldReturnPct.toStringAsFixed(2)}')),
                   Expanded(child: _stat('Maks. gerileme',
-                    '%${bot.backtest!.maxDrawdownPct.toStringAsFixed(1)}')),
+                    '%${bt.maxDrawdownPct.toStringAsFixed(1)}')),
                 ]),
                 const SizedBox(height: 9),
                 Row(children: [
                   Expanded(child: _stat('İncelenen coin',
-                    '${bot.backtest!.coins}')),
+                    '${bt.coins}')),
                   Expanded(child: _stat('Kapanan test işlemi',
-                    '${bot.backtest!.closedTrades}')),
+                    '${bt.closedTrades}')),
                   Expanded(child: _stat('Test kazanma oranı',
-                    bot.backtest!.winRate == null ? 'İşlem yok'
-                      : '%${(bot.backtest!.winRate! * 100).toStringAsFixed(1)}')),
+                    bt.winRate == null ? 'İşlem yok'
+                      : '%${(bt.winRate! * 100).toStringAsFixed(1)}')),
                 ]),
               ],
               const SizedBox(height: 10),
