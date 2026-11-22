@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
 import '../services/market_service_v2.dart';
@@ -111,6 +112,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Web tab backgrounding must not deliberately turn off a user-enabled
+    // paper bot. Browser throttling can still slow timers in hidden tabs.
+    if (kIsWeb && state != AppLifecycleState.resumed) return;
     if (state == AppLifecycleState.resumed) {
       _marketService.startLive();
       _startTimer();
@@ -223,6 +227,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted || _botBusy || _manualTradeOpen || _botState?.enabled != true ||
         _portfolio == null || _quotes.isEmpty ||
         (_marketError != null && !_marketService.isLive)) return;
+    // If WebSocket drops, stop trading until a fresh REST snapshot arrives.
+    if (!_marketService.isLive &&
+        (_marketFetchedAt == null ||
+          DateTime.now().difference(_marketFetchedAt!) >
+            const Duration(minutes: 2))) return;
     _lastBotRun = DateTime.now();
     _botBusy = true;
     setState(() => _botError = null);
