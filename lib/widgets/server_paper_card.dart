@@ -1,279 +1,342 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
-import '../widgets/premium_dashboard.dart';
-import '../widgets/formatters.dart';
+import '../services/server_paper_repository.dart';
+import 'formatters.dart';
+import 'premium_dashboard.dart';
 
-/// Read-only view of the separately persisted, entirely simulated bot wallet.
-/// Public data contains no exchange API keys or personal account information.
-class ServerPaperCard extends StatefulWidget {
-  const ServerPaperCard({super.key});
+String _money(dynamic value) => value is num && value.toDouble().isFinite
+    ? formatTry(value.toDouble()) : '—';
 
-  @override
-  State<ServerPaperCard> createState() => _ServerPaperCardState();
-}
+String _sideLabel(dynamic code) => switch (code) {
+  'buy' => 'LONG AÇ',
+  'sell' => 'LONG KAPAT',
+  'short' => 'SHORT AÇ',
+  'cover' => 'SHORT KAPAT',
+  _ => 'SANAL İŞLEM',
+};
 
-class _ServerPaperCardState extends State<ServerPaperCard> {
-  static const controls =
-      'https://github.com/ashina61/sanal-trader/actions/workflows/paper-bot.yml';
-
-  Map<String, dynamic>? _data;
-  String? _error;
-  DateTime? _updatedAt;
-  bool _loading = false;
-  Timer? _refreshTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _refresh();
-    _refreshTimer = Timer.periodic(
-      const Duration(minutes: 2), (_) => _refresh(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _refresh() async {
-    if (_loading || !mounted) return;
-    setState(() => _loading = true);
-    try {
-      final uri = Uri.parse(
-        'https://raw.githubusercontent.com/ashina61/sanal-trader/'
-        'bot-data/state.json?cache=${DateTime.now().millisecondsSinceEpoch}',
-      );
-      final response = await http.get(uri).timeout(const Duration(seconds: 12));
-      if (response.statusCode != 200) {
-        throw Exception(response.statusCode == 404
-            ? 'İlk bot çalışması veya kayıt dalı henüz hazır değil'
-            : 'GitHub veri erişimi: HTTP ${response.statusCode}');
-      }
-      final decoded = jsonDecode(response.body);
-      if (decoded is! Map || decoded['schema'] != 1) {
-        throw const FormatException('Beklenmeyen sunucu cüzdan formatı');
-      }
-      if (!mounted) return;
-      setState(() {
-        _data = Map<String, dynamic>.from(decoded);
-        _updatedAt = DateTime.now();
-        _error = null;
-      });
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  double? _num(dynamic n) =>
-      n is num && n.toDouble().isFinite ? n.toDouble() : null;
-
-  String _try(dynamic n) {
-    final x = _num(n);
-    return x == null ? '—' : formatTry(x);
-  }
-
-  String _side(dynamic value) => switch (value) {
-    'buy' => 'LONG AÇ',
-    'sell' => 'LONG KAPAT',
-    'short' => 'SHORT AÇ',
-    'cover' => 'SHORT KAPAT',
-    _ => 'SANAL',
-  };
+/// Small, shared status summary for the Panel and local Portfolio tab.
+class ServerPaperSummaryTile extends StatelessWidget {
+  const ServerPaperSummaryTile({
+    super.key, required this.snapshot, required this.loading,
+    required this.error, required this.onTap,
+  });
+  final ServerPaperSnapshot? snapshot;
+  final bool loading;
+  final String? error;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final state = _data;
-    final last = DateTime.tryParse(state?['lastSuccessAt']?.toString() ?? '');
-    final fresh = last != null &&
-        DateTime.now().toUtc().difference(last.toUtc()).inMinutes < 20 &&
-        !last.toUtc().isAfter(DateTime.now().toUtc());
-    final enabled = state?['enabled'] == true;
-    final healthy = enabled && fresh && state?['lastError'] == null;
-    final list = state?['trades'];
-    final trades = list is List ? list.whereType<Map>().take(5).toList() : <Map>[];
-    final longs = state?['holdings'] is Map
-        ? state!['holdings'] as Map : const <String, dynamic>{};
-    final shorts = state?['shorts'] is Map
-        ? state!['shorts'] as Map : const <String, dynamic>{};
-    final marks = state?['marksTry'] is Map
-        ? state!['marksTry'] as Map : const <String, dynamic>{};
+    final healthy = snapshot?.isHealthyAt(DateTime.now()) ?? false;
+    final status = snapshot == null
+        ? (loading ? 'Sunucu verisi yükleniyor' : (error ?? 'Bağlantı bekleniyor'))
+        : !snapshot!.enabled ? 'Durduruldu'
+        : healthy ? 'Son kontrol güncel'
+        : 'Kontrol gecikmiş veya veri hatası var';
+    return PremiumSurface(
+      padding: EdgeInsets.zero,
+      borderColor: PremiumColors.gold.withValues(alpha: .45),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(13),
+            child: Row(children: [
+              const Icon(Icons.cloud_outlined, color: PremiumColors.gold, size: 24),
+              const SizedBox(width: 10),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('SUNUCU · AYRI SANAL KASA', style: TextStyle(
+                    color: PremiumColors.gold, fontSize: 10,
+                    fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 5),
+                  Text(snapshot == null ? '—' : formatTry(snapshot!.equityTry),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900, fontSize: 18)),
+                  const SizedBox(height: 3),
+                  Text(status,
+                    maxLines: 2, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: PremiumColors.muted, fontSize: 10)),
+                ],
+              )),
+              if (loading)
+                const SizedBox(width: 16, height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+              else
+                const Icon(Icons.chevron_right, color: PremiumColors.gold),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
+/// Server snapshot is supplied by HomeScreen's ONE centralized read.
+class ServerPaperCard extends StatelessWidget {
+  const ServerPaperCard({
+    super.key, required this.snapshot, required this.loading,
+    required this.error, required this.onRefresh, required this.onOpenTrades,
+  });
+  final ServerPaperSnapshot? snapshot;
+  final bool loading;
+  final String? error;
+  final VoidCallback onRefresh;
+  final VoidCallback onOpenTrades;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = snapshot;
+    final updated = state?.lastSuccessAt?.toLocal();
+    final healthy = state?.isHealthyAt(DateTime.now()) ?? false;
+    final longs = state?.holdings ?? {};
+    final shorts = state?.shorts ?? {};
+    final marks = state?.marksTry ?? {};
     return PremiumSurface(
       gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF154237), Color(0xFF101F1B)],
+        colors: [Color(0xFF164034), Color(0xFF0D1E1B)],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.cloud_outlined, color: PremiumColors.gold, size: 25),
+          const Icon(Icons.dns_outlined, color: PremiumColors.gold, size: 23),
           const SizedBox(width: 9),
           const Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('7/24 Sunucu Botu', style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w800)),
-              Text('GitHub Actions · ücretsiz zamanlanmış simülasyon',
-                style: TextStyle(
-                  color: PremiumColors.muted, fontSize: 10)),
+              Text('Sunucu Botu · 1x LONG / SHORT',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
+              Text('Ücretsiz GitHub Actions · periyodik sanal emir',
+                style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
             ],
           )),
-          if (_loading)
-            const SizedBox(width: 14, height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2))
-          else IconButton(
-            tooltip: 'Sunucu verisini yenile',
-            onPressed: _refresh,
-            icon: const Icon(Icons.refresh, color: PremiumColors.gold),
+          IconButton(
+            tooltip: 'Sunucu kasasını yenile',
+            onPressed: loading ? null : onRefresh,
+            icon: loading ? const SizedBox(width: 16, height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.refresh, color: PremiumColors.gold),
           ),
         ]),
-        const SizedBox(height: 8),
-        Text(
-          state == null
-              ? 'Sunucudaki ilk sanal çalışma bekleniyor'
-              : !enabled ? 'DURDURULDU'
-              : healthy ? 'AKTİF · Son kontrol güncel'
-              : 'GECİKME / VERİ KONTROLÜ GEREKİYOR',
+        const SizedBox(height: 9),
+        Text(state == null ? 'SUNUCU VERİSİ BEKLENİYOR'
+            : !state.enabled ? 'DURDURULDU'
+            : healthy ? 'ÇALIŞIYOR · SON KONTROL GÜNCEL'
+            : 'SON KONTROL GECİKMİŞ / VERİ HATASI',
           style: TextStyle(
-            fontWeight: FontWeight.bold, fontSize: 12,
             color: healthy ? PremiumColors.emerald : PremiumColors.gold,
-          ),
-        ),
-        const SizedBox(height: 6),
+            fontSize: 11, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 8),
         const Text(
-          'Bu ayrı bir 650 TL sanal sunucu kasasıdır. '
-          'Mevcut tarayıcı portföyünden farklıdır ve gerçek para içermez.',
-          style: TextStyle(
-            color: PremiumColors.muted, fontSize: 11),
-        ),
-        const SizedBox(height: 13),
+          'Bu hesap tarayıcıdaki yerel bot cüzdanından AYRIDIR. '
+          'Aynı 650 TL iki farklı sanal test hesabıdır.',
+          style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+        if (error != null) ...[
+          const SizedBox(height: 8),
+          Text('Veri uyarısı: $error', style: const TextStyle(
+            color: PremiumColors.danger, fontSize: 11)),
+        ],
         if (state != null) ...[
+          const SizedBox(height: 13),
           Row(children: [
-            Expanded(child: _metric('Sunucu sanal kasa',
-                _try(state['equityTry']))),
-            Expanded(child: _metric('Boşta sanal nakit',
-                _try(state['cashTry']))),
+            Expanded(child: _metric('Toplam sanal değer', _money(state.equityTry))),
+            Expanded(child: _metric('Sanal nakit', _money(state.cashTry))),
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            Expanded(child: _metric('Gerçekleşen net kâr',
-                _try(state['realizedTry']))),
-            Expanded(child: _metric('Sanal işlem sayısı',
-                '${state['trades'] is List ? (state['trades'] as List).length : 0}')),
+            Expanded(child: _metric('Kasa değişimi', _money(state.pnlTry))),
+            Expanded(child: _metric('Gerçekleşen net', _money(state.realizedTry))),
           ]),
           const SizedBox(height: 12),
           Row(children: [
             Expanded(child: _metric('Açık LONG', '${longs.length}')),
             Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
+            Expanded(child: _metric('İşlem', '${state.trades.length}')),
           ]),
+          const SizedBox(height: 13),
           if (longs.isNotEmpty || shorts.isNotEmpty) ...[
-            const Divider(height: 22, color: PremiumColors.border),
+            const Divider(color: PremiumColors.border),
             const Text('Açık sanal pozisyonlar',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            for (final item in longs.entries.take(6))
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+            const SizedBox(height: 8),
+            for (final entry in longs.entries.take(8))
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Text('LONG ${item.key} · '
-                  '${item.value is Map ? _try((item.value as Map)['costTry']) : '—'} maliyet',
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text('LONG ${entry.key} · maliyet '
+                  '${entry.value is Map ? _money((entry.value as Map)['costTry']) : '—'}',
                   style: const TextStyle(fontSize: 11,
                     color: PremiumColors.emerald)),
               ),
-            for (final item in shorts.entries.take(6))
+            for (final entry in shorts.entries.take(8)) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Text('SHORT ${item.key} · '
-                  '${item.value is Map ? _try((item.value as Map)['marginTry']) : '—'} teminat'
-                  '${marks[item.key] is num ? ' · son fiyat ${_try(marks[item.key])}' : ''}',
-                  style: const TextStyle(fontSize: 11,
-                    color: PremiumColors.gold)),
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('SHORT ${entry.key} · teminat '
+                  '${entry.value is Map ? _money((entry.value as Map)['marginTry']) : '—'}',
+                  style: const TextStyle(
+                    fontSize: 11, color: PremiumColors.gold)),
               ),
-          ],
-          const SizedBox(height: 13),
-          Text(last == null
-              ? 'Henüz başarılı piyasa kontrolü yok'
-              : 'Son başarılı kontrol: ${last.toLocal().day.toString().padLeft(2, '0')}.'
-                '${last.toLocal().month.toString().padLeft(2, '0')} '
-                '${last.toLocal().hour.toString().padLeft(2, '0')}:'
-                '${last.toLocal().minute.toString().padLeft(2, '0')}',
-            style: const TextStyle(color: PremiumColors.muted, fontSize: 11)),
-          const SizedBox(height: 6),
-          Text(state['lastDecision']?.toString() ?? 'Sinyal bekleniyor',
-            style: const TextStyle(fontSize: 12)),
-          if (trades.isNotEmpty) ...[
-            const Divider(height: 24, color: PremiumColors.border),
-            const Text('Son sunucu sanal emirleri',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-            const SizedBox(height: 7),
-            for (final item in trades)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  '${_side(item['side'])} '
-                  '${item['symbol'] ?? '?'} · ${_try(item['grossTry'])}',
-                  style: const TextStyle(fontSize: 11),
+              if (entry.value is Map &&
+                  (entry.value as Map)['entryPriceTry'] is num &&
+                  (entry.value as Map)['quantity'] is num &&
+                  marks[entry.key] is num)
+                Padding(padding: const EdgeInsets.only(bottom: 7),
+                  child: Text(
+                    'Açık fiyat farkı (ücret hariç): '
+                    '${_money(
+                      ((entry.value as Map)['entryPriceTry'] as num).toDouble() *
+                      ((entry.value as Map)['quantity'] as num).toDouble() -
+                      (marks[entry.key] as num).toDouble() *
+                      ((entry.value as Map)['quantity'] as num).toDouble()
+                    )}',
+                    style: const TextStyle(fontSize: 10,
+                      color: PremiumColors.muted)),
                 ),
-              ),
+            ],
           ],
-          if (_updatedAt != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text('Gösterge son yenileme: '
-                '${_updatedAt!.hour.toString().padLeft(2, '0')}:'
-                '${_updatedAt!.minute.toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                  color: PremiumColors.muted, fontSize: 10)),
-            ),
+          Text(updated == null ? 'Henüz başarılı döngü kaydı yok'
+                : 'Son başarılı piyasa kontrolü: '
+                  '${updated.day.toString().padLeft(2,'0')}.'
+                  '${updated.month.toString().padLeft(2,'0')} '
+                  '${updated.hour.toString().padLeft(2,'0')}:'
+                  '${updated.minute.toString().padLeft(2,'0')}',
+              style: const TextStyle(
+                fontSize: 11, color: PremiumColors.muted)),
+          const SizedBox(height: 6),
+          Text(state.decision, style: const TextStyle(fontSize: 11)),
+          if (state.error != null)
+            Text('Sunucu hatası: ${state.error}',
+              style: const TextStyle(
+                fontSize: 11, color: PremiumColors.danger)),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onOpenTrades,
+            icon: const Icon(Icons.receipt_long_outlined, size: 16),
+            label: const Text('Sunucu işlemleri ve hesap geçmişi'),
+          ),
         ],
-        if (_error != null) ...[
-          const SizedBox(height: 8),
-          Text('Veri alınamadı: $_error',
-            style: const TextStyle(color: PremiumColors.gold, fontSize: 11)),
-        ],
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         TextButton.icon(
           onPressed: () {
-            Clipboard.setData(const ClipboardData(text: controls));
+            Clipboard.setData(
+              const ClipboardData(text: ServerPaperRepository.controlsUrl),
+            );
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('GitHub Actions kontrol bağlantısı kopyalandı.'),
+              content: Text('GitHub bot yönetim bağlantısı kopyalandı.'),
             ));
           },
-          icon: const Icon(Icons.copy, size: 16),
-          label: const Text('GitHub bot yönetim linkini kopyala'),
+          icon: const Icon(Icons.copy, size: 15),
+          label: const Text('GitHub Bot Yönetimi bağlantısını kopyala'),
           style: TextButton.styleFrom(foregroundColor: PremiumColors.gold),
         ),
         const Text(
-          'Sunucu botunda 1x sanal LONG/SHORT bulunur; gerçek '
-          'vadeli işlem, borç veya funding hesabı yoktur. '
-          'Ücretsiz GitHub zamanlaması yaklaşık 5 dakikada bir çalışır; '
-          'gecikme veya duraksama olabilir. Aç/Kapat komutları şimdilik '
-          'GitHub Actions ekranındadır; aşağıdaki anahtar yalnızca yerel botu yönetir.',
-          style: TextStyle(color: PremiumColors.muted, fontSize: 10),
-        ),
+          'GitHub zamanlaması gecikebilir. Tarayıcıdaki yerel bot anahtarı '
+          'sunucu botunu açıp kapatmaz. Finansman/borçlanma maliyeti '
+          'bu 1x sanal SHORT modelinde hesaplanmıyor.',
+          style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
       ]),
     );
   }
 
-  Widget _metric(String label, String value) => Column(
+  Widget _metric(String title, String amount) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: const TextStyle(
-        color: PremiumColors.muted, fontSize: 10)),
-      const SizedBox(height: 5),
-      FittedBox(fit: BoxFit.scaleDown,
+      Text(title, maxLines: 2, overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 10, color: PremiumColors.muted)),
+      const SizedBox(height: 6),
+      FittedBox(
+        fit: BoxFit.scaleDown,
         alignment: Alignment.centerLeft,
-        child: Text(value, style: const TextStyle(
-          fontSize: 16, fontWeight: FontWeight.w800,
-          color: PremiumColors.emerald))),
+        child: Text(amount, style: const TextStyle(
+          color: PremiumColors.emerald, fontSize: 15,
+          fontWeight: FontWeight.w900)),
+      ),
     ],
   );
+}
+
+/// Complete persisted SERVER history, never local browser trade records.
+class ServerPaperTradesScreen extends StatelessWidget {
+  const ServerPaperTradesScreen({
+    super.key, required this.snapshot, required this.onRefresh,
+  });
+  final ServerPaperSnapshot? snapshot;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final trades = snapshot?.trades ?? [];
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sunucu sanal işlem geçmişi'),
+        actions: [
+          IconButton(onPressed: onRefresh,
+              tooltip: 'Sunucu verilerini yenile',
+              icon: const Icon(Icons.refresh)),
+        ],
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const PremiumSectionTitle(title: 'Sunucu Botu · Kayıtlar'),
+              const SizedBox(height: 8),
+              const Text(
+                'Bu işlemler yalnızca ücretsiz sunucu botunun '
+                'ayrı 650 TL sanal kasasına aittir.',
+                style: TextStyle(color: PremiumColors.muted, fontSize: 12),
+              ),
+              const SizedBox(height: 13),
+              if (snapshot != null)
+                ServerPaperSummaryTile(
+                  snapshot: snapshot, loading: false, error: null,
+                  onTap: onRefresh,
+                ),
+              const SizedBox(height: 16),
+              if (trades.isEmpty)
+                const PremiumSurface(
+                  child: Text('Kayıtlı sunucu işlemi bulunamadı.',
+                    style: TextStyle(color: PremiumColors.muted)),
+                ),
+              for (final t in trades)
+                Card(
+                  child: ListTile(
+                    leading: Icon(
+                      t['side'] == 'short' || t['side'] == 'cover'
+                          ? Icons.trending_down : Icons.trending_up,
+                      color: t['side'] == 'short' || t['side'] == 'cover'
+                          ? PremiumColors.gold : PremiumColors.emerald,
+                    ),
+                    title: Text('${_sideLabel(t['side'])} · ${t['symbol'] ?? '—'}'),
+                    subtitle: Text(
+                      '${t['at']?.toString() ?? ''} · '
+                      'Komisyon ${_money(t['feeTry'])}\n'
+                      '${t['reason']?.toString() ?? ''}',
+                      style: const TextStyle(fontSize: 10)),
+                    isThreeLine: true,
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(_money(t['grossTry']),
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                        if (t['side'] == 'sell' || t['side'] == 'cover')
+                          Text('Net ${_money(t['realizedPnlTry'])}',
+                            style: const TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
