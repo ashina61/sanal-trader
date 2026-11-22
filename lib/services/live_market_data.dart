@@ -78,8 +78,10 @@ CoinQuote? marketQuoteFromTicks({
   required MarketMiniTick coin,
   required MarketMiniTick tryRate,
   CoinQuote? previous,
+  Map<String, String>? pairs,
+  Map<String, double>? volumes,
 }) {
-  final id = trackedPairs[coin.symbol];
+  final id = (pairs ?? trackedPairs)[coin.symbol];
   if (id == null || coin.symbol == 'USDTTRY') return null;
   final priceTry = coin.close * tryRate.close;
   final oldTry = coin.open * tryRate.open;
@@ -92,11 +94,12 @@ CoinQuote? marketQuoteFromTicks({
     (prior.isEmpty ? <double>[] : <double>[priceTry]);
   return CoinQuote(
     id: id,
-    symbol: trackedSymbols[coin.symbol]!,
-    name: trackedNames[id]!,
+    symbol: trackedSymbols[coin.symbol] ?? coin.symbol.substring(0, coin.symbol.length - 4),
+    name: trackedNames[id] ?? coin.symbol.substring(0, coin.symbol.length - 4),
     priceTry: priceTry,
     change24h: (priceTry / oldTry - 1) * 100,
     updatedAt: current,
     sparkline: chart,
+    volume24hUsdt: volumes?[coin.symbol] ?? previous?.volume24hUsdt ?? 0,
   );
 }

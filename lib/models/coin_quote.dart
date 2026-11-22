@@ -7,6 +7,7 @@ class CoinQuote {
     required this.change24h,
     required this.updatedAt,
     required this.sparkline,
+    this.volume24hUsdt = 0,
   });
 
   final String id;
@@ -16,6 +17,7 @@ class CoinQuote {
   final double change24h;
   final DateTime updatedAt;
   final List<double> sparkline;
+  final double volume24hUsdt;
 
   bool get isFresh {
     final elapsed = DateTime.now().toUtc().difference(updatedAt.toUtc());
