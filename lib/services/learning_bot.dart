@@ -66,6 +66,12 @@ class BotState {
     required this.evaluated,
     required this.correct,
     required this.activities,
+    this.trainingVersion = 0,
+    this.trainingExamples = 0,
+    this.holdoutExamples = 0,
+    this.holdoutCorrect = 0,
+    this.baselineCorrect = 0,
+    this.trainedCoins = 0,
   });
 
   factory BotState.initial() => const BotState(
@@ -83,6 +89,12 @@ class BotState {
   final int evaluated;
   final int correct;
   final List<BotActivity> activities;
+  final int trainingVersion;
+  final int trainingExamples;
+  final int holdoutExamples;
+  final int holdoutCorrect;
+  final int baselineCorrect;
+  final int trainedCoins;
 
   BotState copyWith({
     bool? enabled,
@@ -94,6 +106,12 @@ class BotState {
     int? evaluated,
     int? correct,
     List<BotActivity>? activities,
+    int? trainingVersion,
+    int? trainingExamples,
+    int? holdoutExamples,
+    int? holdoutCorrect,
+    int? baselineCorrect,
+    int? trainedCoins,
   }) => BotState(
     enabled: enabled ?? this.enabled,
     weights: weights ?? this.weights,
@@ -104,6 +122,12 @@ class BotState {
     evaluated: evaluated ?? this.evaluated,
     correct: correct ?? this.correct,
     activities: activities ?? this.activities,
+    trainingVersion: trainingVersion ?? this.trainingVersion,
+    trainingExamples: trainingExamples ?? this.trainingExamples,
+    holdoutExamples: holdoutExamples ?? this.holdoutExamples,
+    holdoutCorrect: holdoutCorrect ?? this.holdoutCorrect,
+    baselineCorrect: baselineCorrect ?? this.baselineCorrect,
+    trainedCoins: trainedCoins ?? this.trainedCoins,
   );
 
   Map<String, dynamic> toJson() => {
@@ -116,6 +140,12 @@ class BotState {
     'evaluated': evaluated,
     'correct': correct,
     'activities': activities.map((a) => a.toJson()).toList(),
+    'trainingVersion': trainingVersion,
+    'trainingExamples': trainingExamples,
+    'holdoutExamples': holdoutExamples,
+    'holdoutCorrect': holdoutCorrect,
+    'baselineCorrect': baselineCorrect,
+    'trainedCoins': trainedCoins,
   };
 
   factory BotState.fromJson(Map<String, dynamic> json) {
@@ -146,6 +176,12 @@ class BotState {
       evaluated: math.max(0, (json['evaluated'] as num?)?.toInt() ?? 0),
       correct: math.max(0, (json['correct'] as num?)?.toInt() ?? 0),
       activities: activities,
+      trainingVersion: (json['trainingVersion'] as num?)?.toInt() ?? 0,
+      trainingExamples: (json['trainingExamples'] as num?)?.toInt() ?? 0,
+      holdoutExamples: (json['holdoutExamples'] as num?)?.toInt() ?? 0,
+      holdoutCorrect: (json['holdoutCorrect'] as num?)?.toInt() ?? 0,
+      baselineCorrect: (json['baselineCorrect'] as num?)?.toInt() ?? 0,
+      trainedCoins: (json['trainedCoins'] as num?)?.toInt() ?? 0,
     );
   }
 
