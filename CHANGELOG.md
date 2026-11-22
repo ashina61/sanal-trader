@@ -2,6 +2,8 @@
 
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
+- Gerçekleşen sanal emirlerden tamamen bağımsız ileri-test istatistikleri BotState içinde yerel olarak saklanıyor.
+
 - Son 24 saatlik görülmemiş fiyat üzerinde yalnızca geçmişe bakan, %0,1 komisyon + %0,05 varsayımsal kayma içeren uzun pozisyon simülasyonu.
 - Strateji net getirisi, maliyetli al-tut kıyası, kapanan sanal test işlemleri ve maksimum gerileme ölçümleri.
 - Bu geçmiş testi gerçek sanal cüzdan işlemi değildir, hesap bakiyesini değiştirmez ve kazanç garantisi sayılmaz.

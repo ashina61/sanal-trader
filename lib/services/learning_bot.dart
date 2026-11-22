@@ -3,6 +3,7 @@ import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
 import 'technical_analysis.dart';
 import 'profit_learning.dart';
+import '../models/backtest_summary.dart';
 
 /// Online expert-weighting strategy for paper trading ONLY.
 /// Predictions are evaluated using later market snapshots, never future data.
@@ -85,6 +86,7 @@ class BotState {
     this.technicalEvaluated = 0,
     this.technicalCorrect = 0,
     this.profitLearning = const ProfitLearning.empty(),
+    this.backtest,
   });
 
   factory BotState.initial() => const BotState(
@@ -113,6 +115,7 @@ class BotState {
   final int technicalEvaluated;
   final int technicalCorrect;
   final ProfitLearning profitLearning;
+  final BacktestSummary? backtest;
 
   BotState copyWith({
     bool? enabled,
@@ -135,6 +138,7 @@ class BotState {
     int? technicalEvaluated,
     int? technicalCorrect,
     ProfitLearning? profitLearning,
+    BacktestSummary? backtest,
   }) => BotState(
     enabled: enabled ?? this.enabled,
     weights: weights ?? this.weights,
@@ -156,6 +160,7 @@ class BotState {
     technicalEvaluated: technicalEvaluated ?? this.technicalEvaluated,
     technicalCorrect: technicalCorrect ?? this.technicalCorrect,
     profitLearning: profitLearning ?? this.profitLearning,
+    backtest: backtest ?? this.backtest,
   );
 
   Map<String, dynamic> toJson() => {
@@ -179,6 +184,7 @@ class BotState {
     'technicalEvaluated': technicalEvaluated,
     'technicalCorrect': technicalCorrect,
     'profitLearning': profitLearning.toJson(),
+    'backtest': backtest?.toJson(),
   };
 
   factory BotState.fromJson(Map<String, dynamic> json) {
@@ -223,6 +229,9 @@ class BotState {
       profitLearning: json['profitLearning'] is Map
           ? ProfitLearning.fromJson(Map<String, dynamic>.from(json['profitLearning'] as Map))
           : const ProfitLearning.empty(),
+      backtest: json['backtest'] is Map
+          ? BacktestSummary.fromJson(Map<String, dynamic>.from(json['backtest'] as Map))
+          : null,
     );
   }
 
