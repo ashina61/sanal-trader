@@ -1,3 +1,9 @@
+## 2026-11-23 — İki işlemlik olumsuz örneklemin AI'yi kilitlemesini önle
+
+- Groq birkaç geçmiş zararlı sanal işlemi tüm adayların iptal gerekçesi yapmamalı; 20 kapanış altı örneklemin güvenilir tahmin olmadığı AI sistem bağlamında açıkça belirtildi.
+- Model yine gerçek güncel sinyal, oynaklık ve gidiş-geliş ücretinden pozitif avantaj görmezse BEKLE seçebilir; risk kurallarını aşamaz veya emir boyutunu icat edemez.
+- Kapanış sayısı ve gerçek geçmiş sonuçlar AI bağlamına veriliyor; yeni simüle işlem yaratılmıyor.
+
 ## 2026-11-23 — Sunucu karar gerekçelerinde Spot / SHORT netliği
 
 - İşlem motorunun sanal AL/SAT günlükleri, karar açıklamaları ve 15dk koruyucu çıkışları artık gerçek spot alım-satım adını kullanır. İç hesaplamada mevcut uzun yön istatistikleri aynı kalır.

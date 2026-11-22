@@ -65,6 +65,7 @@ class AiBrainTests(unittest.TestCase):
         plan, meta = apply_ai_brain(BASE, state, "fake", ask_fn=respond)
         self.assertEqual(meta["status"], "WAIT")
         self.assertEqual(captured["roundTripPaperFeePct"], .2)
+        self.assertEqual(captured["closedOutcomeSampleSize"], 1)
         self.assertEqual(captured["observedPerformance"]["netTry"], -2.4)
         self.assertEqual(len(captured["recentClosedOutcomes"]), 1)
         self.assertEqual(captured["recentClosedOutcomes"][0]["netPnlTry"], -1.5)

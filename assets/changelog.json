@@ -14,7 +14,8 @@
         "Eski demo uygulama bileşenleri ana program ve kaynak ağacından temizlenmiş durumda. Tek sunucu sanal kasası ve geçmiş 9 işlem korundu.",
         "Flutter testleri ve Python AI karar testleri yeni etiketlerle güncellendi.",
         "Bot ekranından artık eski yerel demo açıklamaları tamamen çıkarıldı. Tek sunucu kasası ve yalnızca sunucunun işlem yapabildiği açıkça belirtilir.",
-        "İşlem motorunun kendi karar gerekçelerinde de SPOT AL/SAT yazılır; normal coin alımı artık sözlü olarak LONG kontratıyla karıştırılmaz."
+        "İşlem motorunun kendi karar gerekçelerinde de SPOT AL/SAT yazılır; normal coin alımı artık sözlü olarak LONG kontratıyla karıştırılmaz.",
+        "Groq karar bağlamına kapanmış sanal işlem örneklem büyüklüğü eklendi. 20'den az kapanışın kazanma oranını tek başına işlem engeli saymaması, güncel gerçek teknik sinyal/komisyonu öncelemesi talimatlandırıldı; BEKLE seçme hakkı ve risk korumaları korunur."
       ]
     },
     {

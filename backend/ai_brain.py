@@ -23,7 +23,12 @@ def _ask_groq(context, api_key, model):
              "Do not invent prices, signals, tickers or trades. Maximize risk-adjusted "
              "simulation performance AFTER fees, not number of trades. "
              "Favor credible risk-adjusted compounding with a cash reserve. "
-             "Past wins do not guarantee future returns; WAIT when edge is weak. "
+             "Use current candidate strength, recent and multi-hour momentum, "
+             "volatility, regime and round-trip fees as primary evidence. "
+             "Closed-trade win rate from fewer than 20 trades is a tiny sample; "
+             "do NOT reject all approved current candidates solely because "
+             "two recent paper closes lost money or past net return is negative. "
+             "Still WAIT when no convincing positive risk-adjusted edge exists. "
              "Return only JSON: "
              '{"decision":"TRADE" or "WAIT","symbol":"ticker or null",'
              '"action":"BUY or SHORT or null","reason":"short explanation"}.'},
@@ -82,6 +87,10 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
         "openShorts": list(state.get("shorts", {})),
         "observedPerformance": state.get("performance") or {},
         "roundTripPaperFeePct": 0.2,
+        "closedOutcomeSampleSize": sum(
+            1 for trade in state.get("trades", [])
+            if isinstance(trade, dict) and trade.get("side") in ("sell", "cover")
+        ),
         "recentClosedOutcomes": [
             {"symbol": trade.get("symbol"), "side": trade.get("side"),
              "netPnlTry": round(float(trade.get("realizedPnlTry", 0)), 2)}
