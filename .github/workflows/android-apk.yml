@@ -1,0 +1,54 @@
+name: SanalTrader Android APK
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Kaynak kodunu al
+        uses: actions/checkout@v4
+
+      - name: Java 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Flutter SDK kur
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Android proje dosyalarını oluştur
+        run: |
+          flutter create --platforms=android --org com.ashina61 --project-name sanal_trader .
+          python3 scripts/ensure_android_internet.py
+
+      - name: Paketleri kur
+        run: flutter pub get
+
+      - name: Dart analizi
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Testler
+        run: flutter test
+
+      - name: APK oluştur
+        run: flutter build apk --release
+
+      - name: APK dosyasını indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: SanalTrader-Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
