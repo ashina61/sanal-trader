@@ -2,6 +2,8 @@
 
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
+- Bot ve Kâr ekranlarında gerçek işlemlerden ayrı, maliyetli geçmiş strateji denemesinin getirisi, al-tut kıyası, işlem sayısı ve en yüksek gerilemesi gösteriliyor.
+
 - Saatlik piyasa geçmişi düzenli yenilenir; yeni saatlik kapanış eskisiyle aynı uzunlukta olsa bile tarihine göre yenilenir ve WebSocket anlık fiyatı korunur.
 - Bot yeni gerçek işlemlerden ayrı, yaklaşık saatte bir komisyonlu ileri-test çıktısını yerel olarak kaydeder.
 

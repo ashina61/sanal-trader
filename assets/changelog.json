@@ -14,7 +14,9 @@
         "Yalnızca geçmiş veriden hesaplanan komisyonlu ileri-test sonuçları BotState'e ayrı kaydediliyor, uygulama açıldığında korunuyor; gerçek bot satış kârıyla karıştırılmıyor.",
         "Bot saatlik geçmiş mumları ilk eğitimden sonra da her saat güncelliyor, birikmiş teknik verinin bayatlaması engelleniyor.",
         "Yeni kapanan mumlar aynı uzunlukta dahi olsa önceki canlı fiyat korunarak analize alınıyor.",
-        "Komisyonlu ileri-test sonuçları eğitimin ardından ve yaklaşık saatte bir yerel bota kaydediliyor; mevcut 650 TL sanal cüzdana emir gönderilmiyor."
+        "Komisyonlu ileri-test sonuçları eğitimin ardından ve yaklaşık saatte bir yerel bota kaydediliyor; mevcut 650 TL sanal cüzdana emir gönderilmiyor.",
+        "Bot ve Kâr ekranlarına ayrı geçmiş ileri-test kartları eklendi: maliyetli strateji getirisi, aynı dönemin al-tut karşılaştırması, işlem sayısı ve gerileme.",
+        "İleri-test simülasyonları gerçek sanal portföyün ₺650 bakiyesine yazılmaz; gerçek satış kârı ayrı tutulur."
       ]
     },
     {

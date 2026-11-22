@@ -93,6 +93,39 @@ class BotPerformanceScreen extends StatelessWidget {
             'Sadece bot tarafından yapılan emirler bu tabloda yer alır.',
             style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
         ])),
+        const SizedBox(height: 16),
+        PremiumSurface(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('EĞİTİM DIŞI 24 SAAT · KÂRLILIK DENEMESİ',
+              style: TextStyle(color: PremiumColors.gold, fontSize: 11,
+                fontWeight: FontWeight.w800)),
+            const SizedBox(height: 10),
+            if (bot?.backtest == null)
+              const Text('Yeterli saatlik fiyat geçmişi ve bot eğitimi bekleniyor.',
+                style: TextStyle(color: PremiumColors.muted, fontSize: 12))
+            else ...[
+              Row(children: [
+                Expanded(child: _metric('Simülasyon getirisi',
+                  '%${bot!.backtest!.strategyReturnPct.toStringAsFixed(2)}')),
+                Expanded(child: _metric('Aynı dönemde al-tut',
+                  '%${bot.backtest!.buyHoldReturnPct.toStringAsFixed(2)}')),
+              ]),
+              const SizedBox(height: 12),
+              Row(children: [
+                Expanded(child: _metric('Test işlemleri',
+                  '${bot.backtest!.closedTrades}')),
+                Expanded(child: _metric('En kötü geri çekilme',
+                  '%${bot.backtest!.maxDrawdownPct.toStringAsFixed(1)}')),
+              ]),
+            ],
+            const SizedBox(height: 9),
+            const Text('Bu rakamlar geçmiş verilere uygulanmış varsayımsal '
+              'emirlerin net sonuçlarıdır; 650 TL kasaya işlenmez. '
+              'Maliyetler %0,1 komisyon + %0,05 kayma / emir yönü.',
+              style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
+          ]),
+        )),
         const SizedBox(height: 17),
         PremiumSectionTitle(
           title: 'Coin Bazında Öğrenme',

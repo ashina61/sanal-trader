@@ -163,6 +163,53 @@ class BotDashboard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const Expanded(child: Text('Komisyonlu ileri-test · son 24 saat',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14))),
+                const Icon(Icons.fact_check_outlined, color: PremiumColors.gold, size: 20),
+              ]),
+              const SizedBox(height: 6),
+              const Text('Eğitim dışında kalan fiyatlarla geriye dönük deney. '
+                'Gerçek sanal cüzdan işlemi değildir.',
+                style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+              const SizedBox(height: 12),
+              if (bot?.backtest == null)
+                const Text('Eğitim tamamlandığında test hesaplanır.',
+                  style: TextStyle(color: PremiumColors.muted))
+              else ...[
+                Row(children: [
+                  Expanded(child: _stat('Strateji getirisi',
+                    '%${bot!.backtest!.strategyReturnPct.toStringAsFixed(2)}')),
+                  Expanded(child: _stat('Al-tut karşılığı',
+                    '%${bot.backtest!.buyHoldReturnPct.toStringAsFixed(2)}')),
+                  Expanded(child: _stat('Maks. gerileme',
+                    '%${bot.backtest!.maxDrawdownPct.toStringAsFixed(1)}')),
+                ]),
+                const SizedBox(height: 9),
+                Row(children: [
+                  Expanded(child: _stat('İncelenen coin',
+                    '${bot.backtest!.coins}')),
+                  Expanded(child: _stat('Kapanan test işlemi',
+                    '${bot.backtest!.closedTrades}')),
+                  Expanded(child: _stat('Test kazanma oranı',
+                    bot.backtest!.winRate == null ? 'İşlem yok'
+                      : '%${(bot.backtest!.winRate! * 100).toStringAsFixed(1)}')),
+                ]),
+              ],
+              const SizedBox(height: 10),
+              const Text('Varsayımsal maliyet: her alış ve satışta %0,1 işlem '
+                'ücreti + %0,05 fiyat kayması. Yalnızca geçmiş sonuç; '
+                'gelecek getiriyi göstermez.',
+                style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          color: PremiumColors.panel,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Text('Piyasa rejimi ve risk', style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               _stat('BTC piyasa göstergesi',
