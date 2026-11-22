@@ -1,8 +1,14 @@
-# SanalTrader — Flutter + Firebase Android MVP
+# SanalTrader — Sanal Kripto Trading ve Öğrenen Bot
 
 Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç bakiyesiyle alıp satmak için Android öncelikli örnek uygulama.
 
 > **Hiçbir yerde gerçek emir, borsa hesabı, para yatırma, para çekme veya cüzdan anahtarı yoktur.** Bu uygulama bir paper-trading simülatörüdür; yatırım tavsiyesi değildir.
+
+## Güncelleme Geçmişi
+
+Uygulamanın üst menüsündeki **güncelleme simgesini** açarak bütün sürümlerin geçmişini görebilirsin. Notlar `assets/changelog.json` dosyasından gelir; geliştirici ayrıntıları `CHANGELOG.md` dosyasında tutulur. Yeni kaynak kod değişiklikleri aynı committe bu iki dosyaya da yazılmazsa GitHub Actions kontrolü başarısız olur.
+
+**Teknik analiz:** Coin detayındaki **Botun teknik analizini gör** butonu RSI, MACD, EMA20/50, 48 saatlik destek/direnç, ATR, hacim ve (varsa) tamamlanmış mum formasyonlarıyla yorumları gösterir. Bot bu göstergelerin geçmişte tutarlı yön gösterip göstermediğini 15 dakikalık sonuçlarla ölçerek teknik göstergelere verdiği ağırlığı sınırlar ve zamanla değiştirir. Bu, insan uzman veya kesin tahmin sistemi değildir.
 
 ## Canlı piyasa ve otomatik bot
 

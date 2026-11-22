@@ -13,7 +13,11 @@
         "Portföyde %12 zirveye göre gerilemede yeni sanal alışları durduracak koruma eklendi.",
         "Her teknik yorumun nedenleri, risk uyarıları ve veri kalitesi kullanıcıya gösteriliyor.",
         "Uygulama içi Güncelleme Geçmişi ekranı, sürüm notları ve değişiklik kaydını zorunlu tutan kontrol eklendi.",
-        "OHLCV verisi geçmiş saatlerdeki gerçek TRY kuru değildir; güncel USDT/TRY ile dönüştürülen yaklaşık TRY grafiğidir."
+        "OHLCV verisi geçmiş saatlerdeki gerçek TRY kuru değildir; güncel USDT/TRY ile dönüştürülen yaklaşık TRY grafiğidir.",
+        "Botun teknik göstergelere duyduğu güven, yalnızca 15 dakika sonra gerçekleşmiş yeni piyasa fiyatıyla doğrulanan tahminlere göre sınırlı ve kademeli olarak uyarlanıyor.",
+        "Bot ekranında teknik güven oranı, teknik tahmin sayısı ve gerçekleşen doğru yön sayısı görüntüleniyor.",
+        "Coin detayından açılan teknik analiz ekranında tamamlanmış gerçek mumlar, destek/direnç, momentum, olası formasyonlar ve risk uyarıları görülebiliyor.",
+        "Grafik tabanlı kararlar göstergelerin doğruluğu açısından test edildi; OHLCV olmayan veri sağlayıcısında mum formasyonu uydurulmuyor."
       ]
     },
     {

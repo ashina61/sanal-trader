@@ -4,6 +4,10 @@ Bu dosya sürümlerin kalıcı, okunabilir kaydıdır. Uygulamanın **Güncellem
 
 ## v0.4.0 — 2026-11-22: Teknik analiz ve uzman karar destek sistemi
 
+- RSI/MACD/EMA ve saatlik mum yorumlarının sonuçlarıyla sınırlı teknik güven ağırlığı güncellenir.
+- Coin ekranına gerçek tamamlanmış OHLCV grafiği ve göstergelerin açıklaması eklendi.
+- Bot arayüzü Bitcoin piyasa rejimini, gerilemeyi, strateji ağırlıklarını ve teknik doğruluğu gösterir.
+
 - RSI(14), EMA20/50, MACD(12/26/9), destek ve direnç, 24 saatlik oynaklık ve ATR analizleri eklendi.
 - Tamamlanmış saatlik OHLCV mumlarından yutan mum, çekiç ve uzun üst fitil gibi formasyonlar yorumlanıyor.
 - Canlı bot, teknik sinyallerin yanında Bitcoin piyasa yönünü ve volatiliteyi dikkate alarak sanal pozisyon miktarını ayarlıyor.
@@ -61,6 +65,16 @@ Bu dosya sürümlerin kalıcı, okunabilir kaydıdır. Uygulamanın **Güncellem
 ## GitHub geçmişi — 22.11.2026
 
 Aşağıdaki gerçek GitHub commitleri önceki geliştirmeleri belgeliyor (en yeni en başta):
+
+- `c2a45eca` Teknik sinyallerin ileri tarihli piyasa sonucu üzerinden kalibrasyonu ve testler
+- `0d72dd52` Teknik güven ağırlığının öğrenilmesi ve saklanması
+- `c4ba3cf4` RSI, MACD, OHLCV ve risk freni otomatik testleri
+- `bdbfb5a0` Bitcoin piyasa rejimi ve portföy düşüş göstergesi
+- `e069a4b3` Mum grafiği ve coin başına ayrıntılı teknik analiz
+- `9ace7ea8` Güncelleme Geçmişi ekranı ve sürüm notları
+- `44bea0a3` Teknik gösterge, volatilite, BTC rejimi ve portföy gerilemesine göre sanal alım kontrolü
+- `cb2cd0b9` Tamamlanmış gerçek Binance OHLCV mumlarının analize bağlanması
+- `af964df0` Teknik göstergelerin ilk yorumlama motoru
 
 - `8b2c996b` Geçmiş eğitim ve ayrı doğrulama testinin doğru başlangıç ağırlıkları
 - `557e08b4` Geniş CoinGecko yedek listesi birim testi
