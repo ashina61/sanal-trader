@@ -1,9 +1,9 @@
 {
-  "cashTry": 571.922,
-  "cycles": 1,
+  "cashTry": 493.90406,
+  "cycles": 2,
   "day": "2026-11-22",
   "enabled": true,
-  "equityTry": 649.922,
+  "equityTry": 649.4822309741551,
   "histories": {
     "ADAUSDT": {
       "fetchedAt": "2026-11-22T18:12:56Z",
@@ -4135,6 +4135,10 @@
     }
   },
   "holdings": {
+    "BNBUSDT": {
+      "costTry": 78.01794,
+      "quantity": 0.0027597755594998795
+    },
     "NEARUSDT": {
       "costTry": 78.078,
       "quantity": 0.5102651612536038
@@ -4143,26 +4147,42 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T18:21:29Z",
+      "message": "Sanal AL BNBUSDT: 77.94 TL; Trend up, puan 0.90"
+    },
+    {
       "at": "2026-11-22T18:12:56Z",
       "message": "Sanal AL NEARUSDT: 78.00 TL; Trend up, puan 0.90"
     }
   ],
-  "lastDecision": "Sanal AL NEARUSDT: 78.00 TL; Trend up, puan 0.90",
+  "lastDecision": "Sanal AL BNBUSDT: 77.94 TL; Trend up, puan 0.90",
   "lastError": null,
   "lastOrder": {
+    "BNBUSDT": "2026-11-22T18:21:29Z",
     "NEARUSDT": "2026-11-22T18:12:56Z"
   },
-  "lastRunAt": "2026-11-22T18:12:56Z",
-  "lastSuccessAt": "2026-11-22T18:12:56Z",
+  "lastRunAt": "2026-11-22T18:21:29Z",
+  "lastSuccessAt": "2026-11-22T18:21:29Z",
   "mode": "server-paper",
-  "paidFeesTry": 0.078,
+  "paidFeesTry": 0.15594,
   "peakEquityTry": 650.0,
   "realizedTry": 0.0,
   "schema": 1,
   "source": "Binance public spot REST",
-  "todayOrders": 1,
+  "todayOrders": 2,
   "tracked": 115,
   "trades": [
+    {
+      "at": "2026-11-22T18:21:29Z",
+      "feeTry": 0.07794,
+      "grossTry": 77.94,
+      "priceTry": 28241.427,
+      "quantity": 0.0027597755594998795,
+      "realizedPnlTry": 0.0,
+      "reason": "Trend up, puan 0.90",
+      "side": "buy",
+      "symbol": "BNBUSDT"
+    },
     {
       "at": "2026-11-22T18:12:56Z",
       "feeTry": 0.078,
