@@ -1,6 +1,6 @@
 # SanalTrader — Öğrenen sanal bot
 
-**Sürüm:** Tarayıcıda çalışan ve yalnızca **sanal bakiyeyle** emir veren, basit online öğrenme kullanan ilk prototip.
+**Sürüm:** v0.9.1. Bu rehber **tarayıcıdaki yerel sanal botu** açıklar. Ayrıca ücretsiz GitHub Actions ile zamanlanan, **ayrı sanal kasalı** LONG/SHORT sunucu botu vardır.
 
 ## Başlatma
 
@@ -48,4 +48,4 @@ Bu teknik basit *online expert weighting*'dir; yapay zekâ dil modeli, derin ö�
 - Siteyi birden fazla sekmede açıp aynı anda botla işlem yapma; tarayıcı depolaması eşzamanlı işlem kilidi sağlamaz.
 - Fiyat API'si 401/403/429 veya ağ hatası verirse işlem gerçekleşmez.
 - 'Sıfırla' portföy işlemleri ve öğrenme geçmişini temizler, botu kapatır.
-- 7/24 kapalı tarayıcıda çalışan bot için daha sonra sunucu tarafı zamanlayıcı, işlem kilidi ve sunucu doğrulama katmanı gerekir.
+- Ücretsiz sunucu botu artık GitHub Actions üzerinden **periyodik** çalışır; GitHub işi gecikebilir/atlanabilir. Sunucu kasası ve yerel kasa birbirinden ayrıdır. Tek hesapta eşzamanlı gerçek zamanlı işlem veya cihazlar arası otomatik birleştirme henüz yoktur.

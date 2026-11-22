@@ -16,10 +16,10 @@ Uygulamanın üst menüsündeki **güncelleme simgesini** açarak bütün sürü
 
 - Güncel, likit USDT spot coinleri için Binance public **tüm piyasa miniTicker WebSocket** ve gerçek **USDT/TRY** piyasa kuru ile TL fiyatları güncellenir; işlem API anahtarı yoktur.
 - Açılışta Binance REST üzerinden 7 günlük saatlik geçmiş ve güncel fiyatlar alınır. Erişim sorunu olursa CoinGecko yedek kaynaktır. **İkisi de erişilemezse işlem yapılmaz**.
-- Kullanıcının bu talebiyle kişisel sanal bot **v2 ilk açılışında otomatik etkinleşir**. Bot sekmesindeki anahtardan istediğin zaman durdurabilirsin; durdurma kararı sonraki açılışlarda korunur.
+- **Yeni kurulumlarda yerel sanal bot kapalı başlar.** Bot sekmesindeki anahtarla bilerek etkinleştirebilirsin; daha önce kaydedilmiş açık/kapalı tercihin ve işlemlerin korunur. Bu anahtar sunucu botunu yönetmez.
 - Uygulama açıkken bot 45 saniyelik döngülerle yeni piyasa fırsatlarını değerlendirir. Her döngüde **en fazla bir sanal emir** verebilir; işlem yoksa sinyal ve risk sınırları beklenir.
 - Fiyatlar **canlı işlem garantisi değildir**; WebSocket bağlantısı kopabilir, piyasa verileri engellenebilir. Sitede **CANLI** veya yedek kaynak durumu gösterilir.
-- GitHub Pages **arka plan bot sunucusu değildir**. Tarayıcı kapanınca bot çalışmaz, kapalı kaldığı süre için geriye dönük işlem uydurulmaz.
+- GitHub Pages yalnızca web arayüzüdür. **Yerel bot tarayıcı kapanınca durur; ayrı ücretsiz GitHub Actions sanal botu ise planlandığında tarayıcıdan bağımsız çalışır.** GitHub planlaması gecikebilir/atlanabilir; sürekli açık sunucu garantisi değildir.
 
 ## Sitede öğrenen bot (sanal işlemler)
 
@@ -30,15 +30,19 @@ Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etk
 - Üç fiyat uzmanının (kısa trend, 24s momentum, ters yön) ağırlıkları en az 15 dakika sonra gelen **yeni fiyatlarla** değerlendirilerek güncellenir. Bu, basit bir **online öğrenme algoritmasıdır**, büyük dil modeli veya kâr garantisi değildir.
 - En fazla toplam portföyün %12'si kadar yeni alış; tek coinde %25; toplam coinlerde %65; en az %30 sanal nakit rezervi.
 - Günlük en fazla 8 emir; aynı coinde 30 dakika tekrar bekleme (koruyucu satış hariç); yaklaşık %6 zarar koruması ve %8 kâr alma.
-- 90 saniyede bir piyasa yenilemesi denenir. **Tarayıcı kapanırsa bot da durur.** GitHub Pages üzerinde sürekli çalışan bir sunucu yoktur.
+- Yerel bot açık sekmede yaklaşık 45 saniyede bir karar vermeyi dener. WebSocket bağlantısı koparsa REST yenilemesi yaklaşık iki dakika aralıklarla denenir; tarayıcı kapanınca **yalnızca yerel bot durur**.
 - Botun ayarları ve öğrenme sayıları tarayıcıdaki yerel depolamada tutulur. Site verilerini temizlersen silinebilir.
 - Bot ve sen manuel sanal alım/satım için aynı doğrulama motorunu kullanırsınız. **Gerçek borsa bağlantısı, anahtar, para transferi bulunmaz**.
 
 Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 
-## Ücretsiz sunucu botu · v0.8.0
+## Ücretsiz sunucu botu · v0.9.1
 
-**Yeni:** Sunucu sanal botu için GitHub Actions beş dakikalık zamanlama kuruldu. Bot `bot-data` dalına açık, kişisel veri içermeyen sanal durumunu yazar. **Bot** sekmesindeki sunucu kartı kasa/son işlem/son çalışma durumunu gösterir. Sunucu kasası ile tarayıcıdaki yerel kasa şu anda iki ayrı test kasasıdır; karışmamaları için farklı etiketlenir. Ücretsiz zamanlama tam kesinlikte çalışmayabilir.
+**Çalışan sunucu simülasyonu:** GitHub Actions üzerinde yaklaşık her beş dakikada bir planlanan Python motoru, yalnızca herkese açık Binance spot verileriyle **1x sanal LONG/SHORT** alım ve kapatmalarını değerlendirebilir. Sonuçları herkese açık `bot-data/state.json` dalında saklar. GitHub zamanlayıcısı gecikebilir veya işlemi atlayabilir; bu VPS gibi kesintisiz gerçek zamanlı bot değildir.
+
+**Sayfa bağlantıları:** Panel ve Portföy sunucu kasasının özetini, Bot açık pozisyonları ve teknik günlük durumunu, Kâr ise ayrı sunucu performansını gösterir. **Sunucu işlem geçmişi** ayrıca açılır; tarayıcıdaki yerel işlem geçmişinden farklıdır. Yeni sanal sunucu hesabının başlangıcı ₺650; eski yerel tarayıcı hesabı da ayrı ₺650 başlayabilir. Bu iki hesabın toplamı **bir tek 1.300 TL yatırım portföyü değildir**. İşlemleri/bakiyeleri otomatik birleştirmiyoruz.
+
+**Yönetim:** Web uygulamasındaki yerel bot anahtarı sunucu botunu kontrol etmez; sunucu botu Actions menüsünden `run`, `pause`, `resume` ile yönetilir. `reset` yalnızca ayrı sunucu sanal cüzdanını sıfırlar.
 
 Sunucu bot yönetimi: https://github.com/ashina61/sanal-trader/actions/workflows/paper-bot.yml
 
@@ -59,22 +63,16 @@ Bot kapalı tarayıcıda işlem yapmaz. Kazanç garantisi, gerçek borsa emri ve
 - Piyasa sekmesinde coin arama ve gerçek USDT hacmine göre sıralama bulunur. Çok küçük tokenlerin TL fiyatı yeterli ondalık hassasiyette gösterilir.
 - Binance API/CORS/ağ/rate-limit sorunlarında CoinGecko'nun piyasa değeri sıralamasındaki uygun, hacimli **erişilebilen ilk 250 uygun coinden oluşan yedek liste** denenir. Bu veri periyodik yenilenir; WebSocket kadar canlı değildir. Sahte fiyat oluşturulmaz.
 
-**Sınır:** Tarayıcı kapalıyken bot işlemez. 7/24 işlem ve cihazlar arası güvenilir öğrenme için sunucu tarafı altyapı gerekir.
+**Sınır:** Tarayıcı kapalıyken **yerel bot durur**. Sunucu botu bağımsız zamanlanan GitHub işleriyle kendi ayrı sanal hesabını izlemeyi sürdürebilir; gecikmeler mümkündür.
 
-## Bu sürümde neler var?
+## Mevcut kapsam ve dürüst sınırlar
 
-- Bitcoin, Ethereum, Solana, XRP, BNB, DOGE için CoinGecko TRY piyasa verisi
-- Yaklaşık 90 saniyede yenilenen piyasa ve son 7 gün fiyat eğilimi grafiği
-- ₺650 başlangıç bakiyesi, ₺5 minimum işlem, %0,1 **varsayımsal** komisyon
-- Piyasa fiyatından **anlık sanal alım ve satım**; bakiye kontrolü
-- Maliyet bazlı pozisyon takibi ve gerçekleşmiş kâr/zarar
-- Başlangıç bakiyesine göre toplam portföy getirisi
-- Sanal işlem geçmişi ve portföy sıfırlama
-- Varsayılan **yerel saklama** (`shared_preferences`)
-- İsteğe bağlı **Firebase Anonymous Auth + Firestore** saklama ve sunucu tarafında atomik cüzdan güncellemesi
-- Güncel olmayan (>10 dakika) fiyatla yeni işlemleri engelleme
+- **Panel · Radar · Portföy · Bot · Kâr**: Canlı fiyat ve teknik analiz, sanal emir, durum/karar geçmişi, gerçekleşmiş sanal net sonuç ve karşılaştırmalı testler.
+- **Tarayıcıdaki yerel kasa**: Varsayılan depolama `shared_preferences`; manuel spot AL/SAT ve istenirse yerel otomatik bot. İşlemler aynı sekmede sıraya alınır, eşzamanlı yazma riski azaltılır. Farklı cihazlar otomatik eşleşmez.
+- **Sunucudaki ayrı kasa**: Ücretsiz GitHub Actions periyodik botu, `bot-data` dalında kalıcı sanal işlemler; LONG/SHORT 1x, varsayımsal komisyon, stop/teminat ve maruziyet kuralları. Tarayıcıdan salt okunur.
+- **Fiyat kaynağı**: Öncelikle Binance REST + `!miniTicker@arr` WebSocket ve USDT/TRY dönüşümü; erişim sorunu varsa CoinGecko TRY fiyatı yedeği. Geçmiş TRY mumları aynı anın kuruyla çevrildiğinden gerçek tarihsel TRY OHLC değildir.
+- **Sınırlamalar**: Ücretsiz cron sürekli saniyelik izleme değildir, duraklayabilir; stop fiyatı garanti edilmez. SHORT funding/faiz, gerçek emir defteri, spread ve likidasyon kademeleri tam modellenmez. Kâr veya gerçek borsa getirisi garanti edilmez.
 
-Bu MVP'de **limit emir, kaldıraç, dil modeliyle haber analizi, gerçek mum grafikleri, gerçek zamanlı WebSocket ve çok kullanıcılı yarışma YOKTUR**. Basit adaptif sanal bot ayrı bir özelliktir. Grafik, CoinGecko'nun 7 günlük fiyat serisinden çizilen çizgidir; canlı mum grafiği değildir.
 
 ## Tarayıcıdan direkt çalıştır (GitHub Pages)
 
@@ -165,13 +163,13 @@ Android uygulaması native Firebase config üzerinden `Firebase.initializeApp()`
 
 ## 3. API ve erişim sınırlaması
 
-Fiyat sağlayıcısı: **CoinGecko** `GET /api/v3/coins/markets?vs_currency=try&ids=...&sparkline=true`.
+Birincil fiyat sağlayıcısı: **Binance public REST** ve public **WebSocket**. Yedek sağlayıcı **CoinGecko** `GET /api/v3/coins/markets?vs_currency=try&...`.
 
 - Varsayılan olarak API anahtarı olmadan public erişim denenir. CoinGecko bölgesel/rate-limit kuralları nedeniyle **401/403/429** yanıtı verebilir. Böyle olursa uygulama sahte fiyat üretmez; uyarı gösterir ve işlemi açmaz.
 - Ücretsiz Demo API anahtarıyla daha güvenilir kullanım için [CoinGecko Demo API](https://www.coingecko.com/en/api) hesabı açılabilir. **API anahtarını APK içine gömme.** Daha sonra Firebase Cloud Functions veya başka sunucu proxy'si üzerinden eklenmeli.
 - Fiyatlar gerçek piyasa kaynaklı **gösterge fiyatlarıdır**, emir defteri derinliği veya gecikmesi simüle edilmez; bu nedenle gerçek alım-satım sonucunu birebir temsil etmez.
-- Yaklaşık her 90 saniyede fiyat yenilenir. Uygulama arka plana alınırsa yenileme durur. Manuel yenileme ikonu ve aşağı çekerek yenileme vardır.
-- 7 günlük grafik, tarihsel fiyatların **çizgi grafiğidir**; mum grafiği değildir.
+- Tarayıcı açıkken WebSocket veri akışı kullanılır; kesintide yaklaşık iki dakikalık REST kontrolleri denenir. Manuel yenileme ve aşağı çekerek yenileme vardır. Bağımsız sunucu botu ayrı zamanlanır.
+- Radar ve detayda geçmiş çizgi grafiği, yeterli veride tamamlanan saatlik Binance mumlarıyla teknik analiz vardır; tarihsel TRY kuruyla ayrı ayrı dönüştürülmüş OHLC değildir.
 
 ## 4. Testler
 

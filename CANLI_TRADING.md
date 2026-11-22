@@ -13,7 +13,7 @@ Sitenin adresi: https://ashina61.github.io/sanal-trader/
 
 ## Bot nasıl çalışıyor?
 
-- Bu talep üzerine bot v2 ilk kullanımda sanal modda otomatik açılır. Bot sekmesindeki anahtardan kapatabilirsin; seçimin kalıcıdır.
+- Yerel bot yeni kurulumlarda kapalıdır. Bot sekmesindeki anahtardan açıkça açılabilir; mevcut kayıtlı açık/kapalı tercih korunur. Bu anahtar yalnızca tarayıcı botunu kontrol eder.
 - Canlı fiyatlar görünür ve günlük limit izin verirse yeni sanal işlemleri onaysız yapabilir; risk kuralları kararı bekletebilir.
 - Sanal başlangıç ₺650; tek emir en çok portföyün %12'si; toplam pozisyon üst sınırı %65; nakit rezervi minimum %30.
 - En çok 8 günlük işlem, coine özel 30 dk tekrar sınırı ve yaklaşık %6 zarar koruması / %8 kâr hedefi.
@@ -22,4 +22,4 @@ Sitenin adresi: https://ashina61.github.io/sanal-trader/
 
 ## Yayın
 
-GitHub Actions 'Publish SanalTrader Web' yeni main commitlerinde web derlemesini otomatik yayımlar. Bot **yalnızca tarayıcı açıkken** çalışır. 7/24 bot için başka bir sunucu, kalıcı veritabanı ve emir kilidi gerekir.
+GitHub Actions 'Publish SanalTrader Web' yeni main commitlerinde web derlemesini otomatik yayımlar. **Yerel bot** yalnızca tarayıcı açıkken işler. **Ayrı 1x sanal LONG/SHORT sunucu botu** ise `Free Scheduled Paper Bot` iş akışında yaklaşık beş dakikada bir çalışması için zamanlanmıştır. Sunucu sanal kasası `bot-data/state.json` içinde tutulur, tarayıcı kasasıyla birleştirilmez; GitHub cron gecikebilir/atlanabilir. Kapatma, devam ettirme ve reset Actions menüsündedir.
