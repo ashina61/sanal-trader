@@ -7,6 +7,7 @@ import '../services/portfolio_repository.dart';
 import '../services/trade_engine.dart';
 import '../widgets/formatters.dart';
 import '../widgets/mini_chart.dart';
+import 'expert_analysis_screen.dart';
 
 class CoinDetailScreen extends StatefulWidget {
   const CoinDetailScreen({
@@ -120,6 +121,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               const SizedBox(height: 12),
               MiniChart(prices: quote.sparkline, positive: quote.change24h >= 0, height: 150),
             ]),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.push(context, MaterialPageRoute<void>(
+              builder: (_) => ExpertAnalysisScreen(quote: quote),
+            )),
+            icon: const Icon(Icons.query_stats),
+            label: const Text('Botun teknik analizini gör'),
           ),
           const SizedBox(height: 20),
           Text('Sanal işlem', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
