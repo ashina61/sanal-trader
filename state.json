@@ -5,7 +5,7 @@
     "status": "NO_CANDIDATE"
   },
   "cashTry": 226.84727,
-  "cycles": 13,
+  "cycles": 14,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "WAIT",
@@ -9185,6 +9185,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T20:24:14Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T20:23:21Z",
       "message": "116 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (23 coin)."
     },
@@ -9247,7 +9251,7 @@
     "NEARUSDT": "2026-11-22T18:12:56Z",
     "PUMPUSDT": "2026-11-22T19:45:48Z"
   },
-  "lastRunAt": "2026-11-22T20:23:21Z",
+  "lastRunAt": "2026-11-22T20:24:14Z",
   "lastSuccessAt": "2026-11-22T20:23:21Z",
   "marksTry": {
     "AEROUSDT": 21.30766,
