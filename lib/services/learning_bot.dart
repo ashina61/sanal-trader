@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
+import 'technical_analysis.dart';
 
 /// Online expert-weighting strategy for paper trading ONLY.
 /// Predictions are evaluated using later market snapshots, never future data.
@@ -72,6 +73,7 @@ class BotState {
     this.holdoutCorrect = 0,
     this.baselineCorrect = 0,
     this.trainedCoins = 0,
+    this.peakEquityTry = initialCashTry,
   });
 
   factory BotState.initial() => const BotState(
@@ -95,6 +97,7 @@ class BotState {
   final int holdoutCorrect;
   final int baselineCorrect;
   final int trainedCoins;
+  final double peakEquityTry;
 
   BotState copyWith({
     bool? enabled,
@@ -112,6 +115,7 @@ class BotState {
     int? holdoutCorrect,
     int? baselineCorrect,
     int? trainedCoins,
+    double? peakEquityTry,
   }) => BotState(
     enabled: enabled ?? this.enabled,
     weights: weights ?? this.weights,
@@ -128,6 +132,7 @@ class BotState {
     holdoutCorrect: holdoutCorrect ?? this.holdoutCorrect,
     baselineCorrect: baselineCorrect ?? this.baselineCorrect,
     trainedCoins: trainedCoins ?? this.trainedCoins,
+    peakEquityTry: peakEquityTry ?? this.peakEquityTry,
   );
 
   Map<String, dynamic> toJson() => {
@@ -146,6 +151,7 @@ class BotState {
     'holdoutCorrect': holdoutCorrect,
     'baselineCorrect': baselineCorrect,
     'trainedCoins': trainedCoins,
+    'peakEquityTry': peakEquityTry,
   };
 
   factory BotState.fromJson(Map<String, dynamic> json) {
@@ -182,6 +188,8 @@ class BotState {
       holdoutCorrect: (json['holdoutCorrect'] as num?)?.toInt() ?? 0,
       baselineCorrect: (json['baselineCorrect'] as num?)?.toInt() ?? 0,
       trainedCoins: (json['trainedCoins'] as num?)?.toInt() ?? 0,
+      peakEquityTry: math.max(initialCashTry,
+        (json['peakEquityTry'] as num?)?.toDouble() ?? initialCashTry),
     );
   }
 
@@ -278,6 +286,8 @@ BotOrder? planBotOrder({
   if (!state.enabled || state.tradesFor(now ?? DateTime.now()) >= botMaxTradesPerDay) return null;
   final time = (now ?? DateTime.now()).toUtc();
   final available = quotes.values.where((q) => q.isFresh && q.priceTry > 0 && q.priceTry.isFinite).toList();
+  final benchmark = quotes['bitcoin'];
+  final btc = benchmark == null ? TechnicalReport.insufficient : analyzeTechnical(benchmark);
   if (available.isEmpty) return null;
   bool cooled(CoinQuote q) {
     final last = state.lastTrades[q.id];
@@ -297,8 +307,13 @@ BotOrder? planBotOrder({
       candidates.add(BotOrder(quote: q, side: TradeSide.sell, amountTry: gross, reason: 'Koruma: maliyetin %6 altında', score: -2.0));
     } else if (change >= botTakeProfitFraction) {
       candidates.add(BotOrder(quote: q, side: TradeSide.sell, amountTry: gross, reason: 'Hedef: maliyetin %8 üstünde', score: -1.8));
-    } else if (cooled(q) && score <= botSellThreshold) {
-      candidates.add(BotOrder(quote: q, side: TradeSide.sell, amountTry: gross, reason: 'Negatif eğilim puanı', score: score));
+    } else if (cooled(q) && (score <= botSellThreshold ||
+        (analyzeTechnical(q).ready && analyzeTechnical(q).score <= -0.40))) {
+      candidates.add(BotOrder(
+        quote: q, side: TradeSide.sell, amountTry: gross,
+        reason: 'Negatif momentum / teknik satış baskısı',
+        score: score,
+      ));
     }
   }
   if (candidates.isNotEmpty) {
@@ -310,10 +325,20 @@ BotOrder? planBotOrder({
   final equity = wallet.marketValue(quotes.map((id, q) => MapEntry(id, q.priceTry)));
   if (!equity.isFinite || equity < botMinimumOrderTry) return null;
   final exposure = equity - wallet.cashTry;
+  // A 12% portfolio drawdown suspends new buys but still allows exits.
+  if (equity < state.peakEquityTry * 0.88) return null;
   for (final q in available) {
     if (!cooled(q) || !botSignals(q).any((signal) => signal != 0)) continue;
     final score = botScore(q, state.weights);
     if (score < botBuyThreshold) continue;
+    final report = analyzeTechnical(q);
+    // Do not invent technical confirmation: close history is required.
+    if (!report.ready || report.score < .18 ||
+        report.trend == TrendDirection.falling) continue;
+    // Crypto-market regime: suppress altcoin buys in a falling BTC market.
+    if (q.id != 'bitcoin' && btc.ready &&
+        btc.trend == TrendDirection.falling && btc.score < -.20) continue;
+    if (report.volatility24hPct > 18 || report.atrPct > 9) continue;
     final positionValue = (wallet.holdings[q.id]?.quantity ?? 0) * q.priceTry;
     final maxBuy = [
       wallet.cashTry,
@@ -322,9 +347,19 @@ BotOrder? planBotOrder({
       equity * botMaxCoinShare - positionValue,
       equity * botMaxTotalExposureShare - exposure,
     ].reduce(math.min);
-    final amount = (maxBuy * 100).floorToDouble() / 100;
+    // No claim of a guaranteed stop; smaller exposure when returns are noisy.
+    final volFactor = report.volatility24hPct > 9 ? .4
+        : report.volatility24hPct > 6 ? .65 : 1.0;
+    final amount = (maxBuy * volFactor * 100).floorToDouble() / 100;
     if (amount >= botMinimumOrderTry) {
-      candidates.add(BotOrder(quote: q, side: TradeSide.buy, amountTry: amount, reason: 'Pozitif öğrenen sinyal', score: score));
+      candidates.add(BotOrder(
+        quote: q, side: TradeSide.buy, amountTry: amount,
+        reason: 'Trend ${report.trendLabel}, RSI ${report.rsi.toStringAsFixed(0)}, '
+            'MACD ${report.macdHistogram >= 0 ? '+' : '-'}, '
+            'teknik ${report.score.toStringAsFixed(2)}, '
+            'öğrenen puan ${score.toStringAsFixed(2)}',
+        score: score + report.score * .5,
+      ));
     }
   }
   candidates.sort((a, b) => b.score.compareTo(a.score));
