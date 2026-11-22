@@ -99,7 +99,7 @@ BacktestSummary? walkForwardBacktest(
   for (final value in perHourReturns) {
     final equity = value / coins.length;
     peak = math.max(peak, equity);
-    maxDrawdown = math.max(maxDrawdown, (1 - equity / peak).clamp(0.0, 1.0));
+    maxDrawdown = math.max(maxDrawdown, (1 - equity / peak).clamp(0.0, 1.0).toDouble());
   }
 
   return BacktestSummary(

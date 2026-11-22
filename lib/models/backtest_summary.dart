@@ -38,9 +38,9 @@ class BacktestSummary {
       return n.isFinite ? n : 0.0;
     }
     return BacktestSummary(
-      coins: ((json['coins'] as num?)?.toInt() ?? 0).clamp(0, 10000),
-      closedTrades: ((json['closedTrades'] as num?)?.toInt() ?? 0).clamp(0, 100000),
-      winningTrades: ((json['winningTrades'] as num?)?.toInt() ?? 0).clamp(0, 100000),
+      coins: ((json['coins'] as num?)?.toInt() ?? 0).clamp(0, 10000).toInt(),
+      closedTrades: ((json['closedTrades'] as num?)?.toInt() ?? 0).clamp(0, 100000).toInt(),
+      winningTrades: ((json['winningTrades'] as num?)?.toInt() ?? 0).clamp(0, 100000).toInt(),
       strategyReturnPct: finite(json['strategyReturnPct']),
       buyHoldReturnPct: finite(json['buyHoldReturnPct']),
       maxDrawdownPct: finite(json['maxDrawdownPct']).clamp(0, 100).toDouble(),
