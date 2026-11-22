@@ -31,7 +31,9 @@ def _ask_groq(context, api_key, model):
         API_URL, data=json.dumps(payload).encode("utf-8"),
         headers={"Authorization": "Bearer " + api_key,
                  "Content-Type": "application/json",
-                 "Accept": "application/json"},
+                 "Accept": "application/json",
+                 # Groq's edge may reject Python-urllib's default UA (HTTP 403).
+                 "User-Agent": "SanalTraderPaperBot/1.0"},
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=9) as response:

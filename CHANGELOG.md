@@ -1,3 +1,9 @@
+## 2026-11-22 — Groq HTTP 403 istemci imzası düzeltmesi
+
+- Groq API HTTP 403 cevabı testte tespit edildi. Python `urllib` varsayılan User-Agent'i Groq edge güvenlik katmanında engellenebildiği için açık `SanalTraderPaperBot/1.0` istemci başlığı eklendi.
+- İstek başlığı için anahtar gizliliği ve JSON yanıtı kontrol eden regresyon testi eklendi.
+- Her durumda gerçek para veya emir gönderme işlevi bulunmaz; sanal cüzdan sıfırlanmadı.
+
 ## 2026-11-22 — Groq bağlantı tanılama iyileştirmesi
 
 - İşlemsiz AI sağlık testi artık API yanıtındaki yalnızca HTTP hata kodunu gösterir; gizli anahtarı veya hassas hata gövdesini yayımlamaz.

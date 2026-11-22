@@ -14,7 +14,8 @@
         "Worker HTTP /health salt okunurdur; herkese açık iş tetikleme ucu yoktur.",
         "Node.js birim testleri ve yeni scheduler CI akışı eklendi.",
         "Önceki sunucu kasa, işlemler, pozisyonlar ve Groq ayarı korunur; GitHub schedule yedek olarak kalır.",
-        "Groq API tanılama durum kodu güvenli biçimde gösterilir; GPT-OSS düşük düşünme eforuyla çağrılır."
+        "Groq API tanılama durum kodu güvenli biçimde gösterilir; GPT-OSS düşük düşünme eforuyla çağrılır.",
+        "HTTP 403 Groq istemci imzası sorunu için urllib varsayılan User-Agent yerine tanımlı SanalTraderPaperBot/1.0 başlığı kullanılmaya başlandı ve regresyon testi eklendi."
       ]
     },
     {

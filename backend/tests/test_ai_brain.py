@@ -16,6 +16,36 @@ STATE = {"cashTry": 400.0, "equityTry": 650.0, "todayOrders": 2,
 
 
 class AiBrainTests(unittest.TestCase):
+
+    def test_groq_request_has_explicit_non_urllib_user_agent(self):
+        from unittest.mock import patch
+        from backend.ai_brain import _ask_groq
+        import io
+        import json
+
+        class Response:
+            status = 200
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            def read(self, maximum):
+                body = {"choices": [{"message": {"content":
+                    '{"decision":"WAIT","reason":"test only"}'}}]}
+                return json.dumps(body).encode()
+
+        def fake_urlopen(req, timeout):
+            self.assertNotIn("Python-urllib",
+                req.get_header("User-agent") or "")
+            self.assertEqual(req.get_header("User-agent"),
+                             "SanalTraderPaperBot/1.0")
+            self.assertTrue(req.get_header("Authorization").startswith("Bearer "))
+            return Response()
+
+        with patch("backend.ai_brain.urllib.request.urlopen", side_effect=fake_urlopen):
+            decision = _ask_groq({"candidates": []}, "fake", "openai/gpt-oss-20b")
+        self.assertEqual(decision["decision"], "WAIT")
+
     def test_unconfigured_rules_continue(self):
         plan, meta = apply_ai_brain(BASE, STATE)
         self.assertEqual(plan["order"], BASE["order"])
