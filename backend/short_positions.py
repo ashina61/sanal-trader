@@ -95,6 +95,8 @@ def close_short(state, t, symbol, price, reason):
     realized = refund - pos["marginTry"] - pos["entryFeeTry"]
     state["cashTry"] += refund
     state["realizedTry"] += realized
+    learn_closed_direction(state, "short", realized,
+                           margin + pos["entryFeeTry"])
     state["paidFeesTry"] += closing_fee
     state["shorts"].pop(symbol)
     state["todayOrders"] += 1
@@ -109,3 +111,33 @@ def close_short(state, t, symbol, price, reason):
     state["trades"] = ([trade] + state["trades"])[:100]
     _log(state, t, f"Sanal SHORT KAPAT {symbol}: net {realized:+.2f} TL; {reason}")
     return trade
+
+
+def learn_closed_direction(state, direction, realized, invested):
+    """Use completed *virtual* exits, never historical imaginary fills."""
+    if direction not in ("long", "short"):
+        raise ValueError("Invalid outcome direction")
+    if not (math.isfinite(realized) and math.isfinite(invested) and invested > 0):
+        return
+    by_direction = state.setdefault("directionStats", {})
+    old = by_direction.setdefault(direction, {
+        "closed": 0, "wins": 0, "realizedTry": 0.0, "meanRoi": 0.0,
+    })
+    roi = max(-1.0, min(1.0, realized / invested))
+    old["meanRoi"] = (roi if old["closed"] == 0
+                      else .8 * old["meanRoi"] + .2 * roi)
+    old["closed"] += 1
+    old["wins"] += int(realized > 0)
+    old["realizedTry"] += realized
+
+
+def direction_edge(state, direction):
+    """Small bounded selection priority after enough completed paper trades."""
+    data = state.get("directionStats", {}).get(direction, {})
+    count = data.get("closed", 0)
+    if count < 3:
+        return 0.0
+    roi = data.get("meanRoi", 0.0)
+    if not isinstance(roi, (int, float)) or not math.isfinite(roi):
+        return 0.0
+    return max(-.12, min(.12, roi * 2)) * min(1, count / 8)

@@ -2,6 +2,9 @@
 
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
+- Bot tamamlanan gerçek sanal LONG ve SHORT satış/kapatış net getirilerinden ayrı ayrı öğrenir; üç kapanışa kadar yön bazlı ödül verilmez.
+- Geçmiş kârlılık tercihi maksimum ±0,12 skor ile sınırlandırılır; trend teyidi, nakit ve maruziyet kuralları değişmez.
+
 - Sunucu botu ekranında LONG/SHORT pozisyonlar, sanal teminat, son işaret fiyatı ve SHORT aç/kapat işlem etiketleri gösteriliyor.
 - Flutter sürümü 0.9.0+9 olarak güncellendi.
 

@@ -13,7 +13,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from backend.short_positions import short_value, exposure, open_short, close_short
+from backend.short_positions import (short_value, exposure, open_short,
+    close_short, learn_closed_direction, direction_edge)
 
 UTC = dt.timezone.utc
 INITIAL = 650.0
@@ -45,7 +46,7 @@ def numeric(value):
 def fresh_state():
     return dict(schema=1, enabled=True, mode="server-paper", cashTry=INITIAL,
                 initialCashTry=INITIAL, equityTry=INITIAL, peakEquityTry=INITIAL,
-                holdings={}, shorts={}, trades=[], journal=[], day="", todayOrders=0,
+                holdings={}, shorts={}, directionStats={}, trades=[], journal=[], day="", todayOrders=0,
                 lastOrder={}, realizedTry=0.0, paidFeesTry=0.0, histories={},
                 lastSuccessAt=None, lastRunAt=None, lastError=None, marksTry={},
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
@@ -62,6 +63,9 @@ def load(path):
         raise ValueError("Invalid persistent wallet; refusing reset")
     # Preserve pre-0.9.0 wallets; never reset real simulated positions.
     obj.setdefault("shorts", {})
+    obj.setdefault("directionStats", {})
+    if not isinstance(obj["directionStats"], dict):
+        raise ValueError("Invalid virtual outcome learning state")
     if not isinstance(obj["shorts"], dict):
         raise ValueError("Corrupt virtual SHORT book")
     for symbol, position in obj["shorts"].items():
@@ -245,6 +249,7 @@ def execute(state, t, symbol, side, amount, price, reason):
                 "quantity": remain, "costTry": old["costTry"] - original}
         state["cashTry"] += amount - fee
         state["realizedTry"] += realized
+        learn_closed_direction(state, "long", realized, original)
     else:
         raise ValueError("Unknown virtual side")
     state["paidFeesTry"] += fee
@@ -337,11 +342,13 @@ def pick(state, latest, t):
         if tech["direction"] == "up" and tech["score"] >= .55:
             if pair != "BTCUSDT" and btc and btc["direction"] == "down":
                 continue
-            choices.append((tech["score"], pair, "buy", amount, tech))
+            choices.append((tech["score"] + direction_edge(state, "long"),
+                            pair, "buy", amount, tech))
         elif tech["direction"] == "down" and tech["score"] <= -.70:
             if pair != "BTCUSDT" and btc and btc["direction"] == "up":
                 continue
-            choices.append((-tech["score"], pair, "short", amount, tech))
+            choices.append((-tech["score"] + direction_edge(state, "short"),
+                            pair, "short", amount, tech))
     if not choices:
         return None
     _, pair, side, amount, tech = max(choices, key=lambda item: item[0])

@@ -20,7 +20,9 @@
         "Yapay düşüş verisiyle uçtan uca testte yalnızca sanal SHORT emir üretilmesi doğrulanacak.",
         "GitHub Actions zamanlayıcısının Python botunu paket modülü olarak başlatması sağlandı; sunucu modül erişim hatası düzeltildi.",
         "Sunucu botu kartına açık LONG/SHORT pozisyon sayıları, kısa pozisyon teminatı, son kaydedilen fiyat ve sanal işlemlerde doğru yön etiketleri eklendi.",
-        "Uygulama sürümü 0.9.0+9 olarak güncellendi."
+        "Uygulama sürümü 0.9.0+9 olarak güncellendi.",
+        "Bot artık tamamlanmış gerçek sanal LONG/SHORT kapanışlarını ayrı öğrenme istatistiklerinde tutar: net kâr, kazanma oranı ve kayan ortalama getiri.",
+        "Yalnızca en az üç tamamlanan işlemden sonra LONG/SHORT tercihine en fazla ±0,12 puanlık sınırlı kârlılık etkisi uygulanır; teknik sinyal ve maruziyet sınırlarını aşamaz."
       ]
     },
     {
