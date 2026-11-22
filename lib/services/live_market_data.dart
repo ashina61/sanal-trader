@@ -17,6 +17,26 @@ class MarketMiniTick {
 
   /// Binance combined stream: { "stream": "...", "data": { "s": "BTCUSDT",
   /// "c": "...", "o": "...", "E": 1234567890000 } }.
+  /// Single-symbol payloads and full-market array payloads share a validator.
+  static List<MarketMiniTick> parseBatch(dynamic source) {
+    try {
+      final message = source is String ? jsonDecode(source) : source;
+      final data = message is Map ? message['data'] : message;
+      if (data is List) {
+        final result = <MarketMiniTick>[];
+        for (final row in data) {
+          final tick = MarketMiniTick.parse({'data': row});
+          if (tick != null) result.add(tick);
+        }
+        return result;
+      }
+      final one = MarketMiniTick.parse(message);
+      return one == null ? [] : [one];
+    } catch (_) {
+      return [];
+    }
+  }
+
   static MarketMiniTick? parse(dynamic source) {
     try {
       final message = source is String ? jsonDecode(source) : source;

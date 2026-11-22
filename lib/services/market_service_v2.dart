@@ -34,6 +34,7 @@ class MarketService {
   final _trackedPairs = <String, String>{...trackedPairs};
   final _volumes = <String, double>{};
   bool _universeLoaded = false;
+  DateTime? _lastUniverseRefresh;
   bool _historyReady = false;
   DateTime? _lastHistoryAttempt;
   int get universeSize => _trackedPairs.length;
@@ -102,7 +103,9 @@ class MarketService {
   Future<List<CoinQuote>> _fetchBinanceQuotes() async {
     // First boot discovers liquid USDT spot pairs without hardcoding listings.
     // Subsequent REST refreshes use only our selected symbols.
-    final discover = !_universeLoaded;
+    final discover = !_universeLoaded || _lastUniverseRefresh == null ||
+        DateTime.now().toUtc().difference(_lastUniverseRefresh!) >
+          const Duration(hours: 6);
     final uri = discover
         ? Uri.https('data-api.binance.vision', '/api/v3/ticker/24hr')
         : Uri.https('data-api.binance.vision', '/api/v3/ticker/24hr', {
@@ -120,22 +123,14 @@ class MarketService {
       if (selected.pairs.length < 6) {
         throw Exception('Yeterli hacimli USDT piyasası bulunamadı.');
       }
-      _trackedPairs
-        ..clear()
-        ..addAll(selected.pairs);
-      _volumes
-        ..clear()
-        ..addAll(selected.volumes);
+      // Retain previously seen symbols so held virtual positions do not
+      // silently vanish when a coin drops out of the top liquidity list.
+      _trackedPairs.addAll(selected.pairs);
+      _volumes.addAll(selected.volumes);
+      _lastUniverseRefresh = DateTime.now().toUtc();
       _universeLoaded = true;
-      // Reconnect with the discovered 72-pair watchlist.
-      final channel = _channel;
-      if (channel != null) {
-        stopLive();
-        // The prior async connection may still be finishing; reconnect once
-        // it has fully settled rather than silently losing the new universe.
-        _paused = false;
-        _scheduleRetry();
-      }
+      // One all-market miniTicker stream serves old and new pairs.
+
     }
 
     final tickerMap = <String, Map<String, dynamic>>{};
@@ -146,12 +141,13 @@ class MarketService {
     }
     final rateTick = _tickerFromRest(tickerMap['USDTTRY'], 'USDTTRY');
     if (rateTick == null) throw Exception('USDT/TRY kuru alınamadı');
+    _tickers['USDTTRY'] = rateTick;
 
-    // Historical data is fetched for up to 36 most liquid pairs. Other coins
+    // Historical data is fetched for up to 64 most liquid pairs. Other coins
     // are visible with live prices but are not eligible for new bot buys.
     final ranked = _trackedPairs.keys.toList()
       ..sort((a, b) => (_volumes[b] ?? 0).compareTo(_volumes[a] ?? 0));
-    final trainingPairs = ranked.take(36).toSet();
+    final trainingPairs = ranked.take(64).toSet();
     final history = <String, _HourlyHistory>{};
     final shouldLoadHistory = !_historyReady &&
         (_lastHistoryAttempt == null ||
@@ -159,7 +155,7 @@ class MarketService {
            const Duration(minutes: 10));
     if (shouldLoadHistory) {
       _lastHistoryAttempt = DateTime.now().toUtc();
-      for (var i = 0; i < ranked.length && i < 36; i += 6) {
+      for (var i = 0; i < ranked.length && i < 64; i += 6) {
         final batch = ranked.skip(i).take(6);
         final fetched = await Future.wait(batch.map((pair) async =>
           MapEntry(pair, await _fetchHourlyHistory(pair, rateTick.close))));
@@ -290,9 +286,9 @@ class MarketService {
     _retryTimer?.cancel();
     _publishStatus('Canlı veri bağlantısı kuruluyor…');
     try {
-      final pairs = [..._trackedPairs.keys, 'USDTTRY'];
-      final streams = pairs.map((s) => '${s.toLowerCase()}@miniTicker').join('/');
-      final uri = Uri.parse('wss://data-stream.binance.vision/stream?streams=$streams');
+      // Binance publishes one public, keyless, all-market stream.
+      // No long URL, no one-WebSocket-per-token subscriptions.
+      final uri = Uri.parse('wss://data-stream.binance.vision/ws/!miniTicker@arr');
       final channel = WebSocketChannel.connect(uri);
       _channel = channel;
       await channel.ready.timeout(const Duration(seconds: 12));
@@ -319,27 +315,34 @@ class MarketService {
   }
 
   void _onMarketMessage(dynamic raw) {
-    final tick = MarketMiniTick.parse(raw);
-    if (tick == null) return;
-    _tickers[tick.symbol] = tick;
+    final batch = MarketMiniTick.parseBatch(raw);
+    if (batch.isEmpty) return;
+    // Update the conversion rate before pricing the same snapshot's coins.
+    for (final tick in batch) {
+      if (tick.symbol == 'USDTTRY') _tickers['USDTTRY'] = tick;
+    }
     final rate = _tickers['USDTTRY'];
-    if (rate == null) return; // Never assume or fabricate a TRY exchange rate.
+    if (rate == null ||
+        DateTime.now().toUtc().difference(rate.time) > const Duration(minutes: 2)) {
+      return; // An out-of-date TRY conversion must never drive a trade.
+    }
 
-    final pairs = tick.symbol == 'USDTTRY' ? _trackedPairs.keys : [tick.symbol];
-    for (final pair in pairs) {
-      final coin = _tickers[pair];
-      if (coin == null) continue;
-      final id = _trackedPairs[pair];
+    for (final tick in batch) {
+      if (!_trackedPairs.containsKey(tick.symbol)) continue;
+      _tickers[tick.symbol] = tick;
+      final id = _trackedPairs[tick.symbol]!;
       final quote = marketQuoteFromTicks(
-        coin: coin, tryRate: rate, previous: id == null ? null : _snapshots[id],
+        coin: tick, tryRate: rate, previous: _snapshots[id],
         pairs: _trackedPairs, volumes: _volumes,
       );
       if (quote == null) continue;
       _snapshots[quote.id] = quote;
       _lastTickTime = DateTime.now().toUtc();
-      if (!_liveEvents.isClosed) _liveEvents.add(
-        LivePriceEvent(quote: quote, status: sourceStatus),
-      );
+      if (!_liveEvents.isClosed) {
+        _liveEvents.add(LivePriceEvent(
+          quote: quote, status: sourceStatus,
+        ));
+      }
     }
   }
 

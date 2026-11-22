@@ -2,6 +2,10 @@
 
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
+- Hacim filtreli Binance USDT spot evreni 72'den 240 sembole genişletildi; 6 saatlik yenileme, eski pozisyon sembollerini koruma ve 64 sembollük tarihsel eğitim taraması eklendi.
+- Çoklu abonelikli uzun URL yerine Binance'in tüm piyasa mini-ticker WebSocket akışı ve toplu mesaj ayrıştırıcısı kullanılıyor.
+- USDT/TRY dönüşüm oranı 2 dakikadan daha eskiyse taze piyasa fiyatı oluşturulmuyor.
+
 - Gerçek sanal bot emirlerinden öğrenilen net kâr bilgisi BotState içinde kalıcı saklanıyor; coine özel birikmiş kâr/zarar gelecekteki aday sırasını sınırlı etkiliyor.
 
 - Yalnızca gerçekten tamamlanmış sanal BOT satışlarından net gerçekleşmiş kâr/zarar, işlem maliyeti, coin bazlı kazanma oranı ve temkinli performans öğrenmesi eklendi.

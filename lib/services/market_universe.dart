@@ -32,8 +32,8 @@ bool eligibleUsdtSpotSymbol(String symbol) {
 /// actually returned by the exchange. Never fabricate listings or prices.
 MarketUniverse selectMarketUniverse(
   List<dynamic> raw, {
-  int limit = 72,
-  double minimumVolumeUsdt = 2000000,
+  int limit = 240,
+  double minimumVolumeUsdt = 1000000,
 }) {
   final candidates = <({String pair, double volume})>[];
   for (final item in raw) {

@@ -10,7 +10,11 @@
         "Botun yön tahmininden ayrı gerçek sanal işlem sonuçlarını ölçen net kâr, kazanma oranı, komisyon ve coin başına getiri öğrenme motorunun temeli eklendi.",
         "Yalnızca gerçekleşen sanal satışların komisyon dahil net kâr/zararı öğrenmeye girer; tek bir sonuç işlem seçimini aşırı etkilemez.",
         "Binance piyasa veri sağlayıcısının sınırları ve risk filtreleri korunur; sınırsız işlem veya garantili kazanç sözü verilmez.",
-        "Sanal botun kâr/zarar istatistikleri BotState içinde saklanır; satış sonucuna göre coin seçim puanı küçük ve sınırlı oranla değişir."
+        "Sanal botun kâr/zarar istatistikleri BotState içinde saklanır; satış sonucuna göre coin seçim puanı küçük ve sınırlı oranla değişir.",
+        "Piyasa taraması hacmi yeterli en fazla 240 güncel Binance USDT spot çiftini seçiyor; dinamik keşif 6 saatte bir yenileniyor.",
+        "Canlı fiyatlar tek Binance !miniTicker@arr akışıyla işleniyor; yüzlerce sembol için ayrı WebSocket açılmıyor.",
+        "En likit 64 sembol için saatlik geçmiş eğitim verisi deneniyor; eski sanal pozisyonların sembolleri listeden düşürülmüyor.",
+        "Geçersiz veya bayat USDT/TRY dönüşüm verisiyle otomatik işlem fiyatı oluşturulmuyor."
       ]
     },
     {
