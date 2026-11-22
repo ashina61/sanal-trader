@@ -2,6 +2,8 @@
 
 ## v0.9.3 — 2026-11-22: Zamanlama ve işlem yapmama nedenleri
 
+- Düşük sinyal ret nedenlerini, ilk 36 dışındaki hacimli hareketli coin taramasını ve sık tekrar eden işlerde kararın silinmemesini sınayan yeni Python testleri eklendi.
+
 - Kayıtlarda son başarılı sunucu fiyat kontrolü 22.29 TR iken saat 22.42'ye kadar planlı beş dakikalık iş görünmedi. GitHub Actions cron saati `3-58/5` biçimine alındı; **GitHub yine gecikme/atlama yapabilir**, kesintisiz sunucu değildir.
 - Sanal botun teknik taraması 24 likit coin yerine ilk 36 yüksek hacimli coin, ek olarak 10 yükselen ve 10 düşen uygun coin ile genişletildi.
 - Sunucu karar motoru uygun teknik sinyal çıkmadığında numaralı gerekçelerini ve piyasa evreni / grafik sayısı / detaylı incelenen sayısını saklar. Bot kartında BEKLE'nin nedenleri gösterilir.

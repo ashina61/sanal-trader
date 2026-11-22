@@ -117,6 +117,43 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual(result["decisionPlan"]["action"], "WAIT")
         self.assertEqual(result["trades"], [])
 
+    def test_no_trade_report_gives_checkable_rejection_reasons(self):
+        state, quotes = market_prices([100.0] * 168)
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertEqual(plan["screened"], 1)
+        self.assertEqual(plan["reviewed"], 1)
+        self.assertEqual(plan["rejectReasons"].get("Zayıf 6s momentum"), 1)
+        self.assertIn("En sık neden", plan["reason"])
+        self.assertEqual(state["trades"], [])
+
+    def test_mover_scan_includes_liquid_coin_outside_top_36(self):
+        ticks = [quote("USDTTRY", 40)]
+        for i in range(45):
+            item = quote(f"COIN{i:02d}USDT", 10,
+                         volume=50_000_000 - i * 1_000_000)
+            if i == 44:
+                item["openPrice"] = "20"  # -50% 24h mover
+            ticks.append(item)
+        result = cycle(fresh_state(), FakeMarket(ticks), NOW)
+        self.assertIsNone(result["lastError"])
+        self.assertEqual(result["tracked"], 45)
+        self.assertGreater(result["screened"], 36)
+        self.assertEqual(result["decisionPlan"]["universe"], 45)
+        self.assertEqual(result["decisionPlan"]["historyPairs"], 0)
+        self.assertEqual(result["trades"], [])
+
+    def test_duplicate_cycle_does_not_erase_prior_decision(self):
+        state, quotes = market_prices([100.0] * 168)
+        state["lastSuccessAt"] = NOW.isoformat()
+        state["lastDecision"] = "Önceki doğrulanmış karar"
+        state["decisionPlan"] = {"action": "WAIT", "reason": "Önceki sebep"}
+        after = cycle(state, FakeMarket([]), NOW + dt.timedelta(seconds=90))
+        self.assertEqual(after["lastDecision"], state["lastDecision"])
+        self.assertEqual(after["decisionPlan"], state["decisionPlan"])
+        self.assertEqual(after["trades"], [])
+        self.assertEqual(after["cycles"], state["cycles"] + 1)
+
 
 if __name__ == "__main__":
     unittest.main()

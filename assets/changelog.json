@@ -14,7 +14,8 @@
         "Karar Merkezi artık piyasa evrenindeki toplam uygun coin, ayrıntılı incelenen coin ve yeterli mum geçmişi olan coin sayılarını farklı gösterir.",
         "Birbirine çok yakın tekrar çalışan işlerde gerçek son karar ve nedeni kaybolmaz; yalnızca tekrarlanan çalıştırma günlüğü eklenir.",
         "Yeni 0.9.3 Flutter sürümü eklendi; botun 650 TL sanal kasası ve mevcut pozisyonları sıfırlanmadı.",
-        "Bot hiçbir sinyal yokken sahte işlem açmaz. Cronun gelecekte çalışıp çalışmadığı ayrıca doğrulanmalıdır."
+        "Bot hiçbir sinyal yokken sahte işlem açmaz. Cronun gelecekte çalışıp çalışmadığı ayrıca doğrulanmalıdır.",
+        "Regresyon testleri: sinyal yokken sayısal ret nedeni, ilk 36 dışındaki hacimli hareketli coin keşfi ve çok yakın tekrarlanan görevde karar kaydının korunması."
       ]
     },
     {
