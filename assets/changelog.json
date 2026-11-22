@@ -28,7 +28,9 @@
         "Yerel bot acil çıkış ve bayat pozisyon nedeniyle yeni alım engelleme testleri eklendi.",
         "GitHub raw durum dosyası çağrısındaki gereksiz Cache-Control başlığı kaldırıldı; web tarayıcısında CORS preflight kaynaklı bağlantı sorununa karşı sorgu parametresiyle cache yenilemesi korunuyor.",
         "Bot ve Kâr ekranlarında gerçek sanal LONG ve SHORT kapatışlarının ayrı öğrenilen net sonuçları görünüyor; yalnızca varsayımsal sinyaller başarı diye sayılmıyor.",
-        "Sunucu botu 100 son sanal işlem kaydı tutuyor, bu sınır kullanıcıya açıklanacak."
+        "Sunucu botu 100 son sanal işlem kaydı tutuyor, bu sınır kullanıcıya açıklanacak.",
+        "Yerel SharedPreferences sanal kasasına aynı uygulama sekmesindeki eşzamanlı manuel/bot emirlerinin kayıtları birbirinin üzerine yazmasını önleyen sıralı işlem kuyruğu eklendi.",
+        "Yerel yükleme ve sıfırlama emir kuyruğuyla senkronize; farklı tarayıcı sekmeleri arasında atomik işlem garantisi verilmez."
       ]
     },
     {

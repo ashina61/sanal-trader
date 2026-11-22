@@ -2,6 +2,9 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- Yerel sanal kasada eşzamanlı manuel/otomatik AL/SAT sıralı kayıt kuyruğuyla çakışmadan işleniyor; reset işlemi de sıraya giriyor.
+- Bu koruma yalnızca aynı uygulama sekmesinde geçerli; ayrı sekmeler için paylaşılan sunucu işlemselliği gerekebilir.
+
 - GitHub public read-only GET isteklerindeki CORS preflight'a neden olabilen Cache-Control header'ı kaldırıldı; URL yenileme parametresiyle cache kontrolü sürüyor.
 - Bot ve Kâr ekranlarında gerçekleşmiş LONG ve SHORT sanal kapanışlarına ait ayrı öğrenme istatistikleri gösteriliyor.
 
