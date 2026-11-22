@@ -55,7 +55,7 @@ def fresh_state():
                 tracked=0, cycles=0, decisionPlan=None,
                 aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"},
                 lastTriggerEvent=None, lastTriggerAt=None,
-                lastScheduledTriggerAt=None, peakMarksTry={},
+                lastScheduledTriggerAt=None, intraday={}, peakMarksTry={},
                 troughMarksTry={}, equityHistory=[], performance={})
 
 def load(path):
@@ -73,6 +73,9 @@ def load(path):
     obj.setdefault("lastTriggerEvent", None)
     obj.setdefault("lastTriggerAt", None)
     obj.setdefault("lastScheduledTriggerAt", None)
+    obj.setdefault("intraday", {})
+    if not isinstance(obj["intraday"], dict):
+        raise ValueError("Invalid intraday paper cache")
     obj.setdefault("peakMarksTry", {})
     obj.setdefault("troughMarksTry", {})
     obj.setdefault("equityHistory", [])
@@ -144,6 +147,10 @@ class Market:
         return self.request("/api/v3/klines",
                             {"symbol": symbol, "interval": "1h", "limit": 168})
 
+    def candles_fast(self, symbol):
+        return self.request("/api/v3/klines",
+                            {"symbol": symbol, "interval": "15m", "limit": 96})
+
 def quotes(raw, t):
     if not isinstance(raw, list):
         raise ValueError("Malformed ticker list")
@@ -214,6 +221,19 @@ def indicators(series):
         score -= .10
     return {"direction": direction, "score": max(-1, min(1, score)),
             "volatility": vol, "momentum6": momentum6}
+
+def fast_momentum(series, mark):
+    """1h/4h momentum from actual closed 15m bars and fresh market mark."""
+    if not isinstance(series, list) or len(series) < 20:
+        return None
+    recent = series[-20:]
+    if not all(numeric(x) and x > 0 for x in recent):
+        return None
+    if numeric(mark) is None or mark <= 0 or abs(mark / recent[-1] - 1) > .08:
+        return None
+    return {"momentum1h": 100 * (mark / series[-4] - 1),
+            "momentum4h": 100 * (mark / series[-16] - 1)}
+
 
 def equity(state, latest):
     total = state["cashTry"]
@@ -319,6 +339,14 @@ def assess_decision(state, latest, t):
         last = as_date(state.get("lastOrder", {}).get(pair))
         return last is None or (t - last).total_seconds() >= 1800
 
+    def quick(pair):
+        record = state.get("intraday", {}).get(pair, {})
+        when = as_date(record.get("fetchedAt"))
+        if when is None or when > t or (t - when).total_seconds() > 1500:
+            return None
+        return fast_momentum(
+            record.get("prices", []), latest.get(pair, {}).get("priceTry"))
+
     def current_tech(pair):
         record = state.get("histories", {}).get(pair, {})
         fetched = as_date(record.get("fetchedAt"))
@@ -373,6 +401,10 @@ def assess_decision(state, latest, t):
               and current / state["troughMarksTry"][pair] - 1 >= .018):
             exits.append((91, pair, "cover", amount,
                           "SHORT takip eden kâr koruması: dipten dönüş", technical))
+        elif (cooled(pair) and quick(pair) is not None
+              and quick(pair)["momentum1h"] >= .75 and adverse < -.002):
+            exits.append((85, pair, "cover", amount,
+                          "15dk mumları: SHORT aleyhine hızlı dönüş", technical))
         elif cooled(pair) and technical and technical["score"] >= .50:
             exits.append((80 + technical["score"], pair, "cover", amount,
                           "Yükseliş trendi SHORT pozisyonla ters düştü", technical))
@@ -398,6 +430,10 @@ def assess_decision(state, latest, t):
               and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.018):
             exits.append((91, pair, "sell", amount,
                           "LONG takip eden kâr koruması: zirveden dönüş", technical))
+        elif (cooled(pair) and quick(pair) is not None
+              and quick(pair)["momentum1h"] <= -.75 and move > .002):
+            exits.append((85, pair, "sell", amount,
+                          "15dk mumları: LONG kâr koruyan hızlı çıkış", technical))
         elif cooled(pair) and technical and technical["score"] < -.50:
             exits.append((80 - technical["score"], pair, "sell", amount,
                           "Momentum düşüşe döndü; açık LONG kapatılıyor", technical))
@@ -410,8 +446,9 @@ def assess_decision(state, latest, t):
                       technical["score"] if technical else None)
 
     # Controls below block NEW positions only, never protective exits.
-    if state.get("todayOrders", 0) >= 8:
-        return wait("Günlük 8 sanal emir sınırı; yeni pozisyon açılmadı")
+    if state.get("todayOrders", 0) >= 16:
+        return wait("Günlük 16 sanal emir sınırı; yeni pozisyon açılmadı. "
+                    "Koruyucu kapanışlar limit dışıdır.")
     if total < state.get("peakEquityTry", total) * .88:
         return wait("Portföy gerilemesi %12'yi geçti; yeni risk durduruldu")
     used = exposure(state, latest)
@@ -422,16 +459,18 @@ def assess_decision(state, latest, t):
     # capacity, allow selling a fading, nearly flat position ONLY when a
     # verified stronger candidate is available. No forced trade without edge.
     # Existing protective exits still take precedence above this block.
-    if (used >= total * .60 and state.get("todayOrders", 0) <= 6
+    if (used >= total * .60 and state.get("todayOrders", 0) <= 14
             and btc and btc["direction"] != "down"):
-        rotated_today = any(
-            str(order.get("reason", "")).startswith("Portföy rotasyonu")
-            and (as_date(order.get("at")) or dt.datetime.min.replace(
-                tzinfo=UTC)).date() == t.date()
-            for order in state.get("trades", [])
+        rotation_times = [
+            as_date(order.get("at")) for order in state.get("trades", [])
             if isinstance(order, dict)
-        )
-        if not rotated_today:
+            and str(order.get("reason", "")).startswith("Portföy rotasyonu")
+        ]
+        rotation_times = [when for when in rotation_times
+                          if when is not None and when.date() == t.date()]
+        recently_rotated = any(
+            (t - when).total_seconds() < 5400 for when in rotation_times)
+        if len(rotation_times) < 3 and not recently_rotated:
             leaders = []
             for pair in latest:
                 if (pair in state["holdings"] or pair in state.get("shorts", {})
@@ -440,8 +479,12 @@ def assess_decision(state, latest, t):
                 tech = current_tech(pair)
                 if not tech or tech["volatility"] > 9:
                     continue
+                fast = quick(pair)
                 if (tech["direction"] == "up" and tech["score"] >= .85
-                        and tech["momentum6"] >= 1.0):
+                        and tech["momentum6"] >= 1.0
+                        and (fast is None or
+                             (fast["momentum1h"] >= .2 and
+                              fast["momentum4h"] >= .5))):
                     leaders.append((tech["score"], tech["momentum6"], pair))
             if leaders:
                 best_score, _, best_pair = max(leaders)
@@ -457,8 +500,11 @@ def assess_decision(state, latest, t):
                     entry = pos["costTry"] / pos["quantity"]
                     pnl_ratio = quote["priceTry"] / entry - 1
                     # Avoid panic-selling meaningful losses to chase a pump.
-                    if (-.0075 <= pnl_ratio <= .015 and
-                            tech["score"] <= .35 and tech["momentum6"] < 0
+                    fast = quick(pair)
+                    fading = (tech["score"] <= .35 and tech["momentum6"] < 0)
+                    fast_fading = fast is not None and fast["momentum1h"] <= -.45
+                    if (-.0075 <= pnl_ratio <= .015
+                            and (fading or fast_fading)
                             and best_score - tech["score"] >= .50):
                         fading.append((tech["score"], pair, tech))
                 if fading:
@@ -507,6 +553,16 @@ def assess_decision(state, latest, t):
         if abs(tech["momentum6"]) < .6:
             rejected("Zayıf 6s momentum")
             continue
+        fast = quick(pair)
+        if fast is not None:
+            if (tech["direction"] == "up"
+                    and fast["momentum1h"] < -.35):
+                rejected("15dk ters trend")
+                continue
+            if (tech["direction"] == "down"
+                    and fast["momentum1h"] > .35):
+                rejected("15dk ters trend")
+                continue
         if pair != "BTCUSDT" and btc is None:
             rejected("BTC grafik verisi yok")
             continue
@@ -551,6 +607,8 @@ def assess_decision(state, latest, t):
             "score": round(score, 3),
             "volatilityPct": round(tech["volatility"], 2),
             "momentum6Pct": round(tech["momentum6"], 2),
+            "momentum1hPct": round(quick(pair)["momentum1h"], 2)
+                if quick(pair) is not None else None,
         }
         for score, pair, side, _, tech in candidates[:5]
     ]
@@ -562,7 +620,9 @@ def assess_decision(state, latest, t):
         {"symbol": pair, "action": "BUY" if side == "buy" else "SHORT",
          "amountTry": amount, "score": round(score, 3),
          "momentum6Pct": round(tech["momentum6"], 2),
-         "volatilityPct": round(tech["volatility"], 2)}
+         "volatilityPct": round(tech["volatility"], 2),
+         "momentum1hPct": round(quick(pair)["momentum1h"], 2)
+             if quick(pair) is not None else None}
         for score, pair, side, amount, tech in candidates[:5]
     ]
     score, pair, side, amount, tech = candidates[0]
@@ -707,6 +767,36 @@ def cycle(state, market, t):
         for symbol in list(cache):
             if symbol not in selected_pairs:
                 cache.pop(symbol, None)
+        # Add real closed 15m candles for liquid + high-momentum symbols and
+        # held positions. Bounded workload; hourly trend still anchors trades.
+        fast_cache = state.setdefault("intraday", {})
+        fast_symbols = {v["symbol"] for v in eligible_pairs[:18]}
+        fast_symbols.update(v["symbol"] for v in movers_up[:7])
+        fast_symbols.update(v["symbol"] for v in movers_down[:7])
+        fast_symbols.update(state["holdings"].keys())
+        fast_symbols.update(state.get("shorts", {}).keys())
+        fast_symbols.intersection_update(latest)
+        fast_provider = getattr(market, "candles_fast", None)
+        if fast_provider is not None:
+            for pair in sorted(fast_symbols):
+                prior = fast_cache.get(pair, {})
+                when = as_date(prior.get("fetchedAt"))
+                if when and (t - when).total_seconds() < 720:
+                    continue
+                try:
+                    real_closes = closes(fast_provider(pair), t, rate)
+                    if len(real_closes) >= 20:
+                        fast_cache[pair] = {
+                            "fetchedAt": stamp(t), "prices": real_closes,
+                        }
+                except Exception:
+                    pass
+        for pair in list(fast_cache):
+            if pair not in fast_symbols:
+                fast_cache.pop(pair, None)
+        state["intradayPairs"] = sum(
+            len(fast_cache.get(pair, {}).get("prices", [])) >= 20
+            for pair in fast_symbols)
         state["tracked"] = len(eligible_pairs)
         state["screened"] = len(latest)
         state["historyPairs"] = sum(
@@ -731,6 +821,9 @@ def cycle(state, market, t):
         state["decisionPlan"]["aiBrain"] = ai_meta
         state["decisionPlan"]["universe"] = len(eligible_pairs)
         state["decisionPlan"]["historyPairs"] = state["historyPairs"]
+        state["decisionPlan"]["intradayPairs"] = state.get("intradayPairs", 0)
+        state["decisionPlan"]["todayOrders"] = state["todayOrders"]
+        state["decisionPlan"]["dailyLimit"] = 16
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice

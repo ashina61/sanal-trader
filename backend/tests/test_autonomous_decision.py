@@ -2,7 +2,7 @@ import datetime as dt
 import unittest
 
 from backend.paper_bot import (
-    assess_decision, cycle, execute, fresh_state, pick,
+    assess_decision, cycle, execute, fresh_state, pick, fast_momentum,
 )
 from backend.short_positions import open_short
 from backend.tests.test_paper_bot import (
@@ -129,7 +129,7 @@ class AutonomousDecisionTests(unittest.TestCase):
 
     def test_rotation_never_ignores_daily_limit_or_existing_rotation(self):
         state, quotes = self._near_capacity_rotation_setup()
-        state["todayOrders"] = 7
+        state["todayOrders"] = 16
         self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
         state["todayOrders"] = 6
         state["trades"].insert(0, {
@@ -163,10 +163,33 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual(plan["action"], "COVER")
         self.assertIn("takip eden kâr koruması", plan["reason"])
 
-    def test_money_or_risk_limit_selects_wait(self):
+    def test_eight_orders_no_longer_blocks_valid_new_entry(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
         state["todayOrders"] = 8
-        self.assertIn("8", assess_decision(state, quotes, NOW)["reason"])
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "BUY")
+
+    def test_actual_intraday_weakness_blocks_fast_buy(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        now = quotes["BTCUSDT"]["priceTry"]
+        bars = [now * (1.015 - i * .0001) for i in range(96)]
+        # Last fast bar is lower than four bars before, matched to ticker.
+        state["intraday"] = {"BTCUSDT": {
+            "fetchedAt": NOW.isoformat(), "prices": bars}}
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertIn("15dk ters trend", plan["rejectReasons"])
+
+    def test_fast_momentum_rejects_unverified_candles(self):
+        self.assertIsNone(fast_momentum([100.0]*8, 100))
+        self.assertIsNone(fast_momentum([100.0]*96, 125))
+        found = fast_momentum([100 + i *.05 for i in range(96)], 105.0)
+        self.assertIsNotNone(found)
+        self.assertGreater(found["momentum1h"], 0)
+
+    def test_money_or_risk_limit_selects_wait(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        state["todayOrders"] = 16
+        self.assertIn("16", assess_decision(state, quotes, NOW)["reason"])
         state["todayOrders"] = 0
         state["peakEquityTry"] = 1000
         self.assertIn("gerilemesi", assess_decision(state, quotes, NOW)["reason"])

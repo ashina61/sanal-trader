@@ -1,3 +1,11 @@
+## 2026-11-23 — Emir kilidi ve kısa vadeli hızlandırma
+
+- Botun gerçekten işlemsiz kalma nedeni: 8 emir/gün sınırı dolmuştu ve risk motoru aday taramadan BEKLE diyordu. 16 kontrollü emir/gün sınırıyla düzeltildi.
+- Gerçek Binance 15 dakikalık kapanışlarından 1s/4s momentum incelenir. En likit ve en hareketli seçili coinler, mevcut açık pozisyonlarla birlikte taranır. Var olmayan mum/sinyal üretilmez.
+- Kısa vadeli ters trend yeni girişleri engelleyebilir; uygun gözlenen çıkış sinyalleri daha erken algılanır.
+- Portföy rotasyonu en fazla 3/gün, 90 dakika aralıklı. Risk/komisyon/kapalı veri, nakit rezervi ve stop-loss korunur.
+- 650 TL sanal kasa, bütün mevcut açık pozisyonlar ve geçmiş işlemler silinmedi.
+
 ## 2026-11-23 — Kâr ekranı ve sunucu botu etiketleri tekleştirildi
 
 - Kâr ekranında sunucu botunun gerçekleşen sanal getirisi, açık LONG/SHORT, komisyonlu kapanan sonuçları, zirveden gerilemesi ve kazanma oranı öne çıkarıldı.
