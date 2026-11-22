@@ -2,6 +2,8 @@
 
 ## v0.5.0 — 2026-11-22: Premium arayüz — Zümrüt & Altın
 
+- Premium widget testlerindeki ekran boyutu ayarı Flutter test API'sine uyarlandı.
+
 - Dar mobil ekranda gerçek sanal bakiye, ölçülmeyen bot doğruluğu ve güncelleme kısayolu widget testleriyle kontrol edildi.
 
 - Bot, coin detay, teknik analiz ve güncelleme ekranları dahil diğer sayfalar aynı premium renk sistemiyle uyumlu hâle getirildi.

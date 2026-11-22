@@ -7,7 +7,7 @@ import 'package:sanal_trader/widgets/premium_dashboard.dart';
 void main() {
   testWidgets('Premium portfolio shows the real 650 TL paper balance on a narrow screen',
       (tester) async {
-    await tester.view.physicalSize = const Size(320, 740);
+    tester.view.physicalSize = const Size(320, 740);
     tester.view.devicePixelRatio = 1;
     addTearDown(() {
       tester.view.resetPhysicalSize();
