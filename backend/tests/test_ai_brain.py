@@ -107,6 +107,16 @@ class AiBrainTests(unittest.TestCase):
         self.assertEqual(result["order"], plan["order"])
         self.assertEqual(meta["status"], "ROTATION_EXIT")
 
+    def test_risk_reduction_reports_discretionary_technical_exit(self):
+        plan = dict(BASE, action="SELL",
+                    reason="Risk azaltımı: zayıf momentum",
+                    order=("BTCUSDT", "sell", 25.0, "Risk azaltımı: zayıf momentum"))
+        result, meta = apply_ai_brain(
+            plan, STATE, "fake", ask_fn=lambda _: 0)
+        self.assertEqual(result["order"], plan["order"])
+        self.assertEqual(meta["status"], "RISK_REDUCTION")
+        self.assertEqual(meta["provider"], "Rules")
+
     def test_protective_exits_bypass_ai(self):
         plan = dict(BASE, action="SELL", order=("BTCUSDT", "sell", 48, "stop"))
         result, meta = apply_ai_brain(plan, STATE, "fake", ask_fn=lambda _: 0)

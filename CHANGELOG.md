@@ -1,3 +1,10 @@
+## 2026-11-23 — v0.9.10 Spot AL/SAT etiketlerinin netleştirilmesi
+
+- Normal spot coin alımı `SPOT AL`, kapatılması `SPOT SAT` olarak Bot/Kasa/Kâr/İşlem Geçmişi ekranlarında gösterilir. Bunlar kaldıraçlı LONG kontratı değildir.
+- 1x sanal SHORT aç/kapat işlemleri ayrı tutulur. Uygulama sadece arka plan sunucu kasasını gösterir; yerel cüzdan veya manuel emir ekranları kaldırılmıştır.
+- Risk azaltımı çıkışları koruyucu zarar-kes yerine doğru `RISK_REDUCTION` tanısıyla raporlanır. Python/Flutter uyumluluk testleri güncellendi.
+- Önceki sanal bakiye, 650 TL başlangıç ve işlem geçmişi sıfırlanmadı.
+
 ## 2026-11-23 — v0.9.9 Tam demo temizliği ve bağımlılık sadeleşmesi
 
 - Eski yerel/demo cüzdanı, tarayıcı botu, manuel işlem ekranları ve onlara ait kullanılmayan model/servis/bileşen/test dosyaları GitHub deposundan silindi.

@@ -10,8 +10,8 @@ String _money(dynamic value) => value is num && value.toDouble().isFinite
     ? formatTry(value.toDouble()) : '—';
 
 String _sideLabel(dynamic code) => switch (code) {
-  'buy' => 'LONG AÇ',
-  'sell' => 'LONG KAPAT',
+  'buy' => 'SPOT AL',
+  'sell' => 'SPOT SAT',
   'short' => 'SHORT AÇ',
   'cover' => 'SHORT KAPAT',
   _ => 'SANAL İŞLEM',
@@ -109,14 +109,15 @@ class ServerPaperCard extends StatelessWidget {
       'WAIT' => 'AI BEKLE DEDİ',
       'FALLBACK' => 'AI HATASI · KURAL MOTORU AKTİF',
       'PROTECTIVE_EXIT' => 'KORUYUCU EMİR · AI ATLANDI',
+      'RISK_REDUCTION' => 'RİSK AZALTIMI · SPOT SATIŞ',
       'ROTATION_EXIT' => 'PORTFÖY ROTASYONU · TEKNİK ÇIKIŞ',
       'NO_CANDIDATE' => 'AI ADAY BEKLİYOR',
       _ => 'AI BAĞLI DEĞİL · KURAL MOTORU AKTİF',
     };
     final action = plan['action']?.toString() ?? 'WAIT';
     final actionText = switch (action) {
-      'BUY' => 'SPOT AL / LONG',
-      'SELL' => 'SPOT SAT / LONG KAPAT',
+      'BUY' => 'SPOT AL',
+      'SELL' => 'SPOT SAT',
       'SHORT' => '1x SHORT AÇ',
       'COVER' => '1x SHORT KAPAT',
       _ => 'BEKLE',
@@ -149,7 +150,7 @@ class ServerPaperCard extends StatelessWidget {
           const Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sunucu Botu · 1x LONG / SHORT',
+              Text('Otonom Bot · SPOT AL/SAT + SHORT',
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
               Text('Ücretsiz GitHub Actions · periyodik sanal emir',
                 style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
@@ -194,12 +195,12 @@ class ServerPaperCard extends StatelessWidget {
           ]),
           const SizedBox(height: 12),
           Row(children: [
-            Expanded(child: _metric('Açık LONG', '${longs.length}')),
+            Expanded(child: _metric('Açık SPOT', '${longs.length}')),
             Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
             Expanded(child: _metric('İşlem', '${state.trades.length}')),
           ]),
           const SizedBox(height: 14),
-          const Text('Gerçek sanal kapanışlardan LONG/SHORT öğrenme',
+          const Text('Gerçek sanal kapanışlardan SPOT/SHORT analizi',
             style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
               color: PremiumColors.gold)),
           const SizedBox(height: 7),
@@ -207,7 +208,7 @@ class ServerPaperCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Text(
-                '${side.toUpperCase()} · '
+                '${side == 'long' ? 'SPOT' : 'SHORT'} · '
                 '${sideStats[side] is Map
                   ? ((sideStats[side] as Map)['closed'] ?? 0)
                   : 0} kapanış · Net '
@@ -227,7 +228,7 @@ class ServerPaperCard extends StatelessWidget {
             for (final entry in longs.entries.take(8))
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
-                child: Text('LONG ${entry.key} · maliyet '
+                child: Text('SPOT ${entry.key} · maliyet '
                   '${entry.value is Map ? _money((entry.value as Map)['costTry']) : '—'}',
                   style: const TextStyle(fontSize: 11,
                     color: PremiumColors.emerald)),

@@ -3,6 +3,19 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.10",
+      "date": "2026-11-23",
+      "title": "Normal spot alım-satımı SHORT'tan net ayır",
+      "details": [
+        "Uygulamada normal coin alımı artık SPOT AL, satışı SPOT SAT olarak açıkça gösterilir; kaldıraçlı LONG gibi yanlış etiketlenmez.",
+        "Sanal SHORT aç/kapat ayrı pozisyon ve 1x teminat akışı olarak kalır. Kullanıcı manuel işlem yapmaz; tüm emirler tek Python sunucu botundan gelir.",
+        "Son emir, açık pozisyon ve gerçekleşmiş işlemler arasında aynı SPOT/SHORT etiketleri kullanılır.",
+        "15dk mumları nedeniyle yapılan erken risk azaltımı AI raporlarında zararı kesme ile karıştırılmaz; RISK_REDUCTION statüsü eklendi.",
+        "Eski demo uygulama bileşenleri ana program ve kaynak ağacından temizlenmiş durumda. Tek sunucu sanal kasası ve geçmiş 9 işlem korundu.",
+        "Flutter testleri ve Python AI karar testleri yeni etiketlerle güncellendi."
+      ]
+    },
+    {
       "version": "0.9.9",
       "date": "2026-11-23",
       "title": "Gerçek tek kasa mimarisi — demo modülleri kalıcı olarak temizlendi",

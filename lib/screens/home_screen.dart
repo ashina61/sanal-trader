@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Expanded(child: _stat('Gözlenen gerileme',
                   performance['drawdownPct'] is num
                   ? '${performance['drawdownPct']}%' : '—')),
-                Expanded(child: _stat('Açık LONG/SHORT',
+                Expanded(child: _stat('Açık SPOT/SHORT',
                   '${s == null ? '—' : s.holdings.length + s.shorts.length}')),
               ]),
             ],

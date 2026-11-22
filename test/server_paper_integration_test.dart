@@ -159,6 +159,8 @@ void main() {
       )),
     )));
     expect(find.text('OTONOM BOT · ANA SANAL KASA'), findsOneWidget);
+    expect(find.textContaining('Son sanal işlem: NEARUSDT · Spot AL'),
+      findsOneWidget);
     expect(find.text('GERÇEK SANAL KASA EĞRİSİ'), findsOneWidget);
     await tester.tap(find.text('Bot merkezi'));
     await tester.tap(find.text('İşlemler'));
@@ -176,7 +178,7 @@ void main() {
       ),
     )));
     expect(find.text('ANA SUNUCU PORTFÖYÜ'), findsOneWidget);
-    expect(find.text('LONG · NEARUSDT'), findsOneWidget);
+    expect(find.text('SPOT · NEARUSDT'), findsOneWidget);
     expect(find.text('Güncel fiyat yok'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -254,7 +256,7 @@ void main() {
         onOpenTrades: () => clicked = true,
       )),
     )));
-    expect(find.textContaining('Açık LONG'), findsOneWidget);
+    expect(find.textContaining('Açık SPOT'), findsOneWidget);
     expect(find.textContaining('Açık SHORT'), findsOneWidget);
     expect(find.textContaining('SHORT ADAUSDT'), findsOneWidget);
     await tester.ensureVisible(
@@ -330,7 +332,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ServerPaperTradesScreen(snapshots: live, onRefresh: () {}),
     ));
-    expect(find.textContaining('LONG AÇ · NEARUSDT'), findsOneWidget);
+    expect(find.textContaining('SPOT AL · NEARUSDT'), findsOneWidget);
     live.value = ServerPaperSnapshot.fromJson(
       paperState(withShort: true));
     await tester.pump();

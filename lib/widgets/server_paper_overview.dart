@@ -38,6 +38,7 @@ class ServerPaperOverview extends StatelessWidget {
       'FALLBACK' => 'AI erişilemedi · kurallar aktif',
       'NO_CANDIDATE' => 'AI uygun aday bekliyor',
       'PROTECTIVE_EXIT' => 'Koruyucu çıkış kararı',
+      'RISK_REDUCTION' => 'Zayıf spot pozisyon satıldı',
       'ROTATION_EXIT' => 'Teknik portföy rotasyonu',
       _ => 'AI karar kaydı bekleniyor',
     };
@@ -126,7 +127,7 @@ class ServerPaperOverview extends StatelessWidget {
               if (lastTrade != null) ...[
                 const SizedBox(height: 4),
                 Text('Son sanal işlem: ${lastTrade['symbol'] ?? '—'} · '
-                  '${lastTrade['side'] ?? '—'} · '
+                  '${_tradeAction(lastTrade['side'])} · '
                   '${lastTrade['grossTry'] is num
                     ? formatTry((lastTrade['grossTry'] as num).toDouble()) : '—'}',
                   maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -159,6 +160,14 @@ class ServerPaperOverview extends StatelessWidget {
       ]),
     );
   }
+
+  String _tradeAction(Object? side) => switch (side) {
+    'buy' => 'Spot AL',
+    'sell' => 'Spot SAT',
+    'short' => 'SHORT aç',
+    'cover' => 'SHORT kapat',
+    _ => 'İşlem',
+  };
 
   Widget _stat(String label, String value) => Column(
     crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -196,7 +205,7 @@ class ServerPaperPositionsPanel extends StatelessWidget {
           ? q.toDouble() * mark.toDouble() : null;
       final gain = current != null && cost is num
           ? current - cost.toDouble() : null;
-      positions.add(_position('LONG', e.key, current, gain));
+      positions.add(_position('SPOT', e.key, current, gain));
     }
     for (final e in s.shorts.entries) {
       if (e.value is! Map) continue;
@@ -217,7 +226,7 @@ class ServerPaperPositionsPanel extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w900,
             fontSize: 12, color: PremiumColors.gold)),
         const SizedBox(height: 7),
-        Text('${s.holdings.length} LONG · ${s.shorts.length} SHORT'
+        Text('${s.holdings.length} SPOT · ${s.shorts.length} SHORT'
           ' · Nakit ${formatTry(s.cashTry)}',
           style: const TextStyle(color: PremiumColors.muted, fontSize: 11)),
         const SizedBox(height: 10),
@@ -236,8 +245,8 @@ class ServerPaperPositionsPanel extends StatelessWidget {
       double? gain) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(children: [
-      Icon(side == 'LONG' ? Icons.trending_up : Icons.trending_down,
-        size: 17, color: side == 'LONG'
+      Icon(side == 'SPOT' ? Icons.trending_up : Icons.trending_down,
+        size: 17, color: side == 'SPOT'
           ? PremiumColors.emerald : PremiumColors.gold),
       const SizedBox(width: 8),
       Expanded(child: Column(

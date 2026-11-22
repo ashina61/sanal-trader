@@ -54,6 +54,11 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
     Stop-loss / take-profit SELL/COVER orders always bypass AI.
     On any AI failure, the deterministic plan continues unchanged.
     """
+    if (plan.get("action") == "SELL" and
+            str(plan.get("reason", "")).startswith("Risk azaltımı:")):
+        return plan, {"status": "RISK_REDUCTION", "provider": "Rules",
+                      "reason": "Verified weakening position closed to reduce "
+                                "paper exposure; AI cannot override exits"}
     if plan.get("rotation") and plan.get("action") == "SELL":
         return plan, {"status": "ROTATION_EXIT", "provider": "Rules",
                       "reason": "Validated low-momentum position rotation; "

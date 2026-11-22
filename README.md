@@ -12,7 +12,7 @@ Yalnızca başlangıç değeri **650 TL** olan tek bir sanal portföyü takip ed
 2. Saatlik teknik trendi ve uygun coinlerde **gerçek kapalı 15 dakikalık mumları**
    analiz eder. Groq AI yalnızca risk motorunun onayladığı AL/SHORT giriş
    adaylarını seçebilir veya BEKLE diyebilir.
-3. Sanal AL, SAT, 1x SHORT AÇ ve SHORT KAPAT kararları tek sunucu cüzdanının
+3. Normal SPOT AL, SPOT SAT, 1x sanal SHORT AÇ ve SHORT KAPAT kararları tek sunucu cüzdanının
    `bot-data/state.json` kaydına işlenir. Stop, teminat ve zorunlu koruyucu
    çıkışlar AI onayına bağlı değildir.
 4. Web ve Android arayüzü sunucu cüzdanını **salt okunur** olarak gösterir.
