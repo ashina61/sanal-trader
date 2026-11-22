@@ -16,7 +16,9 @@
         "En likit 64 sembol için saatlik geçmiş eğitim verisi deneniyor; eski sanal pozisyonların sembolleri listeden düşürülmüyor.",
         "Geçersiz veya bayat USDT/TRY dönüşüm verisiyle otomatik işlem fiyatı oluşturulmuyor.",
         "Yeni Piyasa Radarı ekranında hacim, en çok yükselenler, düşenler ve teknik adaylar filtreleri ile coin arama eklendi.",
-        "Yeni Performans Merkezi sanal portföy değerini, komisyon dahil gerçekleşmiş bot kârını, kazanma oranını ve coin bazlı gerçek sonuçları ayırarak gösteriyor."
+        "Yeni Performans Merkezi sanal portföy değerini, komisyon dahil gerçekleşmiş bot kârını, kazanma oranını ve coin bazlı gerçek sonuçları ayırarak gösteriyor.",
+        "Alt gezinme Panel/Radar/Portföy/Bot/Kâr olarak yeniden düzenlendi; işlem geçmişi üst menüden ve kâr ekranından erişilebilir.",
+        "Gerçekleşen sanal emir kaydındaki komisyon sonrası net sonuç, botun öğrenme motoruna bağlandı; piyasadaki tahminler işlem sonucu gibi kaydedilmiyor."
       ]
     },
     {

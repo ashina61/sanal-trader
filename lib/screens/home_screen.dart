@@ -9,6 +9,8 @@ import '../services/bot_store.dart';
 import '../services/learning_bot.dart';
 import '../services/bot_training.dart';
 import 'bot_dashboard.dart';
+import 'market_radar_screen.dart';
+import 'bot_performance_screen.dart';
 import 'update_history_screen.dart';
 import '../widgets/formatters.dart';
 import '../widgets/premium_dashboard.dart';
@@ -310,13 +312,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           side: order.side,
           amountTry: order.amountTry,
         );
-        final recorded = botRecordedTrade(evolved, order);
+        // Realized profit-learning only uses the actual committed virtual
+        // transaction returned by the repository, never a hypothetical fill.
+        final actual = wallet.trades.isNotEmpty &&
+            (_portfolio!.trades.isEmpty ||
+                wallet.trades.first.id != _portfolio!.trades.first.id)
+            ? wallet.trades.first : null;
+        final recorded = botRecordedTrade(
+          evolved, order, executedTrade: actual,
+        );
         await _botStore.save(recorded);
         if (mounted) setState(() {
           _portfolio = wallet;
           _botState = recorded;
+          final sale = actual != null && actual.side == TradeSide.sell
+              ? ' • Net ${actual.realizedPnlTry.toStringAsFixed(2)} TL' : '';
           _botMessage = (order.side == TradeSide.buy ? 'Sanal AL • ' : 'Sanal SAT • ') +
-              order.quote.symbol + ' • ' + order.reason;
+              order.quote.symbol + ' • ' + order.reason + sale;
         });
       }
     } catch (error) {
@@ -390,6 +402,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (_) => const UpdateHistoryScreen(),
       ));
 
+  void _openTrades() => Navigator.push(context, MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Sanal işlem geçmişi')),
+          body: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 840),
+              child: _historyList(),
+            ),
+          ),
+        ),
+      ));
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -422,10 +446,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onSelected: (value) {
               if (value == 'reset') _resetPortfolio();
               if (value == 'updates') _openUpdates();
+              if (value == 'trades') _openTrades();
             },
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'updates',
                 child: Text('Güncelleme geçmişi')),
+              PopupMenuItem(value: 'trades',
+                child: Text('Sanal işlem geçmişi')),
               PopupMenuItem(value: 'reset',
                 child: Text('Sanal portföyü sıfırla')),
             ],
@@ -452,8 +479,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onRefresh: _refresh,
                   child: switch (_tab) {
                     0 => _marketList(),
-                    1 => _holdingsList(),
-                    2 => BotDashboard(
+                    1 => MarketRadarScreen(
+                      quotes: _quotes,
+                      onOpen: (coin) { _openCoin(coin); },
+                    ),
+                    2 => _holdingsList(),
+                    3 => BotDashboard(
                       state: _botState,
                       quotes: _quotes,
                       wallet: _portfolio,
@@ -461,8 +492,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       error: _botError,
                       lastStatus: _botMessage,
                       onEnabledChanged: _setBotEnabled,
+                      onOpenPerformance: () => setState(() => _tab = 4),
                     ),
-                    _ => _historyList(),
+                    _ => BotPerformanceScreen(
+                      wallet: _portfolio,
+                      quotes: _quotes,
+                      bot: _botState,
+                      onViewTrades: _openTrades,
+                    ),
                   },
                 ),
               ),
@@ -484,9 +521,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.candlestick_chart_outlined),
-              selectedIcon: Icon(Icons.candlestick_chart, color: PremiumColors.gold),
-              label: 'Piyasa'),
+              icon: Icon(Icons.space_dashboard_outlined),
+              selectedIcon: Icon(Icons.space_dashboard, color: PremiumColors.gold),
+              label: 'Panel'),
+            NavigationDestination(
+              icon: Icon(Icons.radar_outlined),
+              selectedIcon: Icon(Icons.radar, color: PremiumColors.gold),
+              label: 'Radar'),
             NavigationDestination(
               icon: Icon(Icons.account_balance_wallet_outlined),
               selectedIcon: Icon(Icons.account_balance_wallet, color: PremiumColors.gold),
@@ -496,9 +537,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               selectedIcon: Icon(Icons.smart_toy, color: PremiumColors.gold),
               label: 'Bot'),
             NavigationDestination(
-              icon: Icon(Icons.history),
-              selectedIcon: Icon(Icons.history_toggle_off, color: PremiumColors.gold),
-              label: 'Geçmiş'),
+              icon: Icon(Icons.query_stats_outlined),
+              selectedIcon: Icon(Icons.query_stats, color: PremiumColors.gold),
+              label: 'Kâr'),
           ],
         ),
       ),
@@ -606,7 +647,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         PremiumBotOverview(
           bot: _botState,
           btc: btc,
-          onTap: () => setState(() => _tab = 2),
+          onTap: () => setState(() => _tab = 3),
         ),
         const SizedBox(height: 22),
         PremiumSectionTitle(title: 'Teknik Göstergeler (BTC)'),
@@ -623,7 +664,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         const SizedBox(height: 18),
         PremiumUpdateTile(
-          version: '0.5.0',
+          version: '0.6.0',
           onTap: _openUpdates,
         ),
         if (_showAllCoins) ...[
