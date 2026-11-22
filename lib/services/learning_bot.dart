@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import '../models/coin_quote.dart';
 import '../models/portfolio.dart';
 import 'technical_analysis.dart';
+import 'profit_learning.dart';
 
 /// Online expert-weighting strategy for paper trading ONLY.
 /// Predictions are evaluated using later market snapshots, never future data.
@@ -83,6 +84,7 @@ class BotState {
     this.technicalWeight = 0.35,
     this.technicalEvaluated = 0,
     this.technicalCorrect = 0,
+    this.profitLearning = const ProfitLearning.empty(),
   });
 
   factory BotState.initial() => const BotState(
@@ -110,6 +112,7 @@ class BotState {
   final double technicalWeight;
   final int technicalEvaluated;
   final int technicalCorrect;
+  final ProfitLearning profitLearning;
 
   BotState copyWith({
     bool? enabled,
@@ -131,6 +134,7 @@ class BotState {
     double? technicalWeight,
     int? technicalEvaluated,
     int? technicalCorrect,
+    ProfitLearning? profitLearning,
   }) => BotState(
     enabled: enabled ?? this.enabled,
     weights: weights ?? this.weights,
@@ -151,6 +155,7 @@ class BotState {
     technicalWeight: technicalWeight ?? this.technicalWeight,
     technicalEvaluated: technicalEvaluated ?? this.technicalEvaluated,
     technicalCorrect: technicalCorrect ?? this.technicalCorrect,
+    profitLearning: profitLearning ?? this.profitLearning,
   );
 
   Map<String, dynamic> toJson() => {
@@ -173,6 +178,7 @@ class BotState {
     'technicalWeight': technicalWeight,
     'technicalEvaluated': technicalEvaluated,
     'technicalCorrect': technicalCorrect,
+    'profitLearning': profitLearning.toJson(),
   };
 
   factory BotState.fromJson(Map<String, dynamic> json) {
@@ -214,6 +220,9 @@ class BotState {
       technicalWeight: ((json['technicalWeight'] as num?)?.toDouble() ?? .35).clamp(.15, .75),
       technicalEvaluated: math.max(0, (json['technicalEvaluated'] as num?)?.toInt() ?? 0),
       technicalCorrect: math.max(0, (json['technicalCorrect'] as num?)?.toInt() ?? 0),
+      profitLearning: json['profitLearning'] is Map
+          ? ProfitLearning.fromJson(Map<String, dynamic>.from(json['profitLearning'] as Map))
+          : const ProfitLearning.empty(),
     );
   }
 
@@ -382,8 +391,11 @@ BotOrder? planBotOrder({
     // Do not invent technical confirmation: close history is required.
     if (!report.ready || report.score < .18 ||
         report.trend == TrendDirection.falling) continue;
+    // Close-trade net return contributes only after enough actual bot exits.
+    // Outcome bias is capped; it cannot turn a negative technical signal positive.
     final score = adaptiveScore * (1 - state.technicalWeight) +
-        report.score * state.technicalWeight;
+        report.score * state.technicalWeight +
+        state.profitLearning.edge(q.id);
     if (score < botBuyThreshold) continue;
     // Crypto-market regime: suppress altcoin buys in a falling BTC market.
     if (q.id != 'bitcoin' && btc.ready &&
@@ -417,17 +429,35 @@ BotOrder? planBotOrder({
   return candidates.isEmpty ? null : candidates.first;
 }
 
-BotState botRecordedTrade(BotState state, BotOrder order, {DateTime? now}) {
+BotState botRecordedTrade(
+  BotState state,
+  BotOrder order, {
+  DateTime? now,
+  TradeRecord? executedTrade,
+}) {
   final time = (now ?? DateTime.now()).toUtc();
   final latest = Map<String, DateTime>.from(state.lastTrades)..[order.quote.id] = time;
   final daily = state.tradesFor(time);
   final action = order.side == TradeSide.buy ? 'AL' : 'SAT';
+  // Only a matching, executed virtual order may train profit performance.
+  final matched = executedTrade != null &&
+      executedTrade.coinId == order.quote.id &&
+      executedTrade.side == order.side &&
+      executedTrade.grossTry.isFinite &&
+      executedTrade.grossTry > 0;
+  final nextProfit = matched
+      ? state.profitLearning.record(executedTrade)
+      : state.profitLearning;
+  final outcomeLabel = matched && executedTrade.side == TradeSide.sell
+      ? ' • Net sonuç ${executedTrade.realizedPnlTry.toStringAsFixed(2)} TL'
+      : '';
   final text = action + ' ' + order.quote.symbol + ' • ' + order.amountTry.toStringAsFixed(2) +
-      ' TL • ' + order.reason + ' • Sinyal ' + order.score.toStringAsFixed(2);
+      ' TL • ' + order.reason + ' • Sinyal ' + order.score.toStringAsFixed(2) + outcomeLabel;
   return state.copyWith(
     day: _utcDay(time),
     tradesToday: daily + 1,
     lastTrades: latest,
+    profitLearning: nextProfit,
     activities: [BotActivity(at: time, message: text), ...state.activities].take(20).toList(),
   );
 }
