@@ -4,6 +4,21 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 
 > **Hiçbir yerde gerçek emir, borsa hesabı, para yatırma, para çekme veya cüzdan anahtarı yoktur.** Bu uygulama bir paper-trading simülatörüdür; yatırım tavsiyesi değildir.
 
+## Sitede öğrenen bot (sanal işlemler)
+
+**Web:** https://ashina61.github.io/sanal-trader/
+
+Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etkinleştir. Bot başlangıçta **kapalıdır**. Açıkken güncel veriler üzerinden kendi başına **sanal** alım/satım yapar ve yaptığı işlemlerin nedenini bot günlüğüne ekler.
+
+- Üç fiyat uzmanının (kısa trend, 24s momentum, ters yön) ağırlıkları en az 15 dakika sonra gelen **yeni fiyatlarla** değerlendirilerek güncellenir. Bu, basit bir **online öğrenme algoritmasıdır**, büyük dil modeli veya kâr garantisi değildir.
+- En fazla toplam portföyün %12'si kadar yeni alış; tek coinde %25; toplam coinlerde %65; en az %30 sanal nakit rezervi.
+- Günlük en fazla 8 emir; aynı coinde 30 dakika tekrar bekleme (koruyucu satış hariç); yaklaşık %6 zarar koruması ve %8 kâr alma.
+- 90 saniyede bir piyasa yenilemesi denenir. **Tarayıcı kapanırsa bot da durur.** GitHub Pages üzerinde sürekli çalışan bir sunucu yoktur.
+- Botun ayarları ve öğrenme sayıları tarayıcıdaki yerel depolamada tutulur. Site verilerini temizlersen silinebilir.
+- Bot ve sen manuel sanal alım/satım için aynı doğrulama motorunu kullanırsınız. **Gerçek borsa bağlantısı, anahtar, para transferi bulunmaz**.
+
+Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
+
 ## Bu sürümde neler var?
 
 - Bitcoin, Ethereum, Solana, XRP, BNB, DOGE için CoinGecko TRY piyasa verisi
@@ -17,7 +32,7 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 - İsteğe bağlı **Firebase Anonymous Auth + Firestore** saklama ve sunucu tarafında atomik cüzdan güncellemesi
 - Güncel olmayan (>10 dakika) fiyatla yeni işlemleri engelleme
 
-Bu MVP'de **limit emir, kaldıraç, haber/AI analizi, gerçek mum grafikleri, gerçek zamanlı WebSocket ve çok kullanıcılı yarışma YOKTUR**. Grafik, CoinGecko'nun 7 günlük fiyat serisinden çizilen çizgidir; canlı mum grafiği değildir.
+Bu MVP'de **limit emir, kaldıraç, dil modeliyle haber analizi, gerçek mum grafikleri, gerçek zamanlı WebSocket ve çok kullanıcılı yarışma YOKTUR**. Basit adaptif sanal bot ayrı bir özelliktir. Grafik, CoinGecko'nun 7 günlük fiyat serisinden çizilen çizgidir; canlı mum grafiği değildir.
 
 ## Tarayıcıdan direkt çalıştır (GitHub Pages)
 
