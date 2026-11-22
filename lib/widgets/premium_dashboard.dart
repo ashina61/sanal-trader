@@ -91,8 +91,10 @@ class PremiumPortfolioCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = wallet?.fullMarketValue(quotes.map(
-      (id, coin) => MapEntry(id, coin.priceTry)));
+    final total = wallet?.fullMarketValue({
+      for (final coin in quotes.values)
+        if (coin.isFresh) coin.id: coin.priceTry,
+    });
     final pnl = total == null ? null : total - initialCashTry;
     final percent = pnl == null ? null : 100 * pnl / initialCashTry;
     final up = (pnl ?? 0) >= 0;

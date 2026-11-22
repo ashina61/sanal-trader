@@ -50,8 +50,10 @@ class BotDashboard extends StatelessWidget {
     final baseline = trained && bot.holdoutExamples > 0
       ? '%${(100 * bot.baselineCorrect / bot.holdoutExamples).toStringAsFixed(1)}'
       : '—';
-    final equity = wallet?.fullMarketValue(
-      quotes.map((id, q) => MapEntry(id, q.priceTry)));
+    final equity = wallet?.fullMarketValue({
+      for (final q in quotes.values)
+        if (q.isFresh) q.id: q.priceTry,
+    });
     final peak = bot?.peakEquityTry ?? initialCashTry;
     final drawdown = equity == null || peak <= 0 ? null :
       (1 - equity / peak).clamp(0.0, 1.0);

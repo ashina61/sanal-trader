@@ -52,6 +52,43 @@ void main() {
     expect(another, isNull);
   });
 
+  test('Emergency risk exit is allowed even after daily trade limit', () {
+    final initialQuote = quote();
+    final bought = executeVirtualTrade(
+      current: Portfolio.fresh(), quote: initialQuote,
+      side: TradeSide.buy, amountTry: 78,
+    );
+    final time = DateTime.now().toUtc();
+    final state = enabled().copyWith(
+      day: time.toIso8601String().substring(0, 10),
+      tradesToday: botMaxTradesPerDay,
+    );
+    final down = quote(price: 90, change: -10, history: false);
+    final emergency = planBotOrder(
+      state: state, wallet: bought.portfolio,
+      quotes: {'bitcoin': down}, now: time,
+    );
+    expect(emergency, isNotNull);
+    expect(emergency!.side, TradeSide.sell);
+    expect(emergency.reason, contains('Koruma'));
+  });
+
+  test('Stale held asset suppresses new BUY, not fictitious exposure', () {
+    final initial = quote(id: 'cardano', symbol: 'ADA');
+    final bought = executeVirtualTrade(
+      current: Portfolio.fresh(), quote: initial,
+      side: TradeSide.buy, amountTry: 75,
+    );
+    final stale = quote(id: 'cardano', symbol: 'ADA',
+      time: DateTime.now().toUtc().subtract(const Duration(hours: 2)));
+    final bullish = quote();
+    expect(planBotOrder(
+      state: enabled(),
+      wallet: bought.portfolio,
+      quotes: {'bitcoin': bullish, 'cardano': stale},
+    ), isNull);
+  });
+
   test('Bot does not exceed daily transaction cap', () {
     final q = quote();
     final state = enabled().copyWith(

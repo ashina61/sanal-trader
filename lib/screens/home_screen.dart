@@ -354,8 +354,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() => _botError = null);
     try {
       var starting = _botState!;
-      final pricedWallet = _portfolio!.fullMarketValue(
-        _quotes.map((id, q) => MapEntry(id, q.priceTry)));
+      final pricedWallet = _portfolio!.fullMarketValue({
+        for (final q in _quotes.values)
+          if (q.isFresh) q.id: q.priceTry,
+      });
       if (pricedWallet != null && pricedWallet.isFinite &&
           pricedWallet > starting.peakEquityTry) {
         starting = starting.copyWith(peakEquityTry: pricedWallet);
@@ -863,8 +865,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: ListTile(
               title: Text(_quotes[item.key]?.symbol ?? item.key.toUpperCase()),
               subtitle: Text('${formatQuantity(item.value.quantity)} adet · Maliyet ${formatTry(item.value.costTry)}'),
-              trailing: Text(_quotes[item.key] == null ? 'Fiyat yok' : formatTry(item.value.quantity * _quotes[item.key]!.priceTry)),
-              onTap: _quotes[item.key] == null ? null : () => _openCoin(_quotes[item.key]!),
+              trailing: Text(_quotes[item.key] == null
+                  ? 'Fiyat yok'
+                  : !_quotes[item.key]!.isFresh
+                    ? 'Fiyat bayat'
+                    : formatTry(item.value.quantity * _quotes[item.key]!.priceTry)),
+              onTap: _quotes[item.key]?.isFresh != true
+                  ? null : () => _openCoin(_quotes[item.key]!),
             ),
           ),
         const SizedBox(height: 24),

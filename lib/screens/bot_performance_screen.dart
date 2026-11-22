@@ -33,8 +33,10 @@ class BotPerformanceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ledger = bot?.profitLearning;
     final bt = bot?.backtest;
-    final equity = wallet?.fullMarketValue(
-      quotes.map((id, q) => MapEntry(id, q.priceTry)));
+    final equity = wallet?.fullMarketValue({
+      for (final q in quotes.values)
+        if (q.isFresh) q.id: q.priceTry,
+    });
     final pnl = equity == null ? null : equity - initialCashTry;
     final botWin = ledger?.winRate;
     final top = ledger?.perCoin.entries.toList() ?? [];

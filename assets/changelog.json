@@ -21,7 +21,11 @@
         "Yerel cüzdan sıfırlama sürmekte olan emir sırasında engellendi; sunucu kasasına dokunulmadığı onay iletişiminde açıkça gösterildi.",
         "Coin detaylarında işlemlerin yerel spot AL/SAT olduğu, SHORT'un ayrı sunucu botuyla izlendiği açıklaması eklendi.",
         "Ana sayfadaki Güncelleme Geçmişi sürüm etiketi 0.6.0 yerine 0.9.1 ile eşitlendi.",
-        "Türkçe karakterli JSON içeren sahte HTTP yanıtı testinde latin1 varsayımı yerine UTF-8 bayt kodlaması kullanıldı; gerçek sunucu JSON okumasıyla uyumlu."
+        "Türkçe karakterli JSON içeren sahte HTTP yanıtı testinde latin1 varsayımı yerine UTF-8 bayt kodlaması kullanıldı; gerçek sunucu JSON okumasıyla uyumlu.",
+        "Yerel botta günlük 8 emir tavanı artık acil zarar koruma satışını engellemiyor; yalnızca yeni alışlara uygulanıyor.",
+        "Bayat fiyatlı tutulan coinler portföy değerlemesinde güncelmiş gibi gösterilmiyor; risk hesapları belirsizse yeni alış engelleniyor.",
+        "Bot, Portföy ve Kâr ekranlarında yalnızca güncel fiyatla net varlık değeri hesaplanıyor; fiyat yok/bayat uyarıları açıkça gösteriliyor.",
+        "Yerel bot acil çıkış ve bayat pozisyon nedeniyle yeni alım engelleme testleri eklendi."
       ]
     },
     {

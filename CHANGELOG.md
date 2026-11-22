@@ -2,6 +2,10 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- Yerel botun zarar koruma satışları günlük emir limiti dolduğunda da yapılabilir; limit yeni alışlara uygulanır.
+- Bayat fiyat, portföy, bot ve kâr ekranlarında sanki güncelmiş gibi değerlenmez; bu durumda yeni alım riski durdurulur.
+- Acil satış ve stale varlıkla yeni işlem engelleme testleri eklendi.
+
 - Türkçe metinli sunucu yanıtı için entegrasyon testinde doğru UTF-8 HTTP kodlaması uygulandı.
 
 - Manuel spot ve otomatik yerel emrin aynı anda çakışması ile sürmekte olan işlemin ortasında yerel kasa sıfırlanması engellendi.

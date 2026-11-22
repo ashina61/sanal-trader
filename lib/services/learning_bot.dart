@@ -349,7 +349,7 @@ BotOrder? planBotOrder({
   required Map<String, CoinQuote> quotes,
   DateTime? now,
 }) {
-  if (!state.enabled || state.tradesFor(now ?? DateTime.now()) >= botMaxTradesPerDay) return null;
+  if (!state.enabled) return null;
   final time = (now ?? DateTime.now()).toUtc();
   final available = quotes.values.where((q) => q.isFresh && q.priceTry > 0 && q.priceTry.isFinite).toList();
   final benchmark = quotes['bitcoin'];
@@ -387,8 +387,14 @@ BotOrder? planBotOrder({
     return candidates.first;
   }
 
-  if (wallet.fullMarketValue(quotes.map((id, q) => MapEntry(id, q.priceTry))) == null) return null;
-  final equity = wallet.marketValue(quotes.map((id, q) => MapEntry(id, q.priceTry)));
+  // Daily cap limits NEW exposure, not protection of existing holdings.
+  if (state.tradesFor(time) >= botMaxTradesPerDay) return null;
+  // A stale or unpriced held asset must never be valued as current.
+  final freshPrices = <String, double>{
+    for (final q in available) q.id: q.priceTry,
+  };
+  if (wallet.fullMarketValue(freshPrices) == null) return null;
+  final equity = wallet.marketValue(freshPrices);
   if (!equity.isFinite || equity < botMinimumOrderTry) return null;
   final exposure = equity - wallet.cashTry;
   // A 12% portfolio drawdown suspends new buys but still allows exits.
