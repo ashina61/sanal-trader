@@ -16,6 +16,7 @@ class BotDashboard extends StatelessWidget {
     required this.busy,
     required this.onEnabledChanged,
     this.onOpenPerformance,
+    this.onRetrain,
     this.error,
     this.lastStatus,
   });
@@ -26,6 +27,7 @@ class BotDashboard extends StatelessWidget {
   final bool busy;
   final ValueChanged<bool> onEnabledChanged;
   final VoidCallback? onOpenPerformance;
+  final VoidCallback? onRetrain;
   final String? error;
   final String? lastStatus;
 
@@ -86,6 +88,16 @@ class BotDashboard extends StatelessWidget {
             ]),
           ),
         ),
+        const SizedBox(height: 10),
+        if (onRetrain != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: busy || bot == null ? null : onRetrain,
+              icon: const Icon(Icons.model_training_outlined),
+              label: const Text('Geçmiş veriden yeniden eğit'),
+            ),
+          ),
         const SizedBox(height: 12),
         Card(
           color: PremiumColors.panel,

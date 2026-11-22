@@ -235,7 +235,7 @@ class MarketService {
     final uri = Uri.https('api.coingecko.com', '/api/v3/coins/markets', {
       'vs_currency': 'try',
       'order': 'market_cap_desc',
-      'per_page': '100',
+      'per_page': '250',
       'page': '1',
       'sparkline': 'true',
     });
@@ -263,7 +263,7 @@ class MarketService {
       } catch (_) {
         continue; // Ignore malformed individual symbols, not entire page.
       }
-      if (data.length >= 72) break;
+      if (data.length >= 250) break;
     }
     if (data.isEmpty) throw Exception('CoinGecko uygun coin döndürmedi');
     return data;

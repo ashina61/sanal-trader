@@ -244,6 +244,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _retrainBot() async {
+    if (_botBusy || _botState == null) return;
+    try {
+      // Reset only historical training status. The real executed-trade
+      // profit ledger and the user's pause/resume choice stay untouched.
+      final reset = _botState!.copyWith(trainingVersion: 0);
+      await _botStore.save(reset);
+      if (!mounted) return;
+      setState(() {
+        _botState = reset;
+        _botMessage = reset.enabled
+            ? 'Yeni geçmiş verilerle eğitim başlatıldı.'
+            : 'Eğitim işaretlendi; bot tekrar açılınca çalışacak.';
+        _botError = null;
+      });
+      if (reset.enabled) {
+        await _loadMarket();
+        await _runBotCycle();
+      }
+    } catch (error) {
+      if (mounted) setState(
+        () => _botError = 'Yeniden eğitim isteği kaydedilemedi: $error');
+    }
+  }
+
   Future<void> _runBotCycle() async {
     if (!mounted || _botBusy || _manualTradeOpen || _botState?.enabled != true ||
         _portfolio == null || _quotes.isEmpty ||
@@ -488,6 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       error: _botError,
                       lastStatus: _botMessage,
                       onEnabledChanged: _setBotEnabled,
+                      onRetrain: _retrainBot,
                       onOpenPerformance: () => setState(() => _tab = 4),
                     ),
                     _ => BotPerformanceScreen(

@@ -14,7 +14,7 @@ Uygulamanın üst menüsündeki **güncelleme simgesini** açarak bütün sürü
 
 **Canlı web:** https://ashina61.github.io/sanal-trader/
 
-- 6 coin için Binance public **WebSocket miniTicker** ve gerçek **USDT/TRY** piyasa kuru ile TL fiyatları güncellenir; işlem API anahtarı yoktur.
+- Güncel, likit USDT spot coinleri için Binance public **tüm piyasa miniTicker WebSocket** ve gerçek **USDT/TRY** piyasa kuru ile TL fiyatları güncellenir; işlem API anahtarı yoktur.
 - Açılışta Binance REST üzerinden 7 günlük saatlik geçmiş ve güncel fiyatlar alınır. Erişim sorunu olursa CoinGecko yedek kaynaktır. **İkisi de erişilemezse işlem yapılmaz**.
 - Kullanıcının bu talebiyle kişisel sanal bot **v2 ilk açılışında otomatik etkinleşir**. Bot sekmesindeki anahtardan istediğin zaman durdurabilirsin; durdurma kararı sonraki açılışlarda korunur.
 - Uygulama açıkken bot 45 saniyelik döngülerle yeni piyasa fırsatlarını değerlendirir. Her döngüde **en fazla bir sanal emir** verebilir; işlem yoksa sinyal ve risk sınırları beklenir.
@@ -36,16 +36,22 @@ Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etk
 
 Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 
+## Kâr odaklı sanal işlem botu · v0.6.0
+
+**Yeni:** Ana gezinme **Panel · Radar · Portföy · Bot · Kâr** olarak ayrıldı. Radar yükselenleri, düşenleri, hacimli coinleri ve teknik sinyalleri listeler. Kâr ekranı botun gerçekten gerçekleştirdiği sanal satışlardan **komisyon dahil net sonuç** hesaplar; henüz satılmamış pozisyonlar gerçekleşmiş kâr sayılmaz.
+
+Bot kapalı tarayıcıda işlem yapmaz. Kazanç garantisi, gerçek borsa emri veya para transferi yoktur. **Geçmiş veriden yeniden eğit** butonu strateji ağırlıklarını günceller; botun gerçek sanal işlem performansı ve kullanıcının açık/kapalı seçimi korunur.
+
 ## Geniş altcoin taraması ve öğrenen bot
 
-- Sabit 6 coin yerine Binance public spot listesinden **24 saatlik USDT işlem hacmine göre en çok 72 likit coin** seçilir. Desteklenmeyen, düşük hacimli, sabit değerli ve kaldıraçlı ürünler elenir. Tam kripto evreni değil; ilk aşamada **Binance'te likit USDT spot çiftleri** kapsamındadır.
+- Sabit sayı sınırı olmadan Binance public spot listesinden **24 saatlik USDT hacmi en az 1 milyon olan uygun likit coinler** seçilir. Desteklenmeyen, düşük hacimli, sabit değerli ve kaldıraçlı ürünler elenir. Tam kripto evreni değil; ilk aşamada **Binance'te likit USDT spot çiftleri** kapsamındadır.
 - Canlı fiyatlar WebSocket ile güncellenir. USDT/TRY piyasa çifti kullanılarak sanal TL karşılığı hesaplanır.
-- En likit 36 coinin yaklaşık 7 günlük saatlik kapanış fiyatları geçmiş strateji eğitimine alınır (API erişimi varsa).
+- En likit 64 coinin yaklaşık 7 günlük saatlik kapanış fiyatları geçmiş strateji eğitimine alınır (API erişimi varsa).
 - Öğrenme motoru **son 24 saatlik veriyi eğitimden ayırır** ve o bölümdeki yön tahmini doğruluğunu basit momentum tahminiyle karşılaştırır. Bu, **kârlılık veya ileriye dönük performans garantisi değildir**.
 - Geçmiş veriden eğitim başarılı değilse **bot yeni AL emri açmaz**; güvenli şekilde bekler. Kullanıcı Bot sekmesinden durdurabilir.
 - Canlı olarak yeni fiyatlar geldikçe sonraki fiyatla karşılaştırılmış tahminlere göre strateji ağırlıkları güncellenir. Sonuçlar bu tarayıcıda saklanır.
 - Piyasa sekmesinde coin arama ve gerçek USDT hacmine göre sıralama bulunur. Çok küçük tokenlerin TL fiyatı yeterli ondalık hassasiyette gösterilir.
-- Binance API/CORS/ağ/rate-limit sorunlarında CoinGecko'nun piyasa değeri sıralamasındaki uygun, hacimli **en fazla 72 coinlik yedek listesi** denenir. Bu veri periyodik yenilenir; WebSocket kadar canlı değildir. Sahte fiyat oluşturulmaz.
+- Binance API/CORS/ağ/rate-limit sorunlarında CoinGecko'nun piyasa değeri sıralamasındaki uygun, hacimli **erişilebilen ilk 250 uygun coinden oluşan yedek liste** denenir. Bu veri periyodik yenilenir; WebSocket kadar canlı değildir. Sahte fiyat oluşturulmaz.
 
 **Sınır:** Tarayıcı kapalıyken bot işlemez. 7/24 işlem ve cihazlar arası güvenilir öğrenme için sunucu tarafı altyapı gerekir.
 

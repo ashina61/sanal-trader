@@ -24,7 +24,10 @@
         "Yeni Radar ve Kâr ekranları için boş veri durumları widget testlerinde kontrol ediliyor.",
         "Sabit 240 coin sayısı sınırı kaldırıldı: yeterli hacim ve doğrulanmış fiyat şartlarını geçen bütün Binance USDT spot çiftleri taranabilir.",
         "Tüm coinler ana sayfaya yığılıp yavaşlatılmıyor; ayrı Radar ekranında kaydırarak ve arayarak görüntüleniyor.",
-        "REST yenileme bütün piyasanın tek 24 saatlik ticker yanıtıyla yapılıyor; uzun URL ve çoklu aboneliklerden kaçınılıyor."
+        "REST yenileme bütün piyasanın tek 24 saatlik ticker yanıtıyla yapılıyor; uzun URL ve çoklu aboneliklerden kaçınılıyor.",
+        "Bot ekranında manuel geçmişten yeniden eğitim butonu eklendi; daha önce gerçekleşmiş sanal işlemlerden öğrenilen kâr verisi korunuyor.",
+        "CoinGecko yedek piyasa sorgusu bir istekte ilk 250 piyasa değerli coin içinden uygun olanları gösterebiliyor.",
+        "README ve piyasa/öğrenme rehberleri yeni limitsiz sayımlı tarama ve Kâr ekranına göre güncellendi."
       ]
     },
     {

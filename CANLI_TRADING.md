@@ -5,7 +5,7 @@ Sitenin adresi: https://ashina61.github.io/sanal-trader/
 ## Fiyatların kaynağı
 
 1. Binance'in yalnızca halka açık piyasa verisi veren `data-api.binance.vision` sunucusundan başlangıç fiyatları, 24s değişimleri ve 1 saatlik geçmiş mum kapanışları alınır.
-2. `wss://data-stream.binance.vision` WebSocket akışından `BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, BNBUSDT, DOGEUSDT` ve `USDTTRY` miniTicker olayları gelir.
+2. `wss://data-stream.binance.vision/ws/!miniTicker@arr` tek toplu WebSocket akışından bütün piyasanın değişmiş miniTicker olayları gelir; yerel likidite listesi ve USDT/TRY kuru üzerinden ilgililer işlenir.
 3. Coinin USDT fiyatı **gerçek USDT/TRY alışveriş çiftinin fiyatıyla** çarpılır; hiçbir sabit döviz kuru veya simüle edilmiş fiyat üretilmez. Canlı 24s değişim USDT ve USDT/TRY değişiminden türetilir.
 4. Başlangıç grafiği Binance 1saat USDT kapanışlarına o anki USDT/TRY çarpanı uygulanarak oluşturulur. **Geçmiş saatlerin gerçek TRY fiyat grafiği olduğu iddia edilmez.**
 5. Binance REST erişilemezse CoinGecko TRY fiyatları yedek olarak denenir. WebSocket erişilemiyorsa belirli aralıklarla REST üzerinden yenilenir. Her iki kaynak yoksa *sahte fiyat gösterilmez* ve bot emir veremez.

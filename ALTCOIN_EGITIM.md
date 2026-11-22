@@ -4,11 +4,17 @@
 
 ## Piyasa keşfi
 
-Sabit 6 coinden daha geniş evrene geçildi. `GET /api/v3/ticker/24hr` ile Binance Spot USDT çiftleri değerlendirilir; işlem hacmi en yüksek **72 uygun çift** izlenir. Bu liste sürekli sabit değildir; market erişimine göre değişebilir. USDT/TRY döviz dönüşüm çifti ayrıca izlenir. Ürün adları Binance sembolünden gelir ve her token için tam kimlik eşlemesi anlamına gelmez.
+Sabit 6 coinden daha geniş evrene geçildi. `GET /api/v3/ticker/24hr` ile Binance Spot USDT çiftleri değerlendirilir; güncel işlem hacmi 1 milyon USDT üzerinde olan **bütün uygun çiftler** taranır (sabit coin sayısı sınırı yoktur). Bu liste sürekli sabit değildir; market erişimine göre değişebilir. USDT/TRY döviz dönüşüm çifti ayrıca izlenir. Ürün adları Binance sembolünden gelir ve her token için tam kimlik eşlemesi anlamına gelmez.
 
 Düşük hacimli (<2 milyon USDT/24s), desteklenmeyen, stablecoin/fiat ve isimden tanınan kaldıraçlı çiftler başlangıç elemesinden geçemez. Bu filtre **riskin sıfır olduğu anlamına gelmez**.
 
-İlk 36 likit çiftin saatlik kapanış geçmişi için ayrı REST çağrıları yapılır. Veri gelmeyen coin listede görünebilir ama geçmişe dayalı bot AL sinyali oluşturmaz.
+En likit 64 çiftin saatlik kapanış geçmişi için ayrı REST çağrıları yapılır. Veri gelmeyen coin listede görünebilir ama geçmişe dayalı bot AL sinyali oluşturmaz.
+
+## Gerçekleşen sanal kârla öğrenme
+
+Bot 15 dakikalık yön tahmini doğruluğundan **ayrı olarak**, gerçekleştirdiği sanal satış emirlerinin komisyon sonrası net kâr/zararını izler. Coin başına kapalı satış sayısı, kazanma oranı ve ortalama getiri kaydedilir. En az iki kapanmış satış olmadan coin için performans ödülü kullanılmaz. Olumlu/olumsuz etkisi sınırlıdır; kazanç garantisi veya gerçek parayla strateji doğrulaması değildir.
+
+**Radar** hacim, yükselenler, düşenler ve teknik adaylar arasında gezdirir. **Kâr** ekranı toplam portföy, gerçekleşmiş sanal bot kârı ve coin bazlı sonuçları gösterir. **Geçmiş veriden yeniden eğit** butonu önceki gerçekleşmiş işlem sonuçlarını silmez.
 
 ## Öğrenme süreci
 
