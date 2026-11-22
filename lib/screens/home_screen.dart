@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     try {
       var starting = _botState!;
       if (starting.trainingVersion < 1) {
-        final training = trainHistoricalBot(_quotes.values, seedWeights: starting.weights);
+        final training = trainHistoricalBot(_quotes.values);
         if (training == null) {
           if (mounted) setState(() {
             _botMessage = 'Geçmiş veriden eğitim bekleniyor; yeterli fiyat geçmişi yok.';
