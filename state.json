@@ -6,7 +6,7 @@
     "status": "WAIT"
   },
   "cashTry": 259.6594620150529,
-  "cycles": 30,
+  "cycles": 31,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "WAIT",
@@ -12294,6 +12294,10 @@
   "intradayPairs": 32,
   "journal": [
     {
+      "at": "2026-11-22T21:45:14Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T21:43:16Z",
       "message": "115 coin tarandı; AI bekle kararı: Current performance shows zero win rate and negative returns; no clear edge in candidates. Better to wait for stronger signal."
     },
@@ -12425,11 +12429,11 @@
     "NEARUSDT": "2026-11-22T18:12:56Z",
     "PUMPUSDT": "2026-11-22T19:45:48Z"
   },
-  "lastRunAt": "2026-11-22T21:43:16Z",
+  "lastRunAt": "2026-11-22T21:45:14Z",
   "lastScheduledTriggerAt": null,
   "lastSuccessAt": "2026-11-22T21:43:16Z",
-  "lastTriggerAt": "2026-11-22T21:43:16Z",
-  "lastTriggerEvent": "push",
+  "lastTriggerAt": "2026-11-22T21:45:14Z",
+  "lastTriggerEvent": "workflow_dispatch",
   "marksTry": {
     "BNBUSDT": 28248.983699999997,
     "ETHFIUSDT": 25.532745,
