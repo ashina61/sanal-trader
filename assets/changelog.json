@@ -17,7 +17,8 @@
         "Yeni Kasa, Radar, Bot ve Kâr ekranları yalnızca aynı ServerPaperRepository verilerini kullanır.",
         "Yüklü kullanıcı cihazındaki eski yerel depolama değiştirilmiyor ancak hiçbir ekranda kullanılmıyor.",
         "Uygulama 0.9.8+15 sürümüne yükseltildi.",
-        "Tek kasa bot ekranının ilk Flutter Analyze bulgusu (fazla kapanış parantezi) düzeltildi."
+        "Tek kasa bot ekranının ilk Flutter Analyze bulgusu (fazla kapanış parantezi) düzeltildi.",
+        "Yaklaşık %65 dolu kasada en az 90 dakikalık, %0,35–%2,5 zararlı ve gerçek 15dk/4s momentumu belirgin zayıflayan pozisyonlar için günde en çok iki erken sanal risk azaltımı eklendi; emir yerini otomatik ve sahte bir kârla doldurmaz."
       ]
     },
     {

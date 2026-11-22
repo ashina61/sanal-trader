@@ -1,3 +1,9 @@
+## 2026-11-23 — %65 kasa doluluk kilidi için kontrollü risk azaltımı
+
+- Botun mevcut kasa yaklaşık %65 pozisyon taşıdığı için ne yeni LONG/SHORT açabildiği ne de onaylı rotasyon bulabildiği kontrol edildi. Gerçek 15dk verisine dayanan ve en az 90 dakikadır taşınan zayıf pozisyonlarda koşullu erken zarar sınırlaması eklendi.
+- En fazla iki sanal risk azaltımı/gün, aralarında en az 90 dakika; zarar ve gerçek momentum şartı olmadan rastgele al-sat yok.
+- Koruyucu stop emirleri daha yüksek önceliklidir, satış sonrası alım otomatik uydurulmaz. Test edilen simülasyon gerçekte kâr garantisi sağlamaz.
+
 ## 2026-11-23 — Tek kasa ekranı Flutter sözdizimi düzeltmesi
 
 - Yeni Bot sekmesinin kapanış parantezindeki fazlalık Flutter Analyze tarafından tespit edilip düzeltildi; derleme ve widget testleriyle doğrulanır.

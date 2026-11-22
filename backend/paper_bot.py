@@ -438,6 +438,43 @@ def assess_decision(state, latest, t):
             exits.append((80 - technical["score"], pair, "sell", amount,
                           "Momentum düşüşe döndü; açık LONG kapatılıyor", technical))
 
+    # EARLY EXPOSURE RELIEF: A portfolio at capacity may stay frozen for
+    # hours even when a held coin has a confirmed 4h deterioration. Only
+    # close a genuinely underperforming existing paper position; never
+    # fabricate a profitable replacement or bypass the original hard stops.
+    # At most two such exits per UTC day, >=90 minutes apart.
+    used_now = exposure(state, latest)
+    if used_now is not None and used_now >= total * .64:
+        recent_exits = [
+            as_date(tr.get("at")) for tr in state.get("trades", [])
+            if isinstance(tr, dict) and
+            str(tr.get("reason", "")).startswith("Risk azaltımı: ")
+        ]
+        recent_exits = [at for at in recent_exits
+                        if at and at.date() == t.date()]
+        if (len(recent_exits) < 2 and not any(
+                (t - at).total_seconds() < 5400 for at in recent_exits)):
+            for pair, pos in state["holdings"].items():
+                mark = latest.get(pair, {}).get("priceTry")
+                if not mark or pos.get("quantity", 0) <= 0:
+                    continue
+                last_open = as_date(state.get("lastOrder", {}).get(pair))
+                if last_open is None or (t - last_open).total_seconds() < 5400:
+                    continue
+                fast = quick(pair)
+                tech = current_tech(pair)
+                if fast is None or tech is None:
+                    continue
+                entry = pos["costTry"] / pos["quantity"]
+                pnl = mark / entry - 1
+                if (-.025 <= pnl <= -.0035
+                        and fast["momentum4h"] <= -.70
+                        and fast["momentum1h"] <= .15
+                        and tech["momentum6"] < .70):
+                    exits.append((82, pair, "sell", pos["quantity"] * mark,
+                        "Risk azaltımı: uzun süren zayıf 15dk momentum "
+                        "ile dolu portföyün zararı sınırlanıyor", tech))
+
     if exits:
         priority, pair, side, amount, reason, technical = max(
             exits, key=lambda item: (item[0], item[3]))

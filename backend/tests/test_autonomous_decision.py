@@ -186,6 +186,52 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertIsNotNone(found)
         self.assertGreater(found["momentum1h"], 0)
 
+    def test_full_portfolio_can_release_declining_held_coin(self):
+        # No fake profits: one observed weak 4h trend + a modest real loss
+        # may free capital before the hard -6% stop.
+        weak = [100 + i * .10 for i in range(168)]
+        state = fresh_state()
+        quotes = {}
+        for pair in ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
+                     "ADAUSDT", "XRPUSDT"):
+            state["histories"][pair] = {
+                "prices": weak, "fetchedAt": NOW.isoformat(),
+            }
+            execute(state, NOW - dt.timedelta(hours=3),
+                    pair, "buy", 78, weak[-1], "existing paper long")
+            quotes[pair] = {"priceTry": weak[-1], "change24h": 1}
+        # Cut a monitored weak position at -0.8%, with an observed
+        # fast 4h decline. No forced replacement order.
+        pair = "ADAUSDT"
+        entry = state["holdings"][pair]["costTry"] / state["holdings"][pair]["quantity"]
+        current = entry * .992
+        quotes[pair]["priceTry"] = current
+        state["intraday"][pair] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [current * (1.02 - i * .0002) for i in range(95)] +
+                      [current * 1.0001],
+        }
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertEqual(plan["symbol"], pair)
+        self.assertIn("Risk azaltımı:", plan["reason"])
+        self.assertEqual(len(state["holdings"]), 6)
+
+    def test_exposure_relief_requires_confirmed_weakness_and_cooldown(self):
+        weak = [100 + i * .1 for i in range(168)]
+        state = fresh_state()
+        quotes = {}
+        for pair in ("BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
+                     "ADAUSDT", "XRPUSDT"):
+            state["histories"][pair] = {
+                "prices": weak, "fetchedAt": NOW.isoformat(),
+            }
+            execute(state, NOW - dt.timedelta(hours=3),
+                    pair, "buy", 78, weak[-1], "existing paper long")
+            quotes[pair] = {"priceTry": weak[-1], "change24h": 1}
+        # Even if exposure is full, favorable 15m data means WAIT, not churn.
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+
     def test_money_or_risk_limit_selects_wait(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
         state["todayOrders"] = 16
