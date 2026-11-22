@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.6",
+      "date": "2026-11-22",
+      "title": "GitHub-only otomatik çalışma tanısı",
+      "details": [
+        "GitHub cron 5 dakikada bir 2-57/5 ifadesiyle yeniden kaydedildi.",
+        "Bot gerçek tetikleme olayını ve son otomatik schedule tarihini kaydeder; push ya da manuel tetik otomatik çalışmaymış gibi gösterilmez.",
+        "Eski sanal kasa şemasıyla uyumluluk testleri eklendi; bakiye ve işlem geçmişi korunur."
+      ]
+    },
+    {
       "version": "0.9.5",
       "date": "2026-11-22",
       "title": "Gerçek Groq bağlantı testi ve harici ücretsiz zamanlayıcı",

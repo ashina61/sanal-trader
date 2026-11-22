@@ -1,3 +1,10 @@
+## 2026-11-22 — GitHub-only gerçek cron tanısı
+
+- Botun 5 dakikalık cron tetikleyicisi `2-57/5 * * * *` biçimiyle yeniden kaydedildi.
+- Sunucu botu gerçek GitHub event türünü (`push`, `workflow_dispatch`, `schedule`) ve son schedule olayını saklar. Kod güncellemesi otomatik çalışma diye gösterilmez.
+- Eski sanal cüzdan dosyası uyumluluğu test edildi; 650 TL kasa, LONG/SHORT pozisyonları ve işlem geçmişi korunur.
+- GitHub schedule olaylarının zamanında ulaşması garanti değildir.
+
 ## 2026-11-22 — Groq HTTP 403 istemci imzası düzeltmesi
 
 - Groq API HTTP 403 cevabı testte tespit edildi. Python `urllib` varsayılan User-Agent'i Groq edge güvenlik katmanında engellenebildiği için açık `SanalTraderPaperBot/1.0` istemci başlığı eklendi.

@@ -4,7 +4,7 @@ on:
   schedule:
     # Shift away from :00 busy minute; GitHub may delay/skip cron anyway.
     # Editing cron can also reactivate a previously disabled schedule.
-    - cron: "3-58/5 * * * *"
+    - cron: "2-57/5 * * * *"
   push:
     branches: [main]
     paths:
@@ -53,6 +53,7 @@ jobs:
         env:
           STATE_FILE: ${{ runner.temp }}/paper-state.json
           RUN_MODE: ${{ github.event.inputs.mode || 'run' }}
+          TRIGGER_EVENT: ${{ github.event_name }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: openai/gpt-oss-20b
         run: python3 -m backend.paper_bot --state "$STATE_FILE" --mode "$RUN_MODE"

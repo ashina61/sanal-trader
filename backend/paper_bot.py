@@ -53,7 +53,9 @@ def fresh_state():
                 lastSuccessAt=None, lastRunAt=None, lastError=None, marksTry={},
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
                 tracked=0, cycles=0, decisionPlan=None,
-                aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"})
+                aiBrain={"status": "NOT_CONFIGURED", "provider": "Groq"},
+                lastTriggerEvent=None, lastTriggerAt=None,
+                lastScheduledTriggerAt=None)
 
 def load(path):
     if not path.exists():
@@ -67,6 +69,9 @@ def load(path):
     # Preserve pre-0.9.0 wallets; never reset real simulated positions.
     obj.setdefault("shorts", {})
     obj.setdefault("directionStats", {})
+    obj.setdefault("lastTriggerEvent", None)
+    obj.setdefault("lastTriggerAt", None)
+    obj.setdefault("lastScheduledTriggerAt", None)
     if not isinstance(obj["directionStats"], dict):
         raise ValueError("Invalid virtual outcome learning state")
     if not isinstance(obj["shorts"], dict):
@@ -616,6 +621,17 @@ def cycle(state, market, t):
         log(state, t, "İşlem yapılmadı: piyasa verisi hatası. " + state["lastError"])
     return state
 
+def record_trigger(state, t, event):
+    """Record real GitHub event; never confuse push with cron."""
+    if event not in ("schedule", "push", "workflow_dispatch"):
+        return state
+    state["lastTriggerEvent"] = event
+    state["lastTriggerAt"] = stamp(t)
+    if event == "schedule":
+        state["lastScheduledTriggerAt"] = stamp(t)
+    return state
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state", type=Path, required=True)
@@ -634,6 +650,7 @@ def main():
         state = fresh_state()
         log(state, t, "Ayrı sunucu sanal kasası 650 TL'ye sıfırlandı.")
     else:
+        state = record_trigger(state, t, os.getenv("TRIGGER_EVENT", ""))
         state = cycle(state, Market(), t)
     save(args.state, state)
     print(json.dumps({

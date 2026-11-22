@@ -6,7 +6,7 @@ from pathlib import Path
 
 from backend.paper_bot import (
     FEE, MIN_ORDER, as_date, closes, cycle, eligible, equity, execute,
-    fresh_state, indicators, load, pick, quotes, save, stamp,
+    fresh_state, indicators, load, pick, quotes, record_trigger, save, stamp,
 )
 
 UTC = dt.timezone.utc
@@ -138,6 +138,31 @@ class PaperBotTests(unittest.TestCase):
             path.write_text('{"schema":5,"cashTry":650}', encoding="utf-8")
             with self.assertRaises(ValueError):
                 load(path)
+
+    def test_only_actual_cron_counts_as_scheduled(self):
+        state = fresh_state()
+        record_trigger(state, NOW, "push")
+        self.assertEqual(state["lastTriggerEvent"], "push")
+        self.assertIsNone(state["lastScheduledTriggerAt"])
+        scheduled = NOW + dt.timedelta(minutes=5)
+        record_trigger(state, scheduled, "schedule")
+        self.assertEqual(state["lastScheduledTriggerAt"], stamp(scheduled))
+        record_trigger(state, scheduled + dt.timedelta(minutes=5), "workflow_dispatch")
+        self.assertEqual(state["lastScheduledTriggerAt"], stamp(scheduled))
+        self.assertEqual(state["cashTry"], 650.0)
+        self.assertEqual(state["trades"], [])
+
+    def test_old_wallet_remains_compatible_with_trigger_diagnostics(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "state.json"
+            state = fresh_state()
+            for key in ("lastTriggerEvent", "lastTriggerAt",
+                        "lastScheduledTriggerAt"):
+                state.pop(key)
+            save(path, state)
+            restored = load(path)
+            self.assertIsNone(restored["lastScheduledTriggerAt"])
+            self.assertEqual(restored["cashTry"], 650.0)
 
     def test_pause_and_resume_modes_persist_state(self):
         state = fresh_state()
