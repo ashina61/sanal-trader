@@ -222,7 +222,8 @@ class AutonomousDecisionTests(unittest.TestCase):
         }
         plan = assess_decision(state, quotes, NOW)
         self.assertEqual(plan["action"], "WAIT")
-        self.assertIn("Aşırı hızlı", plan["rejectReasons"])
+        self.assertIn("Aşırı hızlı yükseliş/düşüş kovalama",
+                      plan["rejectReasons"])
 
     def test_eight_orders_no_longer_blocks_valid_new_entry(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])

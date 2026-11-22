@@ -1,3 +1,7 @@
+## 2026-11-23 — Komisyon hassasiyeti regresyon test düzeltmesi
+
+- Testte ret nedeni sözlüğünün anahtarına kısmi eşleşme yerine gerçek tam etiketle bakılıyor. Koruyucu işlem kuralı değiştirilmedi.
+
 ## 2026-11-23 — v0.9.11 Komisyon sonrası kazanç için işlem kalitesine dönüş
 
 - Son canlı sanal kasa denetiminde: 16 sanal işlem, 4 zararlı kapanış, -1,91 TL gerçekleşmiş zarar, toplam 0,95 TL komisyon ve 647,60 TL toplam kasa ölçüldü. Bunlar sonuçların anlık görüntüsüdür, geleceğin tahmini değildir.

@@ -13,7 +13,8 @@
         "Şüpheli hızlı pump, sert ters momentum veya yüksek oynaklıkta yeni işleme girilmez. Gerçek 15dk sinyal verisi varsa giriş onayı aranır.",
         "Pozitif işlemler için daha erişilebilir %3,5 kâr alma ve gözlenen küçük net kârı koruyan takip sistemi. Sert kayıpta %4,5 stop ve öncelikli zarar/teminat korumaları sürüyor.",
         "Mevcut tüm sanal pozisyonlar, 650 TL başlangıç ve geçmiş emirler korunur; geçmiş kayıplar silinmez. Kâra geçiş garantisi yoktur.",
-        "Yeni regresyon testleri küçük zarar rotasyonu, taze girişler arası soğuma, gün içi giriş üst limiti, daha küçük gerçekleşen kâr ve 15dk pump filtrelerini kapsar."
+        "Yeni regresyon testleri küçük zarar rotasyonu, taze girişler arası soğuma, gün içi giriş üst limiti, daha küçük gerçekleşen kâr ve 15dk pump filtrelerini kapsar.",
+        "15dk aşırı pump ret testi tam rapor etiketine göre düzeltildi; canlı risk kuralları değişmedi."
       ]
     },
     {
