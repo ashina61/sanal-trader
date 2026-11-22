@@ -1,7 +1,8 @@
 {
   "cashTry": 415.8661,
-  "cycles": 4,
+  "cycles": 5,
   "day": "2026-11-22",
+  "directionStats": {},
   "enabled": true,
   "equityTry": 649.6313166529305,
   "histories": {
@@ -4151,6 +4152,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T18:27:09Z",
+      "message": "Tekrarlanan kontrol atlandı."
+    },
+    {
       "at": "2026-11-22T18:25:14Z",
       "message": "Sanal AL BTCUSDT: 77.96 TL; 1x LONG; trend up, sinyal 0.60"
     },
@@ -4167,14 +4172,14 @@
       "message": "Sanal AL NEARUSDT: 78.00 TL; Trend up, puan 0.90"
     }
   ],
-  "lastDecision": "Sanal AL BTCUSDT: 77.96 TL; 1x LONG; trend up, sinyal 0.60",
+  "lastDecision": "Tekrarlanan kontrol atlandı.",
   "lastError": null,
   "lastOrder": {
     "BNBUSDT": "2026-11-22T18:21:29Z",
     "BTCUSDT": "2026-11-22T18:25:14Z",
     "NEARUSDT": "2026-11-22T18:12:56Z"
   },
-  "lastRunAt": "2026-11-22T18:25:14Z",
+  "lastRunAt": "2026-11-22T18:27:09Z",
   "lastSuccessAt": "2026-11-22T18:25:14Z",
   "marksTry": {
     "BNBUSDT": 28252.5754,
