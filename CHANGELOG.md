@@ -2,6 +2,8 @@
 
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
+- SHORT kapanış kâr öğrenmesinde referans alınan teminat değişkeni düzeltilerek testte görülen çalışma hatası giderildi.
+
 - LONG/SHORT yön öğrenmesi için gerçekleşen sanal kapanış, kayıp, örneklem ve sınırlı puanlama birim testleri eklendi.
 
 - Bot tamamlanan gerçek sanal LONG ve SHORT satış/kapatış net getirilerinden ayrı ayrı öğrenir; üç kapanışa kadar yön bazlı ödül verilmez.

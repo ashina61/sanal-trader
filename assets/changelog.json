@@ -23,7 +23,8 @@
         "Uygulama sürümü 0.9.0+9 olarak güncellendi.",
         "Bot artık tamamlanmış gerçek sanal LONG/SHORT kapanışlarını ayrı öğrenme istatistiklerinde tutar: net kâr, kazanma oranı ve kayan ortalama getiri.",
         "Yalnızca en az üç tamamlanan işlemden sonra LONG/SHORT tercihine en fazla ±0,12 puanlık sınırlı kârlılık etkisi uygulanır; teknik sinyal ve maruziyet sınırlarını aşamaz.",
-        "LONG/SHORT öğrenme için başarılı/kayıplı gerçek sanal kapanış, yetersiz örneklem, NaN veri ve ağırlık sınırı birim testleri eklendi."
+        "LONG/SHORT öğrenme için başarılı/kayıplı gerçek sanal kapanış, yetersiz örneklem, NaN veri ve ağırlık sınırı birim testleri eklendi.",
+        "LONG/SHORT öğrenme testlerinde ortaya çıkan SHORT kapanışında tanımsız teminat değişkeni düzeltildi; gerçek sanal emir motoru güvenli doğrulama için yeniden test ediliyor."
       ]
     },
     {

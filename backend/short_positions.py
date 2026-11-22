@@ -96,7 +96,7 @@ def close_short(state, t, symbol, price, reason):
     state["cashTry"] += refund
     state["realizedTry"] += realized
     learn_closed_direction(state, "short", realized,
-                           margin + pos["entryFeeTry"])
+                           pos["marginTry"] + pos["entryFeeTry"])
     state["paidFeesTry"] += closing_fee
     state["shorts"].pop(symbol)
     state["todayOrders"] += 1
