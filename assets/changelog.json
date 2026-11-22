@@ -14,7 +14,8 @@
         "Yerel ve sunucu cüzdanlarının ayrı olduğu Panel, Portföy, Bot, Kâr ve işlem geçmişi başlıklarında açıkça belirtildi.",
         "Sunucu bağlantısı kesilirse en son okunabilen kayıt tutuluyor fakat hata/güncellik durumu da gösteriliyor; sıfır bakiye uydurulmuyor.",
         "Yerel portföyün var olan işlem kayıtları ve sunucu bot-data kasası sıfırlanmadı.",
-        "Flutter testindeki portföy başlığı yeni yerel cüzdan etiketine uyumlu hâle getirildi."
+        "Flutter testindeki portföy başlığı yeni yerel cüzdan etiketine uyumlu hâle getirildi.",
+        "Flutter analizinde bulunan ValueListenable import eksikliği ve Performans sayfasının yeni sunucu parametrelerine uymayan test kurulumu düzeltildi."
       ]
     },
     {

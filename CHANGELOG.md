@@ -2,6 +2,8 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- Ortak sunucu işlem geçmişi için ValueListenable import eksikliği düzeltildi; Performans ekranı widget testi ortak sunucu durumu parametrelerine uyarlandı.
+
 - Tek bir read-only sunucu botu bağlantısı Panel, Portföy, Bot ve Kâr ekranları arasında paylaştırıldı; ayrı 650 TL yerel cüzdan korunuyor.
 - Sunucu botunun tüm kayıtlı LONG/SHORT işlemleri yeni tam işlem geçmişinde görülebilir; ekran açıkken yenilenen durum bildirilir.
 - Yeni kurulumda tarayıcıdaki yerel otomatik bot açık gelmez; eski kullanıcı tercihi olduğu gibi taşınır.

@@ -22,6 +22,10 @@ void main() {
       body: BotPerformanceScreen(
         wallet: Portfolio.fresh(), quotes: const {},
         bot: BotState.initial(), onViewTrades: () {},
+        serverSnapshot: null,
+        serverBusy: false,
+        serverError: null,
+        onViewServerTrades: () {},
       ),
     )));
     expect(find.text('Performans Merkezi'), findsOneWidget);
