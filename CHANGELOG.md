@@ -2,6 +2,9 @@
 
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
+- Net gerçekleşen kâr öğrenmesi, sahte sonuç engeli, emir komisyonu, kayıp, kazanç ve 72 üzeri coin keşfi için yeni testler.
+- Boş piyasa radarı ve boş bot satış geçmişi senaryoları arayüz testleriyle korunuyor.
+
 - Bot paneline gerçekleşmiş sanal işlem kârı, kazanma oranı ve Performans Merkezi kısayolu eklendi.
 
 - Alt navigasyon Panel / Radar / Portföy / Bot / Kâr sekmeleri oldu; geçmiş işlemler menüden veya performans sayfasından erişiliyor.
