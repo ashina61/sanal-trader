@@ -1,3 +1,11 @@
+## 2026-11-22 — Portföy doluluk kilidi ve sanal rotasyon
+
+- %65 maruziyet sınırı portföyde altı SPOT pozisyon açılınca yeni girişleri durduruyordu. %60+ maruziyette, yalnızca en az 90 dakikalık, hafif zarar/kâr bölgesinde momentum kaybeden SPOT pozisyonu ve daha güçlü yeni aday varsa bir kez/UTC gün kontrollü rotasyon satışına izin verildi.
+- Güçlü aday yoksa veya kapanış büyük zarar yaratacaksa pozisyonu sırf hareket olsun diye satmaz. Koruyucu kâr al/zarar kes çıkışları her zaman önceliklidir.
+- Bir satış sonrası yeni giriş aynı döngüde zorlanmaz; adayın sonraki taze fiyatlı döngüde geçerli kalması gerekir. 8 işlem/gün sınırı korunur.
+- Rotasyon / bekleme / günlük limit / zararlı rotasyon engelleme regresyon testleri eklendi. Mevcut sanal kasa ve işlemler sıfırlanmadı.
+- Harici zamanlayıcı olmadan GitHub Actions kesintisiz arka plan çalışması sağlamaz.
+
 ## 2026-11-22 — Zamanlayıcı görünümü regresyon testleri ve sürüm
 
 - Bot ekranındaki GitHub son schedule bilgisinin eski sunucu kayıtlarından uydurulmadığı Flutter testleriyle doğrulanır.

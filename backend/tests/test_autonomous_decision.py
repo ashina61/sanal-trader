@@ -85,6 +85,64 @@ class AutonomousDecisionTests(unittest.TestCase):
         self.assertEqual(plan["action"], "COVER")
         self.assertIn("zarar kes", plan["reason"])
 
+
+    def _near_capacity_rotation_setup(self):
+        weak = [100 + i * .3 for i in range(168)]
+        for j in range(8):
+            weak[-8 + j] = weak[-9] - (j + 1) * .15
+        strong = [100 + i * .6 for i in range(168)]
+        flat = [100.0] * 168
+        state = fresh_state()
+        latest = {}
+        for pair in ("BTCUSDT", "ETHUSDT", "BNBUSDT",
+                     "ADAUSDT", "SOLUSDT", "XRPUSDT"):
+            series = weak if pair == "BTCUSDT" else flat
+            state["histories"][pair] = {
+                "fetchedAt": NOW.isoformat(), "prices": series,
+            }
+            latest[pair] = {"priceTry": series[-1], "change24h": 0}
+            execute(state, NOW - dt.timedelta(hours=2),
+                    pair, "buy", 78, series[-1], "previous paper entry")
+        state["histories"]["AVAXUSDT"] = {
+            "fetchedAt": NOW.isoformat(), "prices": strong,
+        }
+        latest["AVAXUSDT"] = {"priceTry": strong[-1], "change24h": 8}
+        return state, latest
+
+    def test_near_full_wallet_can_sell_fading_spot_for_stronger_signal(self):
+        state, quotes = self._near_capacity_rotation_setup()
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertEqual(plan["symbol"], "BTCUSDT")
+        self.assertEqual(plan["rotation"]["candidate"], "AVAXUSDT")
+        self.assertIn("Portföy rotasyonu", plan["reason"])
+        self.assertEqual(len(state["trades"]), 6)
+
+    def test_no_rotation_without_verified_stronger_entry_or_extra_fees(self):
+        state, quotes = self._near_capacity_rotation_setup()
+        state["histories"]["AVAXUSDT"]["prices"] = [100.0] * 168
+        quotes["AVAXUSDT"]["priceTry"] = 100.0
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertEqual(state["todayOrders"], 6)
+        self.assertEqual(len(state["trades"]), 6)
+
+    def test_rotation_never_ignores_daily_limit_or_existing_rotation(self):
+        state, quotes = self._near_capacity_rotation_setup()
+        state["todayOrders"] = 7
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+        state["todayOrders"] = 6
+        state["trades"].insert(0, {
+            "at": NOW.isoformat(), "reason": "Portföy rotasyonu: prior",
+            "symbol": "ETHUSDT", "side": "sell",
+        })
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+
+    def test_rotation_does_not_realize_large_paper_loss_to_force_a_trade(self):
+        state, quotes = self._near_capacity_rotation_setup()
+        quotes["BTCUSDT"]["priceTry"] *= .975
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+
     def test_money_or_risk_limit_selects_wait(self):
         state, quotes = market_prices([100 + i * .4 for i in range(168)])
         state["todayOrders"] = 8

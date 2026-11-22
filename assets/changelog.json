@@ -13,7 +13,10 @@
         "Bot ekranında GitHub zamanlayıcısının son gerçek tetiklenme zamanı veya doğrulanmadığı ve son çalıştırma kaynağı gösterilir.",
         "Bağımsız GitHub Cron Diagnostic (No Trades) iş akışı saat 11 ve 41'de GitHub schedule olayını gözlemler; sanal işlemlere ve cüzdana dokunmaz.",
         "Flutter entegrasyon ve widget testleri son schedule alanı olmayan eski kayıtların doğru işlendiğini kontrol eder.",
-        "Uygulama sürüm numarası 0.9.6+13 olarak güncellendi."
+        "Uygulama sürüm numarası 0.9.6+13 olarak güncellendi.",
+        "Pozisyon maruziyeti %60 üstündeyken, en az 90 dakikalık zayıflayan SPOT pozisyon yalnızca doğrulanmış güçlü yeni aday varsa, günde en çok bir kez kontrollü sanal rotasyon için kapatılabilir.",
+        "Rotasyonda %0,75'ten büyük zararda zorunlu satış yapılmaz; beklenmedik gerçek para işlemi yoktur, tek döngüde otomatik yeniden alım yapılmaz.",
+        "Rotasyon, satış kârı garantisi yerine riskli aşırı işlem sıklığını sınırlayan regresyon testleriyle doğrulanır."
       ]
     },
     {

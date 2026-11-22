@@ -398,8 +398,69 @@ def assess_decision(state, latest, t):
     used = exposure(state, latest)
     if used is None:
         return wait("Açık pozisyonlar için güvenilir piyasa değeri yok")
+
+    # One cautious SPOT portfolio rotation per UTC day. When nearly at
+    # capacity, allow selling a fading, nearly flat position ONLY when a
+    # verified stronger candidate is available. No forced trade without edge.
+    # Existing protective exits still take precedence above this block.
+    if (used >= total * .60 and state.get("todayOrders", 0) <= 6
+            and btc and btc["direction"] != "down"):
+        rotated_today = any(
+            str(order.get("reason", "")).startswith("Portföy rotasyonu")
+            and (as_date(order.get("at")) or dt.datetime.min.replace(
+                tzinfo=UTC)).date() == t.date()
+            for order in state.get("trades", [])
+            if isinstance(order, dict)
+        )
+        if not rotated_today:
+            leaders = []
+            for pair in latest:
+                if (pair in state["holdings"] or pair in state.get("shorts", {})
+                        or not cooled(pair)):
+                    continue
+                tech = current_tech(pair)
+                if not tech or tech["volatility"] > 9:
+                    continue
+                if (tech["direction"] == "up" and tech["score"] >= .85
+                        and tech["momentum6"] >= 1.0):
+                    leaders.append((tech["score"], tech["momentum6"], pair))
+            if leaders:
+                best_score, _, best_pair = max(leaders)
+                fading = []
+                for pair, pos in state["holdings"].items():
+                    quote = latest.get(pair)
+                    when = as_date(state.get("lastOrder", {}).get(pair))
+                    if not quote or not when or (t - when).total_seconds() < 5400:
+                        continue
+                    tech = current_tech(pair)
+                    if tech is None:
+                        continue
+                    entry = pos["costTry"] / pos["quantity"]
+                    pnl_ratio = quote["priceTry"] / entry - 1
+                    # Avoid panic-selling meaningful losses to chase a pump.
+                    if (-.0075 <= pnl_ratio <= .015 and
+                            tech["score"] <= .35 and tech["momentum6"] < 0
+                            and best_score - tech["score"] >= .50):
+                        fading.append((tech["score"], pair, tech))
+                if fading:
+                    _, pair, tech = min(fading, key=lambda item: (item[0], item[1]))
+                    gross = (state["holdings"][pair]["quantity"] *
+                             latest[pair]["priceTry"])
+                    plan["rotation"] = {
+                        "exit": pair, "candidate": best_pair,
+                        "reason": "Yüksek maruziyette zayıf momentum yerine güçlü aday",
+                    }
+                    plan["reviewed"] = len(latest)
+                    return choose(
+                        pair, "sell", gross,
+                        f"Portföy rotasyonu: {pair} momentumu zayıfladı; "
+                        f"{best_pair} için daha güçlü sinyal var. "
+                        "Yeni pozisyon ancak sonraki doğrulanmış döngüde açılabilir.",
+                        tech["score"])
+
     if used >= total * .65:
-        return wait("Toplam LONG+SHORT maruziyeti %65 sınırında")
+        return wait("Toplam LONG+SHORT maruziyeti %65 sınırında; "
+                    "uygun güvenli rotasyon adayı yok")
     if state["cashTry"] <= total * .30:
         return wait("Minimum %30 sanal nakit rezervi korunuyor")
 
