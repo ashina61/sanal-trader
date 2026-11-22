@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.7.0",
+      "date": "2026-11-22",
+      "title": "Komisyonlu ileri-test ve güvenilir bot değerlendirmesi",
+      "details": [
+        "Son 24 saatlik eğitim dışında kalan kapanışlarda sinyal verildiği anda sanal alış/satış simülasyonu yapan ileri-test motoru eklendi.",
+        "Sanal ileri-test %0,1 işlem komisyonu ve işlem başına %0,05 varsayımsal kayma maliyeti içerir; sonuçlar gerçek sanal emirlerden ayrı tutulur.",
+        "Aynı coinlerin işlem maliyetli al-tut karşılaştırması, örneklem sayısı ve gerileme ölçümleri hesaplanır.",
+        "Eğitim testinde gelecekteki kapanışların alım sinyaline sızmaması kontrol edilir; sonuçlar kâr garantisi sayılmaz."
+      ]
+    },
+    {
       "version": "0.6.0",
       "date": "2026-11-22",
       "title": "Geniş piyasa radarı ve kâr odaklı sanal öğrenme",

@@ -1,5 +1,12 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
+
+- Son 24 saatlik görülmemiş fiyat üzerinde yalnızca geçmişe bakan, %0,1 komisyon + %0,05 varsayımsal kayma içeren uzun pozisyon simülasyonu.
+- Strateji net getirisi, maliyetli al-tut kıyası, kapanan sanal test işlemleri ve maksimum gerileme ölçümleri.
+- Bu geçmiş testi gerçek sanal cüzdan işlemi değildir, hesap bakiyesini değiştirmez ve kazanç garantisi sayılmaz.
+
+
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
 - Bot ekranına 'Geçmiş veriden yeniden eğit' eklendi; öğrenilen sanal gerçekleşmiş işlem kârı silinmeden tarihsel eğitim yenileniyor.
