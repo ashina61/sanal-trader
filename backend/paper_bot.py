@@ -560,7 +560,9 @@ def assess_decision(state, latest, t):
         return wait("Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı." + detail)
     plan["aiChoices"] = [
         {"symbol": pair, "action": "BUY" if side == "buy" else "SHORT",
-         "amountTry": amount, "score": round(score, 3)}
+         "amountTry": amount, "score": round(score, 3),
+         "momentum6Pct": round(tech["momentum6"], 2),
+         "volatilityPct": round(tech["volatility"], 2)}
         for score, pair, side, amount, tech in candidates[:5]
     ]
     score, pair, side, amount, tech = candidates[0]

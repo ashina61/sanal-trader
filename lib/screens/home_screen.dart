@@ -197,13 +197,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     ),
   ));
 
-  Widget _serverSummary() => ServerPaperSummaryTile(
-    snapshot: _serverSnapshot,
-    loading: _serverBusy,
-    error: _serverError,
-    onTap: () => setState(() => _tab = 3),
-  );
-
   Future<void> _loadPortfolio() async {
     try {
       final data = await widget.repository.load();

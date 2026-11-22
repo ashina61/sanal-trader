@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:sanal_trader/services/server_paper_repository.dart';
 import 'package:sanal_trader/widgets/server_paper_card.dart';
+import 'package:sanal_trader/widgets/server_paper_overview.dart';
 
 Map<String, dynamic> paperState({
   bool withShort = false,
@@ -118,6 +119,65 @@ void main() {
     )));
     expect(find.textContaining('henüz doğrulanmadı'), findsOneWidget);
     expect(find.textContaining('kod güncellemesi'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('Real equity observations stay separate from browser demo', () {
+    final state = paperState();
+    expect(ServerPaperSnapshot.fromJson(state).equityHistory, isEmpty);
+    state['equityHistory'] = [
+      {'at': '2026-11-22T20:00:00Z', 'equityTry': 650.0},
+      {'at': '2026-11-22T20:05:00Z', 'equityTry': 649.922},
+    ];
+    final s = ServerPaperSnapshot.fromJson(state);
+    expect(s.equityHistory.length, 2);
+    expect(s.equityHistory.last['equityTry'], 649.922);
+  });
+
+  testWidgets('Autonomous main card shows real server wallet and working links',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1450);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final state = paperState();
+    state['equityHistory'] = [
+      {'at': '2026-11-22T20:00:00Z', 'equityTry': 650.0},
+      {'at': '2026-11-22T20:05:00Z', 'equityTry': 649.922},
+    ];
+    var botOpened = false;
+    var tradesOpened = false;
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      body: SingleChildScrollView(child: ServerPaperOverview(
+        snapshot: ServerPaperSnapshot.fromJson(state),
+        loading: false, error: null,
+        onRefresh: () {},
+        onOpenBot: () => botOpened = true,
+        onOpenTrades: () => tradesOpened = true,
+      )),
+    )));
+    expect(find.text('OTONOM BOT · ANA SANAL KASA'), findsOneWidget);
+    expect(find.text('GERÇEK SANAL KASA EĞRİSİ'), findsOneWidget);
+    await tester.tap(find.text('Bot merkezi'));
+    await tester.tap(find.text('İşlemler'));
+    expect(botOpened, isTrue);
+    expect(tradesOpened, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Server portfolio only shows real server positions',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      body: ServerPaperPositionsPanel(
+        snapshot: ServerPaperSnapshot.fromJson(paperState()),
+        onOpenTrades: () {},
+      ),
+    )));
+    expect(find.text('ANA SUNUCU PORTFÖYÜ'), findsOneWidget);
+    expect(find.text('LONG · NEARUSDT'), findsOneWidget);
+    expect(find.text('Güncel fiyat yok'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

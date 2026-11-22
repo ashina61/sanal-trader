@@ -12,7 +12,9 @@
         "Risk ve stop korumaları korunur; 650 TL kasa ve işlem geçmişi değiştirilmez.",
         "Ana sanal kasa için tek kaynaklı performans ve açık LONG/SHORT pozisyon kartları oluşturuldu; zaman serisinde sahte veri gösterilmez.",
         "Ana Panel, Bot ve Portföy ekranları tek ana sunucu botu önceliğiyle sadeleştirildi; yerel demo bölümleri kapalı yardımcı alanlara alındı.",
-        "Uygulama açıkken sunucu sanal kasası her 60 saniyede bir yenilenir."
+        "Uygulama açıkken sunucu sanal kasası her 60 saniyede bir yenilenir.",
+        "Groq'a gerçek kapanış sonuçları, komisyon yükü, sanal büyüme ve teknik adayların momentum/oynaklığı sunulur; net getiri, aşırı işlemden önceliklidir.",
+        "Tek ana sanal kasa görünümü, grafik, açık pozisyonlar ve işlem geçmişi butonları için mobil Flutter testleri eklendi."
       ]
     },
     {

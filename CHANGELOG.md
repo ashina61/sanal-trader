@@ -1,3 +1,10 @@
+## 2026-11-23 — Groq net getiri hedefi ve arayüz regresyon testleri
+
+- Groq beynine onaylı adayların gerçek 6 saatlik momentum/oynaklık verileri ile kayıtlı net performans, kapanan işlemlerin gerçek net kâr/zararı ve %0,2 sanal gidiş-geliş komisyonu iletilir.
+- Sistem rolüne sadece işlem sayısını değil komisyon sonrası risk ayarlı kasa büyümesini hedeflemesi ve üstünlük yokken beklemesi yazıldı. AI yalnızca onaylı aday seçebilir, risk sınırlarını aşamaz.
+- Sunucu kasası ana görünümü, gerçek kasa eğrisi, ana portföy ve geçmişe giden butonlar için Flutter mobil testleri eklendi.
+- Kullanılmayan eski HomeScreen sunucu özet metodu kaldırıldı. Sanal kasa değişmez.
+
 ## 2026-11-23 — Arayüz tek ana sunucu botu etrafında toplandı
 
 - Panelde ana sanal kasa, sunucu botu performansı ve Groq AI kararları öncelikli; yerel demo cüzdanı ayrı, kapalı bölümde gösterilir.

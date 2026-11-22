@@ -51,6 +51,26 @@ class AiBrainTests(unittest.TestCase):
         self.assertEqual(plan["order"], BASE["order"])
         self.assertEqual(meta["status"], "NOT_CONFIGURED")
 
+    def test_ai_gets_actual_pnl_costs_and_only_approved_candidates(self):
+        state = dict(STATE, performance={
+            "netTry": -2.4, "returnPct": -0.37
+        }, trades=[
+            {"symbol": "BTCUSDT", "side": "sell", "realizedPnlTry": -1.5},
+            {"symbol": "ETHUSDT", "side": "buy", "realizedPnlTry": 0.0},
+        ])
+        captured = {}
+        def respond(context):
+            captured.update(context)
+            return {"decision": "WAIT", "reason": "fees too high"}
+        plan, meta = apply_ai_brain(BASE, state, "fake", ask_fn=respond)
+        self.assertEqual(meta["status"], "WAIT")
+        self.assertEqual(captured["roundTripPaperFeePct"], .2)
+        self.assertEqual(captured["observedPerformance"]["netTry"], -2.4)
+        self.assertEqual(len(captured["recentClosedOutcomes"]), 1)
+        self.assertEqual(captured["recentClosedOutcomes"][0]["netPnlTry"], -1.5)
+        self.assertEqual(len(captured["candidates"]), 2)
+        self.assertIsNone(plan["order"])
+
     def test_ai_can_pick_only_valid_alternative(self):
         plan, meta = apply_ai_brain(
             BASE, STATE, "fake",
