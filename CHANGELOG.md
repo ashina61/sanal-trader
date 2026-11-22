@@ -2,6 +2,9 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- GitHub public read-only GET isteklerindeki CORS preflight'a neden olabilen Cache-Control header'ı kaldırıldı; URL yenileme parametresiyle cache kontrolü sürüyor.
+- Bot ve Kâr ekranlarında gerçekleşmiş LONG ve SHORT sanal kapanışlarına ait ayrı öğrenme istatistikleri gösteriliyor.
+
 - Yerel botun zarar koruma satışları günlük emir limiti dolduğunda da yapılabilir; limit yeni alışlara uygulanır.
 - Bayat fiyat, portföy, bot ve kâr ekranlarında sanki güncelmiş gibi değerlenmez; bu durumda yeni alım riski durdurulur.
 - Acil satış ve stale varlıkla yeni işlem engelleme testleri eklendi.

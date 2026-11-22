@@ -83,6 +83,30 @@ class BotPerformanceScreen extends StatelessWidget {
                   Expanded(child: _metric('SHORT pozisyon',
                     '${serverSnapshot!.shorts.length}')),
                 ]),
+                const SizedBox(height: 13),
+                const Text('Gerçekleşmiş sanal LONG / SHORT kapanışları',
+                  style: TextStyle(color: PremiumColors.gold,
+                    fontWeight: FontWeight.w700, fontSize: 11)),
+                const SizedBox(height: 8),
+                for (final direction in const ['long', 'short'])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 7),
+                    child: Row(children: [
+                      Expanded(child: Text(
+                        direction == 'long' ? 'LONG' : 'SHORT',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 12))),
+                      Text(
+                        serverSnapshot!.directionStats[direction] is Map
+                          ? '${(serverSnapshot!.directionStats[direction]
+                              as Map)['closed'] ?? 0} kapanış · '
+                            '${formatTry(((serverSnapshot!.directionStats[direction]
+                              as Map)['realizedTry'] as num?)?.toDouble() ?? 0)}'
+                          : 'Henüz gerçekleşmiş kapanış yok',
+                        style: const TextStyle(color: PremiumColors.muted,
+                          fontSize: 11)),
+                    ]),
+                  ),
                 const SizedBox(height: 9),
                 const Text('Bu sunucu sonuçları aşağıdaki yerel bot '
                     'istatistiklerine EKLENMEZ. Ayrı sanal hesaplardır.',

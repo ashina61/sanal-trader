@@ -25,7 +25,10 @@
         "Yerel botta günlük 8 emir tavanı artık acil zarar koruma satışını engellemiyor; yalnızca yeni alışlara uygulanıyor.",
         "Bayat fiyatlı tutulan coinler portföy değerlemesinde güncelmiş gibi gösterilmiyor; risk hesapları belirsizse yeni alış engelleniyor.",
         "Bot, Portföy ve Kâr ekranlarında yalnızca güncel fiyatla net varlık değeri hesaplanıyor; fiyat yok/bayat uyarıları açıkça gösteriliyor.",
-        "Yerel bot acil çıkış ve bayat pozisyon nedeniyle yeni alım engelleme testleri eklendi."
+        "Yerel bot acil çıkış ve bayat pozisyon nedeniyle yeni alım engelleme testleri eklendi.",
+        "GitHub raw durum dosyası çağrısındaki gereksiz Cache-Control başlığı kaldırıldı; web tarayıcısında CORS preflight kaynaklı bağlantı sorununa karşı sorgu parametresiyle cache yenilemesi korunuyor.",
+        "Bot ve Kâr ekranlarında gerçek sanal LONG ve SHORT kapatışlarının ayrı öğrenilen net sonuçları görünüyor; yalnızca varsayımsal sinyaller başarı diye sayılmıyor.",
+        "Sunucu botu 100 son sanal işlem kaydı tutuyor, bu sınır kullanıcıya açıklanacak."
       ]
     },
     {

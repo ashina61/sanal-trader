@@ -99,6 +99,7 @@ class ServerPaperCard extends StatelessWidget {
     final longs = state?.holdings ?? {};
     final shorts = state?.shorts ?? {};
     final marks = state?.marksTry ?? {};
+    final sideStats = state?.directionStats ?? const <String, dynamic>{};
     return PremiumSurface(
       gradient: const LinearGradient(
         colors: [Color(0xFF164034), Color(0xFF0D1E1B)],
@@ -159,6 +160,26 @@ class ServerPaperCard extends StatelessWidget {
             Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
             Expanded(child: _metric('İşlem', '${state.trades.length}')),
           ]),
+          const SizedBox(height: 14),
+          const Text('Gerçek sanal kapanışlardan LONG/SHORT öğrenme',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+              color: PremiumColors.gold)),
+          const SizedBox(height: 7),
+          for (final side in const ['long', 'short'])
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                '${side.toUpperCase()} · '
+                '${sideStats[side] is Map
+                  ? ((sideStats[side] as Map)['closed'] ?? 0)
+                  : 0} kapanış · Net '
+                '${sideStats[side] is Map
+                  ? _money((sideStats[side] as Map)['realizedTry'])
+                  : '—'}',
+                style: const TextStyle(fontSize: 11,
+                  color: PremiumColors.muted),
+              ),
+            ),
           const SizedBox(height: 13),
           if (longs.isNotEmpty || shorts.isNotEmpty) ...[
             const Divider(color: PremiumColors.border),

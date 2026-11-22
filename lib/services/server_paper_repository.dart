@@ -89,9 +89,11 @@ class ServerPaperRepository {
 
   Future<ServerPaperSnapshot> load() async {
     final uri = Uri.parse('$sourceUrl?refresh=${DateTime.now().millisecondsSinceEpoch}');
+    // Only CORS-safelisted Accept: non-safelisted Cache-Control can
+    // trigger a failed OPTIONS preflight on a public GitHub raw file.
+    // The timestamp query already avoids stale CDN cache entries.
     final response = await _client.get(uri, headers: {
       'Accept': 'application/json',
-      'Cache-Control': 'no-cache',
     }).timeout(const Duration(seconds: 14));
     if (response.statusCode != 200) {
       throw Exception(response.statusCode == 404

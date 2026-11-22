@@ -98,6 +98,7 @@ void main() {
     var requests = 0;
     final client = MockClient((request) async {
       expect(request.method, 'GET');
+      expect(request.headers.containsKey('cache-control'), isFalse);
       expect(request.url.host, 'raw.githubusercontent.com');
       requests++;
       return http.Response.bytes(
