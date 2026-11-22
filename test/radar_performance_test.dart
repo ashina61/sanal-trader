@@ -26,7 +26,14 @@ void main() {
     )));
     expect(find.text('Performans Merkezi'), findsOneWidget);
     expect(find.text('Kapanan bot satışları'), findsOneWidget);
-    expect(find.textContaining('Bot henüz sanal satış kapatmadı'), findsOneWidget);
+    final emptyState = find.textContaining('Bot henüz sanal satış kapatmadı');
+    // The performance page is a lazy scrolling ListView: the section is
+    // intentionally below the fold on compact mobile screens.
+    await tester.scrollUntilVisible(
+      emptyState, 180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(emptyState, findsOneWidget);
     expect(find.textContaining('%100 başarı'), findsNothing);
   });
 }

@@ -19,7 +19,8 @@
         "İleri-test simülasyonları gerçek sanal portföyün ₺650 bakiyesine yazılmaz; gerçek satış kârı ayrı tutulur.",
         "Komisyonlu ileri-test için eksik veri, yatay piyasa, tersine dönüş, eğitim-test ayrımı ve bot kayıt serileştirmesi otomatik testleri eklendi.",
         "İleri-test ekranlarında null güvenliği ve küçük ekran uyumluluğu iyileştirildi.",
-        "Kâr ekranında yeni ileri-test kartının kapanış parantezi ve gereksiz null uyarıları düzeltildi; derleme kontrolü yenilendi."
+        "Kâr ekranında yeni ileri-test kartının kapanış parantezi ve gereksiz null uyarıları düzeltildi; derleme kontrolü yenilendi.",
+        "Kâr ekranının aşağıdaki coin boş-durum mesajı için test, kaydırmalı arayüze uygun hâle getirildi; ekrandaki gerçek kullanıcı davranışı sınanıyor."
       ]
     },
     {
