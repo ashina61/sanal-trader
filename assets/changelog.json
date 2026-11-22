@@ -30,7 +30,8 @@
         "Bot ve Kâr ekranlarında gerçek sanal LONG ve SHORT kapatışlarının ayrı öğrenilen net sonuçları görünüyor; yalnızca varsayımsal sinyaller başarı diye sayılmıyor.",
         "Sunucu botu 100 son sanal işlem kaydı tutuyor, bu sınır kullanıcıya açıklanacak.",
         "Yerel SharedPreferences sanal kasasına aynı uygulama sekmesindeki eşzamanlı manuel/bot emirlerinin kayıtları birbirinin üzerine yazmasını önleyen sıralı işlem kuyruğu eklendi.",
-        "Yerel yükleme ve sıfırlama emir kuyruğuyla senkronize; farklı tarayıcı sekmeleri arasında atomik işlem garantisi verilmez."
+        "Yerel yükleme ve sıfırlama emir kuyruğuyla senkronize; farklı tarayıcı sekmeleri arasında atomik işlem garantisi verilmez.",
+        "Yerel botun yeni kurulumda kapalı olması, eski açık/kapalı tercihini koruma, eşzamanlı emir toplamı ve sıralı sıfırlama davranışı için yeni testler eklendi."
       ]
     },
     {
