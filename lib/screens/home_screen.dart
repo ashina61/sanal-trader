@@ -11,9 +11,7 @@ import '../services/bot_training.dart';
 import 'bot_dashboard.dart';
 import 'update_history_screen.dart';
 import '../widgets/formatters.dart';
-import '../widgets/mini_chart.dart';
 import '../widgets/premium_dashboard.dart';
-import '../services/technical_analysis.dart';
 import 'coin_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {

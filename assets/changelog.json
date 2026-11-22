@@ -15,7 +15,8 @@
         "Güncelleme Geçmişi ana ekrana taşındı ve üst başlık, gezinme ile veri giriş alanları premium temaya geçirildi.",
         "Görsel prototipteki örnek ₺1.248.730 gibi rakamlar uygulamaya alınmadı; ₺650 başlangıç sanal bakiyesi ve hesaplanan gerçek portföy bilgileri korundu.",
         "Bot, coin detay, teknik analiz, portföy, işlem geçmişi ve güncelleme ekranlarının kart ve aksan renkleri premium temayla uyumlu hâle getirildi.",
-        "Eski mavi/gri kartlar zümrüt panellere, olumlu/olumsuz değerler kontrastlı yeşil/kırmızı renklere dönüştürüldü."
+        "Eski mavi/gri kartlar zümrüt panellere, olumlu/olumsuz değerler kontrastlı yeşil/kırmızı renklere dönüştürüldü.",
+        "320px dar mobil genişlikte gerçek ₺650 sanal portföyü, botta uydurma güven skoru olmamasını ve güncelleme kısayolunun çalışmasını sınayan widget testleri eklendi."
       ]
     },
     {

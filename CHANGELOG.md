@@ -2,6 +2,8 @@
 
 ## v0.5.0 — 2026-11-22: Premium arayüz — Zümrüt & Altın
 
+- Dar mobil ekranda gerçek sanal bakiye, ölçülmeyen bot doğruluğu ve güncelleme kısayolu widget testleriyle kontrol edildi.
+
 - Bot, coin detay, teknik analiz ve güncelleme ekranları dahil diğer sayfalar aynı premium renk sistemiyle uyumlu hâle getirildi.
 
 - Referans premium görünüm, Flutter widget'larıyla gerçek veriye bağlı koyu zümrüt/altın tasarıma dönüştürüldü.
