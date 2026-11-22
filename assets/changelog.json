@@ -3,6 +3,20 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.5",
+      "date": "2026-11-22",
+      "title": "Gerçek Groq bağlantı testi ve harici ücretsiz zamanlayıcı",
+      "details": [
+        "Groq AI Connectivity (No Trades) Actions testi gerçek Groq API anahtarı ile sadece JSON BEKLE yanıtını doğrular; sanal cüzdanı değiştirmez.",
+        "Cloudflare Workers için 5 dakikalık harici cron köprüsü eklendi; mevcut GitHub Python sanal işlem motorunu workflow_dispatch üzerinden tetikler.",
+        "Cloudflare tokeni yalnızca Worker secret olarak saklanır ve tek depo için Actions write izni gerekir; Flutter veya GitHub kaynak dosyalarına konmaz.",
+        "Cloudflare üzerinden gerçek 7/24 çalışmanın başlaması için Cloudflare hesabında bir defalık deploy ve GITHUB_DISPATCH_TOKEN kurulumu gereklidir.",
+        "Worker HTTP /health salt okunurdur; herkese açık iş tetikleme ucu yoktur.",
+        "Node.js birim testleri ve yeni scheduler CI akışı eklendi.",
+        "Önceki sunucu kasa, işlemler, pozisyonlar ve Groq ayarı korunur; GitHub schedule yedek olarak kalır."
+      ]
+    },
+    {
       "version": "0.9.4",
       "date": "2026-11-22",
       "title": "Ücretsiz Groq yapay zekâ karar katmanı",

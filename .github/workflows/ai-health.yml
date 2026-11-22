@@ -1,0 +1,54 @@
+name: Groq AI Connectivity (No Trades)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ai-health.yml"
+      - "backend/ai_brain.py"
+
+permissions:
+  contents: read
+
+jobs:
+  ai-connectivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Groq API key and model (no wallet, no orders)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: openai/gpt-oss-20b
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from backend.ai_brain import _ask_groq
+
+          key = os.getenv("GROQ_API_KEY")
+          if not key:
+              print("::error::Missing GROQ_API_KEY repository Actions secret")
+              raise SystemExit(1)
+
+          context = {
+              "healthcheck": "TEST ONLY, never execute trades",
+              "marketRegime": "TEST",
+              "availableCashTry": 0,
+              "equityTry": 0,
+              "dailyOrders": 0,
+              "openLongs": [],
+              "openShorts": [],
+              "candidates": [],
+          }
+          try:
+              response = _ask_groq(context, key, os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"))
+              if not isinstance(response, dict) or response.get("decision") != "WAIT":
+                  raise ValueError("AI must WAIT without candidates")
+          except Exception as exc:
+              print("::error::Groq health check failed: " + type(exc).__name__)
+              raise SystemExit(1)
+          print("GROQ_AI_OK: accepted no-trade health probe; model JSON response validated")
+          print("NO PAPER ORDERS PLACED; NO WALLET OR STATE CHANGED")
+          PY

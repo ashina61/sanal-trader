@@ -1,3 +1,11 @@
+## 2026-11-22 — AI gerçek bağlantı kontrolü ve dış zamanlayıcı
+
+- İşlemsiz Groq bağlantı sınaması bağımsız GitHub Actions akışına eklendi; cüzdanı/işlem geçmişini değiştirmez.
+- Cloudflare Workers ücretsiz cron köprüsü hazırlandı. Her 5 dakikada bir mevcut GitHub `Free Scheduled Paper Bot` workflow'unu `workflow_dispatch` ile tetikleyebilecek. Kurulum yönergeleri `cloudflare/README.md` altında.
+- Gizli GitHub fine-grained token yalnızca Cloudflare secret alanında tutulur. Worker HTTP isteklerinden emir başlatılamaz.
+- Altı Node birim testi ve CI eklendi. Kesintisiz çalışma henüz Cloudflare hesabında deploy yapılmadığından doğrulanmadı.
+- 650 TL sanal kasa, açık pozisyonlar ve geçmiş işlemler değiştirilmedi.
+
 ## 2026-11-22 — Ücretsiz AI karar katmanı (paper trading)
 
 - Bot ekranında AI bağlantı/karar/hata durumları ve gerekçesi gösterilir.

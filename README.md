@@ -10,6 +10,12 @@ Botun `Bot → Sunucu Botu → Otonom Karar Merkezi` ekranı artık **yeterli fi
 
 Ücretsiz sunucu GitHub Actions cron'unun 5 dakikalık takvimle tetiklenmesi **garanti değildir**. Son kayıt 20 dakikayı aştıysa `Free Scheduled Paper Bot` iş akışında `Run workflow → run` komutuyla güvenli bir manuel sanal kontrol başlatılabilir. `pause` ve `resume` durum değiştirir; `reset` ise **ayrı sunucu sanal kasasını sıfırlar, test sırasında kullanmayın**. Uygulamadaki yerel bot farklı kasadır.
 
+## Harici 5 dakikalık ücretsiz zamanlayıcı ve Groq sağlık testi
+
+- Cloudflare Workers köprüsü: [kurulum ve güvenlik](cloudflare/README.md)
+- GitHub Actions → `Groq AI Connectivity (No Trades)`: gerçek Groq API yanıtını sanal işlem açmadan test eder.
+- Cloudflare kurulumu yapılana kadar GitHub `schedule` düzensiz olabilir; bot kendi kendine 7/24 çalışıyor kabul edilmemelidir.
+
 ## Güncelleme Geçmişi
 
 Uygulamanın üst menüsündeki **güncelleme simgesini** açarak bütün sürümlerin geçmişini görebilirsin. Notlar `assets/changelog.json` dosyasından gelir; geliştirici ayrıntıları `CHANGELOG.md` dosyasında tutulur. Yeni kaynak kod değişiklikleri aynı committe bu iki dosyaya da yazılmazsa GitHub Actions kontrolü başarısız olur.
