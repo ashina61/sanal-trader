@@ -1,5 +1,7 @@
 ## 2026-11-22 — Ücretsiz AI karar katmanı (paper trading)
 
+- Bot ekranında AI bağlantı/karar/hata durumları ve gerekçesi gösterilir.
+
 - Sunucu botuna opsiyonel Groq `openai/gpt-oss-20b` karar katmanı eklendi.
 - AI yalnızca risk motorunun önceden onayladığı ilk beş BUY/SHORT adayından birini seçebilir veya WAIT diyebilir. STOP/TP kaynaklı SELL/COVER emirleri AI kontrolüne takılmaz.
 - `GROQ_API_KEY` GitHub Actions secret olarak tanımlanmadıkça mevcut kural tabanlı motor değişmeden çalışır. Hatalı/limit aşılmış AI yanıtında da kural motoruna geri döner.

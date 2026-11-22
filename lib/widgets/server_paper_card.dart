@@ -101,6 +101,17 @@ class ServerPaperCard extends StatelessWidget {
     final marks = state?.marksTry ?? {};
     final sideStats = state?.directionStats ?? const <String, dynamic>{};
     final plan = state?.decisionPlan ?? const <String, dynamic>{};
+    final ai = plan['aiBrain'] is Map
+        ? (plan['aiBrain'] as Map) : const <String, dynamic>{};
+    final aiStatus = ai['status']?.toString() ?? 'NOT_CONFIGURED';
+    final aiText = switch (aiStatus) {
+      'TRADE' => 'AI ONAYLI İŞLEM',
+      'WAIT' => 'AI BEKLE DEDİ',
+      'FALLBACK' => 'AI HATASI · KURAL MOTORU AKTİF',
+      'PROTECTIVE_EXIT' => 'KORUYUCU EMİR · AI ATLANDI',
+      'NO_CANDIDATE' => 'AI ADAY BEKLİYOR',
+      _ => 'AI BAĞLI DEĞİL · KURAL MOTORU AKTİF',
+    };
     final action = plan['action']?.toString() ?? 'WAIT';
     final actionText = switch (action) {
       'BUY' => 'SPOT AL / LONG',
@@ -261,6 +272,20 @@ class ServerPaperCard extends StatelessWidget {
                     plan['reason']?.toString() ?? state.decision,
                     style: const TextStyle(fontSize: 12)),
                 ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Yapay zekâ beyni · $aiText',
+                    style: const TextStyle(color: PremiumColors.gold,
+                      fontWeight: FontWeight.w800, fontSize: 11)),
+                ),
+                if (ai['reason'] != null) ...[
+                  const SizedBox(height: 3),
+                  Align(alignment: Alignment.centerLeft,
+                    child: Text(ai['reason'].toString(),
+                      style: const TextStyle(fontSize: 10,
+                        color: PremiumColors.muted))),
+                ],
                 const SizedBox(height: 10),
                 Row(children: [
                   Expanded(child: _metric('Piyasa evreni',

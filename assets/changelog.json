@@ -14,7 +14,8 @@
         "Anahtar yoksa veya AI hata verirse mevcut kural tabanlı işlem sistemi çalışmaya devam eder. AI durum ve seçim gerekçesi bot-data karar kaydına yazılır.",
         "AI seçimi, yetersiz veri veya risk sınırları nedeniyle oluşan güvenli BEKLE kararını işlem açmaya dönüştüremez.",
         "Yeni AI testleri eklendi; önceki sanal portföy, açık pozisyonlar ve işlemler korunmuştur.",
-        "GitHub Actions beş dakikalık schedule için kesintisiz çalışma garantisi vermez; başka altyapı sorunu ayrıca çözülmelidir."
+        "GitHub Actions beş dakikalık schedule için kesintisiz çalışma garantisi vermez; başka altyapı sorunu ayrıca çözülmelidir.",
+        "Bot ekranının Otonom Karar Merkezi'ne AI bağlı/bağlı değil, onay, bekleme, hata ve koruyucu emir durumlarıyla AI gerekçesi eklendi."
       ]
     },
     {
