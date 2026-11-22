@@ -238,7 +238,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         await _botStore.save(evolved);
         if (mounted) setState(() {
           _botState = evolved;
-          _botMessage = 'Yeni sinyal bekleniyor veya risk limitleri devrede.';
+          _botMessage = '${_quotes.values.where((q) => q.isFresh).length} güncel coin izleniyor; '
+              'uygun sinyal veya risk koşulu bekleniyor.';
         });
       } else {
         // Use the exact same validated virtual wallet pathway as manual orders.
@@ -347,6 +348,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               2 => _historyList(),
               _ => BotDashboard(
                 state: _botState,
+                quotes: _quotes,
                 busy: _botBusy,
                 error: _botError,
                 lastStatus: _botMessage,

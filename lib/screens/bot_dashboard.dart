@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../services/learning_bot.dart';
+import '../models/coin_quote.dart';
 import '../widgets/formatters.dart';
 
 class BotDashboard extends StatelessWidget {
   const BotDashboard({
     super.key,
     required this.state,
+    required this.quotes,
     required this.busy,
     required this.onEnabledChanged,
     this.error,
@@ -13,6 +15,7 @@ class BotDashboard extends StatelessWidget {
   });
 
   final BotState? state;
+  final Map<String, CoinQuote> quotes;
   final bool busy;
   final ValueChanged<bool> onEnabledChanged;
   final String? error;
@@ -25,6 +28,8 @@ class BotDashboard extends StatelessWidget {
     final weight = bot?.weights ?? const [1 / 3, 1 / 3, 1 / 3];
     final accuracy = (bot?.evaluated ?? 0) == 0 ? 'Henüz ölçülmedi' :
       '%'+ (100 * bot!.correct / bot.evaluated).toStringAsFixed(1);
+    final watchlist = quotes.values.where((q) => q.isFresh).toList()
+      ..sort((a, b) => botScore(b, weight).compareTo(botScore(a, weight)));
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -91,6 +96,22 @@ class BotDashboard extends StatelessWidget {
             ],
           )),
         ),
+
+        const SizedBox(height: 10),
+        const Text('Canlı bot sinyalleri', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        const Text('Sinyaller işlem garantisi değildir; nakit ve risk sınırları ayrıca kontrol edilir.',
+          style: TextStyle(color: Colors.white54, fontSize: 11)),
+        const SizedBox(height: 8),
+        if (watchlist.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Güncel fiyat bekleniyor. Canlı veya yedek piyasa verisi gelmeden işlem yapılmaz.',
+              style: TextStyle(color: Colors.white54, fontSize: 12)),
+          )
+        else
+          for (final coin in watchlist)
+            _signalRow(coin, weight),
         const SizedBox(height: 10),
         const Text('Risk sınırları', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
@@ -123,6 +144,28 @@ class BotDashboard extends StatelessWidget {
         const Text('Not: Bu site kapanınca bot durur; yeniden açıldığında yalnızca yeni fiyatlardan devam eder. Fiyat sağlayıcısı hata verirse işlem yapılmaz. Portföy ile bot verileri bu tarayıcıda saklanır.',
             style: TextStyle(color: Colors.white54, fontSize: 11)),
       ],
+    );
+  }
+
+  Widget _signalRow(CoinQuote quote, List<double> weights) {
+    final score = botScore(quote, weights);
+    final positive = score >= botBuyThreshold;
+    final negative = score <= botSellThreshold;
+    final color = positive
+        ? const Color(0xFF43D9A3)
+        : negative ? const Color(0xFFF27777) : Colors.white54;
+    final label = positive ? 'AL sinyali' : (negative ? 'Negatif' : 'BEKLE');
+    return Card(
+      color: const Color(0xFF19212D),
+      margin: const EdgeInsets.only(bottom: 5),
+      child: ListTile(
+        dense: true,
+        title: Text('${quote.symbol} · ${formatTry(quote.priceTry)}',
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        subtitle: Text('24s ${quote.change24h.toStringAsFixed(2)}% · Puan ${score.toStringAsFixed(2)}',
+            style: const TextStyle(color: Colors.white54, fontSize: 11)),
+        trailing: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 12)),
+      ),
     );
   }
 
