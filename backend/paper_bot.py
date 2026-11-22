@@ -50,7 +50,7 @@ def fresh_state():
                 lastOrder={}, realizedTry=0.0, paidFeesTry=0.0, histories={},
                 lastSuccessAt=None, lastRunAt=None, lastError=None, marksTry={},
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
-                tracked=0, cycles=0)
+                tracked=0, cycles=0, decisionPlan=None)
 
 def load(path):
     if not path.exists():
@@ -215,9 +215,11 @@ def equity(state, latest):
     return total
 
 def execute(state, t, symbol, side, amount, price, reason):
-    if not (MIN_ORDER <= amount and math.isfinite(amount) and
+    if not (amount > 0 and math.isfinite(amount) and
             price > 0 and math.isfinite(price)):
         raise ValueError("Bad virtual order")
+    if side == "buy" and amount < MIN_ORDER:
+        raise ValueError("Buy below virtual minimum")
     holdings = state["holdings"]
     fee = amount * FEE
     quantity = amount / price
@@ -263,104 +265,216 @@ def execute(state, t, symbol, side, amount, price, reason):
         f" {symbol}: {amount:.2f} TL; {reason}")
     return rec
 
-def pick(state, latest, t):
-    if not state["enabled"]:
-        return None
-    total = equity(state, latest)
-    if total is None or total <= 0:
-        return None
-    def cooled(pair):
-        d = as_date(state["lastOrder"].get(pair))
-        return d is None or (t - d).total_seconds() >= 1800
+def assess_decision(state, latest, t):
+    """Choose SPOT BUY, SPOT SELL, virtual SHORT, SHORT COVER or WAIT.
 
-    # Protective SHORT covers have priority, even at the daily order cap
-    # or while the portfolio drawdown circuit breaker is active.
+    Decisions use observed public market marks and existing closed hourly
+    histories only. No future prices, hypothetical fills or real exchange API.
+    Protective closes outrank new entries, and waiting is a valid outcome.
+    """
+    plan = {
+        "at": stamp(t), "action": "WAIT", "symbol": None, "amountTry": None,
+        "score": None, "marketRegime": "VERİ BEKLENİYOR",
+        "reason": "Güncel veri bekleniyor", "reviewed": 0,
+        "candidates": [], "order": None,
+    }
+    def wait(reason):
+        plan["reason"] = reason
+        return plan
+    def choose(pair, side, amount, reason, score=None):
+        plan.update({
+            "action": {
+                "buy": "BUY", "sell": "SELL",
+                "short": "SHORT", "cover": "COVER",
+            }[side],
+            "symbol": pair, "amountTry": round(amount, 4),
+            "score": round(score, 3) if score is not None else None,
+            "reason": reason, "order": (pair, side, amount, reason),
+        })
+        return plan
+
+    if not state.get("enabled", False):
+        return wait("Sunucu botu duraklatılmış")
+    total = equity(state, latest)
+    if total is None or not math.isfinite(total) or total <= 0:
+        return wait("Açık pozisyonların fiyatı güvenilir şekilde değerlenemedi")
+
+    def cooled(pair):
+        last = as_date(state.get("lastOrder", {}).get(pair))
+        return last is None or (t - last).total_seconds() >= 1800
+
+    def current_tech(pair):
+        record = state.get("histories", {}).get(pair, {})
+        fetched = as_date(record.get("fetchedAt"))
+        if fetched and (
+            fetched > t or (t - fetched).total_seconds() > 7200
+        ):
+            return None
+        history = record.get("prices", [])
+        market_price = latest.get(pair, {}).get("priceTry")
+        if (not isinstance(history, list) or
+                len(history) < 60 or
+                market_price is None or
+                not math.isfinite(market_price) or market_price <= 0):
+            return None
+        # Append the CURRENT observed mark, not an invented future candle.
+        # A >20% disagreement with the last closed bar suggests a feed,
+        # conversion or extraordinary volatility problem; no new entry.
+        if not math.isfinite(history[-1]) or history[-1] <= 0:
+            return None
+        if abs(market_price / history[-1] - 1) > .20:
+            return None
+        return indicators(history + [market_price])
+
+    btc = current_tech("BTCUSDT")
+    plan["marketRegime"] = (
+        "YÜKSELİŞ" if btc and btc["direction"] == "up"
+        else "DÜŞÜŞ" if btc and btc["direction"] == "down"
+        else "YATAY" if btc else "BTC VERİSİ YOK"
+    )
+
+    exits = []
     for pair, pos in state.get("shorts", {}).items():
-        q = latest.get(pair)
-        if q is None:
+        quote = latest.get(pair)
+        if quote is None:
             continue
-        current = q["priceTry"]
+        current = quote["priceTry"]
         entry = pos["entryPriceTry"]
         adverse = current / entry - 1
-        tech = indicators(state["histories"].get(pair, {}).get("prices", []))
+        technical = current_tech(pair)
+        amount = pos["quantity"] * current
         if short_value(pos, current) <= pos["marginTry"] * .10:
-            return pair, "cover", pos["quantity"] * current, "SHORT teminat güvenliği"
-        if adverse >= .06:
-            return pair, "cover", pos["quantity"] * current, "SHORT zarar kes (+%6)"
-        if adverse <= -.08:
-            return pair, "cover", pos["quantity"] * current, "SHORT kâr al (-%8)"
-        if cooled(pair) and tech and tech["score"] >= .50:
-            return pair, "cover", pos["quantity"] * current, "SHORT trend tersine döndü"
+            exits.append((130, pair, "cover", amount, "SHORT teminat koruması", technical))
+        elif adverse >= .06:
+            exits.append((120 + adverse, pair, "cover", amount,
+                          f"SHORT zarar kes: ters hareket %{adverse*100:.1f}", technical))
+        elif adverse <= -.08:
+            exits.append((100 - adverse, pair, "cover", amount,
+                          f"SHORT kâr al: düşüş %{abs(adverse)*100:.1f}", technical))
+        elif cooled(pair) and technical and technical["score"] >= .50:
+            exits.append((80 + technical["score"], pair, "cover", amount,
+                          "Yükseliş trendi SHORT pozisyonla ters düştü", technical))
 
-    # LONG exits also bypass new-entry limits.
     for pair, pos in state["holdings"].items():
-        q = latest.get(pair)
-        if q is None:
+        quote = latest.get(pair)
+        if quote is None or pos["quantity"] <= 0:
             continue
-        amt = pos["quantity"] * q["priceTry"]
-        if amt < MIN_ORDER:
-            continue
+        amount = pos["quantity"] * quote["priceTry"]
         cost = pos["costTry"] / pos["quantity"]
-        percent = q["priceTry"] / cost - 1
-        tech = indicators(state["histories"].get(pair, {}).get("prices", []))
-        if percent <= -.06:
-            return pair, "sell", amt, "Sanal zarar koruması"
-        if percent >= .08:
-            return pair, "sell", amt, "Sanal kâr hedefi"
-        if cooled(pair) and tech and tech["score"] < -.5:
-            return pair, "sell", amt, "Negatif momentum"
+        move = quote["priceTry"] / cost - 1
+        technical = current_tech(pair)
+        # Protective exits can close small remaining dust positions too.
+        if move <= -.06:
+            exits.append((120 - move, pair, "sell", amount,
+                          f"Spot zarar kes: düşüş %{abs(move)*100:.1f}", technical))
+        elif move >= .08:
+            exits.append((100 + move, pair, "sell", amount,
+                          f"Spot kâr al: yükseliş %{move*100:.1f}", technical))
+        elif cooled(pair) and technical and technical["score"] < -.50:
+            exits.append((80 - technical["score"], pair, "sell", amount,
+                          "Momentum düşüşe döndü; açık LONG kapatılıyor", technical))
 
-    if state["todayOrders"] >= 8:
-        return None
-    if total < state["peakEquityTry"] * .88:
-        return None
-    used_exposure = exposure(state, latest)
-    if used_exposure is None:
-        return None
-    btc = indicators(state["histories"].get("BTCUSDT", {}).get("prices", []))
-    choices = []
-    for pair, q in latest.items():
-        if not cooled(pair):
-            continue
-        # Never hold both long and short on the same reference asset.
+    if exits:
+        priority, pair, side, amount, reason, technical = max(
+            exits, key=lambda item: (item[0], item[3]))
+        plan["reviewed"] = len(latest)
+        return choose(pair, side, amount, reason,
+                      technical["score"] if technical else None)
+
+    # Controls below block NEW positions only, never protective exits.
+    if state.get("todayOrders", 0) >= 8:
+        return wait("Günlük 8 sanal emir sınırı; yeni pozisyon açılmadı")
+    if total < state.get("peakEquityTry", total) * .88:
+        return wait("Portföy gerilemesi %12'yi geçti; yeni risk durduruldu")
+    used = exposure(state, latest)
+    if used is None:
+        return wait("Açık pozisyonlar için güvenilir piyasa değeri yok")
+    if used >= total * .65:
+        return wait("Toplam LONG+SHORT maruziyeti %65 sınırında")
+    if state["cashTry"] <= total * .30:
+        return wait("Minimum %30 sanal nakit rezervi korunuyor")
+
+    candidates = []
+    for pair, quote in latest.items():
         if pair in state["holdings"] or pair in state.get("shorts", {}):
             continue
-        tech = indicators(state["histories"].get(pair, {}).get("prices", []))
+        if not cooled(pair):
+            continue
+        tech = current_tech(pair)
         if tech is None or tech["volatility"] > 18:
             continue
-        price = q["priceTry"]
-        upper = min(total * .12, state["cashTry"] / (1 + FEE),
-                    (state["cashTry"] - total * .30) / (1 + FEE),
-                    total * .25, total * .65 - used_exposure)
-        riskfactor = .4 if tech["volatility"] > 9 else (
-            .65 if tech["volatility"] > 6 else 1.0)
-        amount = math.floor(max(0, upper) * riskfactor * 100) / 100
+        plan["reviewed"] += 1
+        # The recent observed movement must exceed both sides' assumed
+        # 0.1% fees plus a buffer. Not a profitability prediction.
+        if abs(tech["momentum6"]) < .6:
+            continue
+        if pair != "BTCUSDT" and btc is None:
+            continue
+        mode = None
+        if tech["direction"] == "up" and tech["score"] >= .55:
+            if pair == "BTCUSDT" or btc["direction"] != "down":
+                mode = "buy"
+        elif tech["direction"] == "down" and tech["score"] <= -.70:
+            if pair == "BTCUSDT" or btc["direction"] != "up":
+                mode = "short"
+        if mode is None:
+            continue
+
+        upper = min(
+            total * .12, state["cashTry"] / 1.001,
+            (state["cashTry"] - total * .30) / 1.001,
+            total * .25, total * .65 - used,
+        )
+        scale = (.4 if tech["volatility"] > 9 else
+                 .65 if tech["volatility"] > 6 else 1.0)
+        amount = math.floor(max(0.0, upper) * scale * 100) / 100
         if amount < MIN_ORDER:
             continue
-        # The SHORT side needs stronger bearish evidence than LONG, while
-        # BTC's rising regime vetoes weaker altcoin bearish setups.
-        if tech["direction"] == "up" and tech["score"] >= .55:
-            if pair != "BTCUSDT" and btc and btc["direction"] == "down":
-                continue
-            choices.append((tech["score"] + direction_edge(state, "long"),
-                            pair, "buy", amount, tech))
-        elif tech["direction"] == "down" and tech["score"] <= -.70:
-            if pair != "BTCUSDT" and btc and btc["direction"] == "up":
-                continue
-            choices.append((-tech["score"] + direction_edge(state, "short"),
-                            pair, "short", amount, tech))
-    if not choices:
-        return None
-    _, pair, side, amount, tech = max(choices, key=lambda item: item[0])
-    kind = "LONG" if side == "buy" else "SHORT"
-    return pair, side, amount, (
-        f"1x {kind}; trend {tech['direction']}, sinyal {tech['score']:.2f}")
+        direction = "long" if mode == "buy" else "short"
+        score = ((tech["score"] if mode == "buy" else -tech["score"])
+                 + direction_edge(state, direction))
+        candidates.append((score, pair, mode, amount, tech))
+
+    candidates.sort(key=lambda item: (-item[0], item[1]))
+    plan["candidates"] = [
+        {
+            "symbol": pair,
+            "action": "BUY" if side == "buy" else "SHORT",
+            "score": round(score, 3),
+            "volatilityPct": round(tech["volatility"], 2),
+            "momentum6Pct": round(tech["momentum6"], 2),
+        }
+        for score, pair, side, _, tech in candidates[:5]
+    ]
+    if not candidates:
+        return wait("Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı")
+    score, pair, side, amount, tech = candidates[0]
+    mode = "SPOT AL / LONG" if side == "buy" else "SANAL 1x SHORT"
+    return choose(
+        pair, side, amount,
+        f"{mode} · {plan['marketRegime']} piyasası · "
+        f"sinyal {tech['score']:+.2f}, 6s momentum "
+        f"%{tech['momentum6']:+.1f}, oynaklık %{tech['volatility']:.1f}",
+        score=score,
+    )
+
+
+def pick(state, latest, t):
+    """Backward compatible order planning API for existing bot tests."""
+    return assess_decision(state, latest, t)["order"]
+
 
 def cycle(state, market, t):
     state = json.loads(json.dumps(state))
     state["lastRunAt"] = stamp(t)
     state["cycles"] += 1
     if not state.get("enabled", False):
+        state["decisionPlan"] = {
+            "at": stamp(t), "action": "WAIT", "symbol": None,
+            "amountTry": None, "score": None,
+            "marketRegime": "DURDURULDU",
+            "reason": "Bot durduruldu", "reviewed": 0, "candidates": [],
+        }
         log(state, t, "Sunucu botu duraklatılmış.")
         return state
     last = as_date(state.get("lastSuccessAt"))
@@ -413,7 +527,11 @@ def cycle(state, market, t):
         if state["day"] != day:
             state["day"] = day
             state["todayOrders"] = 0
-        choice = pick(state, latest, t)
+        planned = assess_decision(state, latest, t)
+        state["decisionPlan"] = {
+            key: value for key, value in planned.items() if key != "order"
+        }
+        choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
             price = latest[pair]["priceTry"]
@@ -425,7 +543,7 @@ def cycle(state, market, t):
                 execute(state, t, pair, side, gross, price, reason)
         else:
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
-                "güvenli sanal emir sinyali oluşmadı.")
+                + planned["reason"])
         state["equityTry"] = equity(state, latest)
         # Store last observed marks of open paper positions for Flutter.
         active = set(state["holdings"]) | set(state.get("shorts", {}))
@@ -436,6 +554,13 @@ def cycle(state, market, t):
         state["lastError"] = None
     except Exception as exc:
         state["lastError"] = str(exc)[:200]
+        state["decisionPlan"] = {
+            "at": stamp(t), "action": "WAIT", "symbol": None,
+            "amountTry": None, "score": None,
+            "marketRegime": "VERİ HATASI",
+            "reason": "Veri hatası nedeniyle yeni sanal emir engellendi",
+            "reviewed": 0, "candidates": [],
+        }
         log(state, t, "İşlem yapılmadı: piyasa verisi hatası. " + state["lastError"])
     return state
 
