@@ -16,7 +16,7 @@ class MiniChart extends StatelessWidget {
       height: height,
       width: double.infinity,
       child: CustomPaint(
-        painter: _ChartPainter(prices, positive ? const Color(0xFF43D9A3) : const Color(0xFFF27777)),
+        painter: _ChartPainter(prices, positive ? const Color(0xFF44E5AB) : const Color(0xFFFF796F)),
       ),
     );
   }

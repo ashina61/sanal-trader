@@ -1,3 +1,4 @@
+import '../widgets/premium_dashboard.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,7 +35,7 @@ class UpdateHistoryScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               const Text('SanalTrader geliştirme günlüğü',
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
+                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: PremiumColors.gold)),
               const SizedBox(height: 8),
               const Text(
                 'Yayınlanan sürümlerde neler değişti? Bu notlar GitHub deposundaki kodla birlikte saklanır.',
@@ -42,7 +43,7 @@ class UpdateHistoryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               for (final release in releases) Card(
-                color: const Color(0xFF19212D),
+                color: PremiumColors.panel,
                 margin: const EdgeInsets.only(bottom: 10),
                 child: ExpansionTile(
                   initiallyExpanded: release == releases.first,

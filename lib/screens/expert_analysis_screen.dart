@@ -1,3 +1,4 @@
+import '../widgets/premium_dashboard.dart';
 import 'package:flutter/material.dart';
 import '../models/coin_quote.dart';
 import '../services/technical_analysis.dart';
@@ -27,8 +28,8 @@ class ExpertAnalysisScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(report.decisionLabel,
             style: TextStyle(
-              color: report.score > .2 ? const Color(0xFF43D9A3)
-                  : report.score < -.2 ? const Color(0xFFF27777)
+              color: report.score > .2 ? PremiumColors.emerald
+                  : report.score < -.2 ? PremiumColors.danger
                   : Colors.orangeAccent,
               fontWeight: FontWeight.bold,
             )),
@@ -103,7 +104,7 @@ class ExpertAnalysisScreen extends StatelessWidget {
   }
 
   Widget _panel({required String title, required Widget child}) => Card(
-    color: const Color(0xFF19212D),
+    color: PremiumColors.panel,
     child: Padding(
       padding: const EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -127,7 +128,7 @@ class ExpertAnalysisScreen extends StatelessWidget {
   Widget _point(String text, IconData icon) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Icon(icon, size: 15, color: const Color(0xFF43D9A3)),
+      Icon(icon, size: 15, color: PremiumColors.emerald),
       const SizedBox(width: 8),
       Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
     ]),

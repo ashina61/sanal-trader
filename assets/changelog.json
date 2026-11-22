@@ -13,7 +13,9 @@
         "Uzman bot kartı BTC trendini, ölçülmüş teknik doğruluğu ve piyasa riskini gösteriyor; uydurma yapay zekâ güven skoru yok.",
         "BTC teknik göstergeleri RSI, MACD, trend ve oynaklık kartları olarak özetleniyor; detay ekranına geçiş korunuyor.",
         "Güncelleme Geçmişi ana ekrana taşındı ve üst başlık, gezinme ile veri giriş alanları premium temaya geçirildi.",
-        "Görsel prototipteki örnek ₺1.248.730 gibi rakamlar uygulamaya alınmadı; ₺650 başlangıç sanal bakiyesi ve hesaplanan gerçek portföy bilgileri korundu."
+        "Görsel prototipteki örnek ₺1.248.730 gibi rakamlar uygulamaya alınmadı; ₺650 başlangıç sanal bakiyesi ve hesaplanan gerçek portföy bilgileri korundu.",
+        "Bot, coin detay, teknik analiz, portföy, işlem geçmişi ve güncelleme ekranlarının kart ve aksan renkleri premium temayla uyumlu hâle getirildi.",
+        "Eski mavi/gri kartlar zümrüt panellere, olumlu/olumsuz değerler kontrastlı yeşil/kırmızı renklere dönüştürüldü."
       ]
     },
     {

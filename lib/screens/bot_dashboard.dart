@@ -1,3 +1,4 @@
+import '../widgets/premium_dashboard.dart';
 import 'package:flutter/material.dart';
 import '../services/learning_bot.dart';
 import '../models/coin_quote.dart';
@@ -58,7 +59,7 @@ class BotDashboard extends StatelessWidget {
         Text('Öğrenen sanal bot', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         Card(
-          color: const Color(0xFF192D2C),
+          color: PremiumColors.panelRaised,
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -78,14 +79,14 @@ class BotDashboard extends StatelessWidget {
               ),
               if (error != null) ...[
                 const SizedBox(height: 8),
-                Text(error!, style: const TextStyle(fontSize: 12, color: Colors.orangeAccent)),
+                Text(error!, style: const TextStyle(fontSize: 12, color: PremiumColors.gold)),
               ],
             ]),
           ),
         ),
         const SizedBox(height: 12),
         Card(
-          color: const Color(0xFF19212D),
+          color: PremiumColors.panel,
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -103,13 +104,13 @@ class BotDashboard extends StatelessWidget {
               ]),
               const SizedBox(height: 6),
               const Text('Bu oranlar yön tahmini içindir; komisyon sonrası kâr veya gelecekteki başarı değildir.',
-                style: TextStyle(color: Colors.white54, fontSize: 11)),
+                style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
             ]),
           ),
         ),
         const SizedBox(height: 12),
         Card(
-          color: const Color(0xFF19212D),
+          color: PremiumColors.panel,
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -127,7 +128,7 @@ class BotDashboard extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.only(top: 10),
                   child: Text('Risk freni: yeni sanal alışlar durduruldu. Mevcut varlıklar için satış kontrolü devam eder.',
-                    style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
+                    style: TextStyle(color: PremiumColors.gold, fontSize: 12)),
                 ),
             ]),
           ),
@@ -141,7 +142,7 @@ class BotDashboard extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Card(
-          color: const Color(0xFF19212D),
+          color: PremiumColors.panel,
           child: Padding(padding: const EdgeInsets.all(14), child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -166,7 +167,7 @@ class BotDashboard extends StatelessWidget {
               ]),
               const SizedBox(height: 7),
               const Text('Ağırlık, sonraki gerçek fiyatla karşılaştırılan teknik yön tahminlerine göre yavaş güncellenir.',
-                style: TextStyle(fontSize: 11, color: Colors.white54)),
+                style: TextStyle(fontSize: 11, color: PremiumColors.muted)),
               const SizedBox(height: 16),
               const Text('Öğrenilen strateji ağırlıkları', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -187,24 +188,24 @@ class BotDashboard extends StatelessWidget {
         Row(children: [
           const Text('Canlı bot sinyalleri', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const Spacer(),
-          Text('${watchlist.length} izleniyor', style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          Text('${watchlist.length} izleniyor', style: const TextStyle(color: PremiumColors.muted, fontSize: 11)),
         ]),
         const SizedBox(height: 4),
         const Text('Sinyaller işlem garantisi değildir; nakit ve risk sınırları ayrıca kontrol edilir.',
-          style: TextStyle(color: Colors.white54, fontSize: 11)),
+          style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
         const SizedBox(height: 8),
         if (watchlist.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16),
             child: Text('Güncel fiyat bekleniyor. Canlı veya yedek piyasa verisi gelmeden işlem yapılmaz.',
-              style: TextStyle(color: Colors.white54, fontSize: 12)),
+              style: TextStyle(color: PremiumColors.muted, fontSize: 12)),
           )
         else
           for (final coin in watchlist.take(20))
             _signalRow(context, coin, weight),
         if (watchlist.length > 20)
           Text('Diğer ${watchlist.length - 20} coin piyasada izleniyor.',
-            style: const TextStyle(color: Colors.white54, fontSize: 11)),
+            style: const TextStyle(color: PremiumColors.muted, fontSize: 11)),
         const SizedBox(height: 10),
         const Text('Risk sınırları', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
@@ -214,28 +215,28 @@ class BotDashboard extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         Text('650 TL başlangıç bakiyesinde tek alışın üst sınırı yaklaşık ${formatTry(650 * botMaxOrderShare)}.',
-          style: const TextStyle(fontSize: 12, color: Colors.white54)),
+          style: const TextStyle(fontSize: 12, color: PremiumColors.muted)),
         const SizedBox(height: 16),
         const Text('Botun işlem günlüğü', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         if (bot == null || bot.activities.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 22),
-            child: Center(child: Text('Bot henüz sanal işlem yapmadı.', style: TextStyle(color: Colors.white54))),
+            child: Center(child: Text('Bot henüz sanal işlem yapmadı.', style: TextStyle(color: PremiumColors.muted))),
           )
         else
           for (final event in bot.activities)
-            Card(color: const Color(0xFF19212D), child: ListTile(
+            Card(color: PremiumColors.panel, child: ListTile(
               dense: true,
               title: Text(event.message, style: const TextStyle(fontSize: 12)),
               subtitle: Text('${event.at.toLocal().day}.${event.at.toLocal().month} · '
                 '${event.at.toLocal().hour.toString().padLeft(2, '0')}:'
                 '${event.at.toLocal().minute.toString().padLeft(2, '0')}',
-                style: const TextStyle(fontSize: 11, color: Colors.white54)),
+                style: const TextStyle(fontSize: 11, color: PremiumColors.muted)),
             )),
         const SizedBox(height: 14),
         const Text('Not: Bu site kapanınca bot durur; yeniden açıldığında yalnızca yeni fiyatlardan devam eder. Fiyat sağlayıcısı hata verirse işlem yapılmaz. Portföy ile bot verileri bu tarayıcıda saklanır.',
-            style: TextStyle(color: Colors.white54, fontSize: 11)),
+            style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
       ],
     );
   }
@@ -246,12 +247,12 @@ class BotDashboard extends StatelessWidget {
     final positive = analysis.ready && analysis.score >= .35 &&
         learningScore >= botBuyThreshold;
     final danger = analysis.ready && analysis.score <= -.35;
-    final color = positive ? const Color(0xFF43D9A3) :
-      danger ? const Color(0xFFF27777) : Colors.white54;
+    final color = positive ? PremiumColors.emerald :
+      danger ? PremiumColors.danger : Colors.white54;
     final label = !analysis.ready ? 'VERİ YOK' :
         positive ? 'ALIM ADAYI' : danger ? 'SATIŞ BASKISI' : 'BEKLE';
     return Card(
-      color: const Color(0xFF19212D),
+      color: PremiumColors.panel,
       margin: const EdgeInsets.only(bottom: 5),
       child: ExpansionTile(
         dense: true,
@@ -259,7 +260,7 @@ class BotDashboard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         subtitle: Text('${analysis.trendLabel} · RSI ${analysis.rsi.toStringAsFixed(0)}'
           ' · Teknik ${analysis.score.toStringAsFixed(2)}',
-          style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          style: const TextStyle(color: PremiumColors.muted, fontSize: 11)),
         trailing: Text(label, style: TextStyle(color: color,
           fontWeight: FontWeight.w700, fontSize: 10)),
         children: [
@@ -271,7 +272,7 @@ class BotDashboard extends StatelessWidget {
               const SizedBox(height: 6),
               if (!analysis.ready) const Text(
                 'Kapanış geçmişi olmadan teknik işlem önerisi yapılmaz.',
-                style: TextStyle(fontSize: 11, color: Colors.white54),
+                style: TextStyle(fontSize: 11, color: PremiumColors.muted),
               ),
               for (final reason in analysis.reasons.take(3))
                 Padding(padding: const EdgeInsets.symmetric(vertical: 2),
@@ -279,7 +280,7 @@ class BotDashboard extends StatelessWidget {
               for (final warning in analysis.warnings.take(2))
                 Padding(padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text('⚠ $warning',
-                    style: const TextStyle(fontSize: 11, color: Colors.orangeAccent))),
+                    style: const TextStyle(fontSize: 11, color: PremiumColors.gold))),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
@@ -300,7 +301,7 @@ class BotDashboard extends StatelessWidget {
   Widget _stat(String name, String value) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(name, style: const TextStyle(fontSize: 10, color: Colors.white54)),
+      Text(name, style: const TextStyle(fontSize: 10, color: PremiumColors.muted)),
       const SizedBox(height: 6),
       Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
     ],

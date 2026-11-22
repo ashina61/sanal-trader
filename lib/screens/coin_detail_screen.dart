@@ -1,3 +1,4 @@
+import '../widgets/premium_dashboard.dart';
 import "dart:math" as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -100,7 +101,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       _side == TradeSide.buy ? amount - grossBuy : amount * tradingFeeRate;
     final estimatedQty = amount == null ? 0.0 :
       (_side == TradeSide.buy ? grossBuy : amount) / quote.priceTry;
-    final accent = quote.change24h >= 0 ? const Color(0xFF43D9A3) : const Color(0xFFF27777);
+    final accent = quote.change24h >= 0 ? PremiumColors.emerald : PremiumColors.danger;
 
     return Scaffold(
       appBar: AppBar(title: Text('${quote.symbol} / TRY')),
@@ -115,9 +116,9 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: const Color(0xFF19212D), borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: PremiumColors.panel, borderRadius: BorderRadius.circular(20), border: Border.all(color: PremiumColors.border)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Son 7 gün · fiyat eğilimi', style: TextStyle(color: Colors.white70)),
+              const Text('Son 7 gün · fiyat eğilimi', style: TextStyle(color: PremiumColors.gold, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               MiniChart(prices: quote.sparkline, positive: quote.change24h >= 0, height: 150),
             ]),

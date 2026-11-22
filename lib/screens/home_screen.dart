@@ -695,7 +695,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         for (final item in holdings)
           Card(
-            color: const Color(0xFF19212D),
+            color: PremiumColors.panel,
             child: ListTile(
               title: Text(_quotes[item.key]?.symbol ?? item.key.toUpperCase()),
               subtitle: Text('${formatQuantity(item.value.quantity)} adet · Maliyet ${formatTry(item.value.costTry)}'),
@@ -729,12 +729,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         for (final trade in trades)
           Card(
-            color: const Color(0xFF19212D),
+            color: PremiumColors.panel,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: trade.side == TradeSide.buy ? const Color(0xFF205647) : const Color(0xFF593535),
+                backgroundColor: trade.side == TradeSide.buy ? PremiumColors.emeraldDim : const Color(0xFF593535),
                 child: Icon(trade.side == TradeSide.buy ? Icons.south_west : Icons.north_east,
-                  color: trade.side == TradeSide.buy ? const Color(0xFF43D9A3) : const Color(0xFFF27777)),
+                  color: trade.side == TradeSide.buy ? PremiumColors.emerald : PremiumColors.danger),
               ),
               title: Text('${trade.side == TradeSide.buy ? 'AL' : 'SAT'} · ${trade.symbol}'),
               subtitle: Text('${trade.executedAt.day}.${trade.executedAt.month}.${trade.executedAt.year} '
