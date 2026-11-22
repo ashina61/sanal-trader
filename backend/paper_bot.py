@@ -13,6 +13,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from backend.short_positions import short_value, exposure, open_short, close_short
+
 UTC = dt.timezone.utc
 INITIAL = 650.0
 FEE = .001
@@ -43,7 +45,7 @@ def numeric(value):
 def fresh_state():
     return dict(schema=1, enabled=True, mode="server-paper", cashTry=INITIAL,
                 initialCashTry=INITIAL, equityTry=INITIAL, peakEquityTry=INITIAL,
-                holdings={}, trades=[], journal=[], day="", todayOrders=0,
+                holdings={}, shorts={}, trades=[], journal=[], day="", todayOrders=0,
                 lastOrder={}, realizedTry=0.0, paidFeesTry=0.0, histories={},
                 lastSuccessAt=None, lastRunAt=None, lastError=None,
                 source="Binance public spot REST", lastDecision="İlk kontrol bekleniyor",
@@ -58,6 +60,16 @@ def load(path):
             or numeric(obj.get("cashTry")) is None
             or obj["cashTry"] < -1e-6):
         raise ValueError("Invalid persistent wallet; refusing reset")
+    # Preserve pre-0.9.0 wallets; never reset real simulated positions.
+    obj.setdefault("shorts", {})
+    if not isinstance(obj["shorts"], dict):
+        raise ValueError("Corrupt virtual SHORT book")
+    for symbol, position in obj["shorts"].items():
+        if (not isinstance(position, dict) or
+                any(numeric(position.get(key)) is None or
+                    numeric(position.get(key)) <= 0
+                    for key in ("quantity", "marginTry", "entryPriceTry"))):
+            raise ValueError(f"Invalid virtual SHORT position: {symbol}")
     return obj
 
 def save(path, obj):
@@ -191,6 +203,11 @@ def equity(state, latest):
         if data is None:
             return None
         total += pos["quantity"] * data["priceTry"]
+    for symbol, pos in state.get("shorts", {}).items():
+        data = latest.get(symbol)
+        if data is None:
+            return None
+        total += short_value(pos, data["priceTry"])
     return total
 
 def execute(state, t, symbol, side, amount, price, reason):
@@ -202,6 +219,8 @@ def execute(state, t, symbol, side, amount, price, reason):
     quantity = amount / price
     realized = 0.0
     if side == "buy":
+        if symbol in state.get("shorts", {}):
+            raise ValueError("Close virtual SHORT before opening LONG")
         charged = amount + fee
         if charged > state["cashTry"] + 1e-6:
             raise ValueError("Insufficient paper cash")
@@ -240,7 +259,7 @@ def execute(state, t, symbol, side, amount, price, reason):
     return rec
 
 def pick(state, latest, t):
-    if not state["enabled"] or state["todayOrders"] >= 8:
+    if not state["enabled"]:
         return None
     total = equity(state, latest)
     if total is None or total <= 0:
@@ -249,7 +268,26 @@ def pick(state, latest, t):
         d = as_date(state["lastOrder"].get(pair))
         return d is None or (t - d).total_seconds() >= 1800
 
-    # Exits must still be possible during a portfolio drawdown.
+    # Protective SHORT covers have priority, even at the daily order cap
+    # or while the portfolio drawdown circuit breaker is active.
+    for pair, pos in state.get("shorts", {}).items():
+        q = latest.get(pair)
+        if q is None:
+            continue
+        current = q["priceTry"]
+        entry = pos["entryPriceTry"]
+        adverse = current / entry - 1
+        tech = indicators(state["histories"].get(pair, {}).get("prices", []))
+        if short_value(pos, current) <= pos["marginTry"] * .10:
+            return pair, "cover", pos["quantity"] * current, "SHORT teminat güvenliği"
+        if adverse >= .06:
+            return pair, "cover", pos["quantity"] * current, "SHORT zarar kes (+%6)"
+        if adverse <= -.08:
+            return pair, "cover", pos["quantity"] * current, "SHORT kâr al (-%8)"
+        if cooled(pair) and tech and tech["score"] >= .50:
+            return pair, "cover", pos["quantity"] * current, "SHORT trend tersine döndü"
+
+    # LONG exits also bypass new-entry limits.
     for pair, pos in state["holdings"].items():
         q = latest.get(pair)
         if q is None:
@@ -267,9 +305,13 @@ def pick(state, latest, t):
         if cooled(pair) and tech and tech["score"] < -.5:
             return pair, "sell", amt, "Negatif momentum"
 
+    if state["todayOrders"] >= 8:
+        return None
     if total < state["peakEquityTry"] * .88:
         return None
-    exposure = total - state["cashTry"]
+    used_exposure = exposure(state, latest)
+    if used_exposure is None:
+        return None
     btc = indicators(state["histories"].get("BTCUSDT", {}).get("prices", []))
     choices = []
     for pair, q in latest.items():
@@ -286,7 +328,7 @@ def pick(state, latest, t):
         own = state["holdings"].get(pair, {}).get("quantity", 0) * price
         upper = min(total * .12, state["cashTry"] / (1 + FEE),
                     (state["cashTry"] - total * .30) / (1 + FEE),
-                    total * .25 - own, total * .65 - exposure)
+                    total * .25 - own, total * .65 - used_exposure)
         riskfactor = .4 if tech["volatility"] > 9 else (
             .65 if tech["volatility"] > 6 else 1.0)
         amt = math.floor(upper * riskfactor * 100) / 100
@@ -319,6 +361,7 @@ def cycle(state, market, t):
         selected_pairs = {v["symbol"] for v in eligible_pairs[:24]}
         selected_pairs.update(x for x in CORE if x in lookup)
         selected_pairs.update(state["holdings"].keys())
+        selected_pairs.update(state.get("shorts", {}).keys())
         latest = {}
         for pair in selected_pairs:
             v = lookup.get(pair)
@@ -356,7 +399,13 @@ def cycle(state, market, t):
         choice = pick(state, latest, t)
         if choice:
             pair, side, gross, reason = choice
-            execute(state, t, pair, side, gross, latest[pair]["priceTry"], reason)
+            price = latest[pair]["priceTry"]
+            if side == "short":
+                open_short(state, t, pair, gross, price, reason)
+            elif side == "cover":
+                close_short(state, t, pair, price, reason)
+            else:
+                execute(state, t, pair, side, gross, price, reason)
         else:
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 "güvenli sanal emir sinyali oluşmadı.")

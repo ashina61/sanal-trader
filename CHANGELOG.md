@@ -2,6 +2,10 @@
 
 ## v0.9.0 — 2026-11-22: 1x sanal LONG / SHORT
 
+- SHORT ayrı sanal teminatı ve fiyat farkıyla portföy değerine katılır, eski cüzdanlar uyumlu yüklenir.
+- SHORT ters fiyat %6 zarar kes, %8 olumlu fiyat hareketinde kâr alma, teminat ve trend dönüşü kontrolü uygulanır.
+- LONG/SHORT toplam maruziyet hesaplanır; riskten çıkışlar günlük yeni emir sınırı aşıldığında da kontrol edilir.
+
 - Ayrı teminatlı 1x sanal SHORT aç/kapat, komisyonlu net sonuç ve portföy değerlemesi motoru eklendi.
 - Eski LONG cüzdanı silinmez. Spot fiyatlarla yapılan bu model gerçek vadeli kontrat, funding, borçlanma bedeli veya likidasyon motoru değildir.
 
