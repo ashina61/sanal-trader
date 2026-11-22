@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.6.0",
+      "date": "2026-11-22",
+      "title": "Geniş piyasa radarı ve kâr odaklı sanal öğrenme",
+      "details": [
+        "Botun yön tahmininden ayrı gerçek sanal işlem sonuçlarını ölçen net kâr, kazanma oranı, komisyon ve coin başına getiri öğrenme motorunun temeli eklendi.",
+        "Yalnızca gerçekleşen sanal satışların komisyon dahil net kâr/zararı öğrenmeye girer; tek bir sonuç işlem seçimini aşırı etkilemez.",
+        "Binance piyasa veri sağlayıcısının sınırları ve risk filtreleri korunur; sınırsız işlem veya garantili kazanç sözü verilmez."
+      ]
+    },
+    {
       "version": "0.5.0",
       "date": "2026-11-22",
       "title": "Premium arayüz — Zümrüt & Altın",

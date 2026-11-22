@@ -1,5 +1,11 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
+
+- Yalnızca gerçekten tamamlanmış sanal BOT satışlarından net gerçekleşmiş kâr/zarar, işlem maliyeti, coin bazlı kazanma oranı ve temkinli performans öğrenmesi eklendi.
+- Öğrenme geçmişte uydurulmuş işlemlere, fiyat yönü isabetinin tek başına kâr olduğu varsayımına veya sınırsız risk almaya dayanmaz.
+
+
 ## v0.5.0 — 2026-11-22: Premium arayüz — Zümrüt & Altın
 
 - Premium widget testlerindeki ekran boyutu ayarı Flutter test API'sine uyarlandı.
