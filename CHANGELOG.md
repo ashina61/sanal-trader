@@ -2,6 +2,8 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- SharedPreferencesAsync testleri resmi in-memory platform sahte uygulaması üzerinden çalıştırılıyor; eski setMockInitialValues yeni API ile uyumlu değildi.
+
 - Yerel bot otomatik açılma/migrasyon ve aynı sekmede eşzamanlı sanal emir/sıfırlama sırasını koruyan yeni otomatik testler eklendi.
 
 - Yerel sanal kasada eşzamanlı manuel/otomatik AL/SAT sıralı kayıt kuyruğuyla çakışmadan işleniyor; reset işlemi de sıraya giriyor.
