@@ -12,6 +12,8 @@ import 'bot_dashboard.dart';
 import 'update_history_screen.dart';
 import '../widgets/formatters.dart';
 import '../widgets/mini_chart.dart';
+import '../widgets/premium_dashboard.dart';
+import '../services/technical_analysis.dart';
 import 'coin_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -41,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _quotes = <String, CoinQuote>{};
   final _searchController = TextEditingController();
   String _marketSearch = '';
+  bool _showAllCoins = false;
   Portfolio? _portfolio;
   Timer? _refreshTimer;
   bool _loadingMarket = true;
@@ -385,62 +388,121 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _openUpdates() => Navigator.push(context, MaterialPageRoute<void>(
+        builder: (_) => const UpdateHistoryScreen(),
+      ));
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(children: [
-          Icon(Icons.candlestick_chart, color: Color(0xFF43D9A3)),
-          SizedBox(width: 8), Text('SanalTrader', style: TextStyle(fontWeight: FontWeight.w800)),
+        toolbarHeight: 66,
+        titleSpacing: 16,
+        title: Row(children: [
+          const Icon(Icons.candlestick_chart, color: PremiumColors.gold, size: 27),
+          const SizedBox(width: 9),
+          const Flexible(child: Text.rich(TextSpan(children: [
+            TextSpan(text: 'Sanal', style: TextStyle(
+              fontWeight: FontWeight.w900, color: Colors.white)),
+            TextSpan(text: 'Trader', style: TextStyle(
+              fontWeight: FontWeight.w900, color: PremiumColors.gold)),
+          ]), style: TextStyle(fontSize: 20), overflow: TextOverflow.ellipsis)),
         ]),
         actions: [
           IconButton(
-            tooltip: 'Güncelleme geçmişi',
-            onPressed: () => Navigator.push(context, MaterialPageRoute<void>(
-              builder: (_) => const UpdateHistoryScreen(),
-            )),
-            icon: const Icon(Icons.update),
+            tooltip: 'Güncelleme Geçmişi',
+            onPressed: _openUpdates,
+            icon: const Icon(Icons.notifications_none, size: 22),
           ),
-          IconButton(tooltip: 'Fiyatları yenile', onPressed: _refresh, icon: const Icon(Icons.refresh)),
+          IconButton(
+            tooltip: 'Fiyatları yenile',
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh, size: 22),
+          ),
           PopupMenuButton<String>(
-            onSelected: (value) { if (value == 'reset') _resetPortfolio(); },
-            itemBuilder: (_) => const [PopupMenuItem(value: 'reset', child: Text('Portföyü sıfırla'))],
+            tooltip: 'Diğer seçenekler',
+            onSelected: (value) {
+              if (value == 'reset') _resetPortfolio();
+              if (value == 'updates') _openUpdates();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'updates',
+                child: Text('Güncelleme geçmişi')),
+              PopupMenuItem(value: 'reset',
+                child: Text('Sanal portföyü sıfırla')),
+            ],
           ),
         ],
       ),
-      body: Column(children: [
-        _walletCard(),
-        if (_marketError != null && !_marketService.isLive) _warning('Fiyat hatası: $_marketError'),
-        if (_walletError != null) _warning('Cüzdan hatası: $_walletError'),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _refresh,
-            child: switch (_tab) {
-              0 => _marketList(),
-              1 => _holdingsList(),
-              2 => _historyList(),
-              _ => BotDashboard(
-                state: _botState,
-                quotes: _quotes,
-                wallet: _portfolio,
-                busy: _botBusy,
-                error: _botError,
-                lastStatus: _botMessage,
-                onEnabledChanged: _setBotEnabled,
-              ),
-            },
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0B1A16), PremiumColors.background, Color(0xFF0B1113)],
           ),
         ),
-      ]),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (index) => setState(() => _tab = index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.show_chart), label: 'Piyasa'),
-          NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), label: 'Portföy'),
-          NavigationDestination(icon: Icon(Icons.history), label: 'Geçmiş'),
-          NavigationDestination(icon: Icon(Icons.smart_toy_outlined), label: 'Bot'),
-        ],
+        child: Column(children: [
+          if (_marketError != null && !_marketService.isLive)
+            _warning('Fiyat hatası: $_marketError'),
+          if (_walletError != null) _warning('Cüzdan hatası: $_walletError'),
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 840),
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: switch (_tab) {
+                    0 => _marketList(),
+                    1 => _holdingsList(),
+                    2 => BotDashboard(
+                      state: _botState,
+                      quotes: _quotes,
+                      wallet: _portfolio,
+                      busy: _botBusy,
+                      error: _botError,
+                      lastStatus: _botMessage,
+                      onEnabledChanged: _setBotEnabled,
+                    ),
+                    _ => _historyList(),
+                  },
+                ),
+              ),
+            ),
+          ),
+        ]),
+      ),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: PremiumColors.background,
+          border: Border(top: BorderSide(color: PremiumColors.border, width: .8)),
+        ),
+        child: NavigationBar(
+          selectedIndex: _tab,
+          onDestinationSelected: (index) => setState(() => _tab = index),
+          backgroundColor: PremiumColors.background,
+          indicatorColor: PremiumColors.goldDim,
+          height: 70,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.candlestick_chart_outlined),
+              selectedIcon: Icon(Icons.candlestick_chart, color: PremiumColors.gold),
+              label: 'Piyasa'),
+            NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(Icons.account_balance_wallet, color: PremiumColors.gold),
+              label: 'Portföy'),
+            NavigationDestination(
+              icon: Icon(Icons.smart_toy_outlined),
+              selectedIcon: Icon(Icons.smart_toy, color: PremiumColors.gold),
+              label: 'Bot'),
+            NavigationDestination(
+              icon: Icon(Icons.history),
+              selectedIcon: Icon(Icons.history_toggle_off, color: PremiumColors.gold),
+              label: 'Geçmiş'),
+          ],
+        ),
       ),
     );
   }
@@ -453,159 +515,158 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     child: Text(message, style: const TextStyle(fontSize: 12, color: Color(0xFFFFD0A8))),
   );
 
-  Widget _walletCard() {
-    final wallet = _portfolio;
-    final prices = _quotes.map((id, quote) => MapEntry(id, quote.priceTry));
-    final total = wallet?.fullMarketValue(prices);
-    final profit = total == null ? null : total - initialCashTry;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF233F42), Color(0xFF1B2738)]),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Text('TOPLAM SANAL VARLIK', style: TextStyle(fontSize: 12, color: Colors.white70, letterSpacing: 1.2)),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-            decoration: BoxDecoration(color: const Color(0xFF426B61), borderRadius: BorderRadius.circular(8)),
-            child: Text(widget.cloudMode ? 'FIREBASE · DEMO' : 'YEREL · DEMO', style: const TextStyle(fontSize: 10)),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Text(total == null ? (_portfolio == null ? 'Yükleniyor...' : 'Fiyat bekleniyor') : formatTry(total),
-            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 14),
-        Row(children: [
-          Expanded(child: _metric('Sanal nakit', wallet == null ? '...' : formatTry(wallet.cashTry))),
-          Expanded(child: _metric('Toplam getiri', profit == null ? '—' : '${profit >= 0 ? '+' : ''}${formatTry(profit)}',
-              color: profit == null ? null : profit >= 0 ? const Color(0xFF43D9A3) : const Color(0xFFF27777))),
-        ]),
-      ]),
-    );
-  }
-
-  Widget _metric(String label, String value, {Color? color}) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: const TextStyle(fontSize: 12, color: Colors.white60)),
-      const SizedBox(height: 5),
-      Text(value, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
-    ],
-  );
+  Widget _walletCard() => PremiumPortfolioCard(
+        wallet: _portfolio,
+        quotes: _quotes,
+        cloudMode: widget.cloudMode,
+      );
 
   Widget _marketList() {
-    if (_loadingMarket && _quotes.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
     final ordered = _quotes.values.toList()
       ..sort((a, b) => b.volume24hUsdt.compareTo(a.volume24hUsdt));
-    final query = _marketSearch.toLowerCase();
-    final filtered = ordered.where((coin) =>
-        coin.symbol.toLowerCase().contains(query) ||
-        coin.name.toLowerCase().contains(query)).toList();
-    if (ordered.isEmpty) {
-      return ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
-        SizedBox(height: 80),
-        Icon(Icons.wifi_off, size: 54, color: Colors.white38),
-        SizedBox(height: 12),
-        Center(child: Text('Piyasa verisi yok. Aşağı çekip yenile.')),
-      ]);
-    }
+    final term = _marketSearch.trim().toLowerCase();
+    final matching = ordered.where((coin) =>
+        coin.symbol.toLowerCase().contains(term) ||
+        coin.name.toLowerCase().contains(term)).toList();
+    final btc = _quotes['bitcoin'];
+    final featured = ordered.take(5).toList();
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
       children: [
-        Row(children: [
-          Text('Kripto piyasası', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(width: 8),
-          Text('${ordered.length} coin', style: const TextStyle(color: Colors.white54, fontSize: 12)),
-          const Spacer(),
-          Text(_marketFetchedAt == null ? '' : 'Alındı: ${TimeOfDay.fromDateTime(_marketFetchedAt!).format(context)}',
-            style: const TextStyle(fontSize: 11, color: Colors.white54)),
-        ]),
-        const SizedBox(height: 6),
-        Row(children: [
-          Icon(
-            _marketService.isLive ? Icons.sensors : Icons.sync,
-            size: 15,
-            color: _marketService.isLive ? const Color(0xFF43D9A3) : Colors.orangeAccent,
+        _walletCard(),
+        const SizedBox(height: 24),
+        PremiumSectionTitle(
+          title: 'Piyasa Takip Listesi',
+          trailing: TextButton(
+            onPressed: () => setState(() => _showAllCoins = !_showAllCoins),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text(_showAllCoins ? 'Daralt' : 'Tümünü gör',
+                style: const TextStyle(color: PremiumColors.gold, fontSize: 12)),
+              const SizedBox(width: 2),
+              Icon(_showAllCoins ? Icons.keyboard_arrow_up : Icons.chevron_right,
+                color: PremiumColors.gold, size: 17),
+            ]),
           ),
+        ),
+        const SizedBox(height: 10),
+        PremiumSurface(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+          child: featured.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 30),
+                  child: Center(
+                    child: Column(children: [
+                      if (_loadingMarket) const CircularProgressIndicator(),
+                      const SizedBox(height: 11),
+                      Text(_loadingMarket
+                          ? 'Canlı piyasa verisi yükleniyor...'
+                          : 'Fiyat verisi yok. Yenilemeyi deneyebilirsin.',
+                        style: const TextStyle(
+                          color: PremiumColors.muted, fontSize: 12)),
+                    ]),
+                  ),
+                )
+              : Column(children: [
+                  for (var i = 0; i < featured.length; i++) ...[
+                    PremiumMarketTile(
+                      quote: featured[i],
+                      onTap: () => _openCoin(featured[i]),
+                    ),
+                    if (i != featured.length - 1)
+                      Divider(height: 1, thickness: .6,
+                        indent: 11, endIndent: 11,
+                        color: PremiumColors.border.withValues(alpha: .6)),
+                  ],
+                ]),
+        ),
+        const SizedBox(height: 9),
+        Row(children: [
+          Icon(_marketService.isLive
+              ? Icons.sensors : Icons.sync_outlined,
+            color: _marketService.isLive
+                ? PremiumColors.emerald : PremiumColors.gold, size: 15),
           const SizedBox(width: 6),
-          Expanded(child: Text(
-            _shownFeedStatus,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: _marketService.isLive ? const Color(0xFF43D9A3) : Colors.white60,
-              fontSize: 12,
-            ),
-          )),
+          Expanded(child: Text(_shownFeedStatus,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: PremiumColors.muted, fontSize: 11))),
+          Text('${ordered.length} coin',
+            style: const TextStyle(
+              color: PremiumColors.muted, fontSize: 11)),
         ]),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _searchController,
-          onChanged: (text) => setState(() => _marketSearch = text.trim()),
-          decoration: const InputDecoration(
-            hintText: 'Altcoin ara (BTC, SOL, ADA...)',
-            prefixIcon: Icon(Icons.search),
-            isDense: true,
-            border: OutlineInputBorder(),
-          ),
+        const SizedBox(height: 23),
+        PremiumSectionTitle(
+          title: 'Uzman Bot',
+          trailing: const Text('ADAPTİF ANALİZ',
+            style: TextStyle(
+              color: PremiumColors.gold, fontWeight: FontWeight.w800,
+              fontSize: 10, letterSpacing: .4)),
         ),
         const SizedBox(height: 10),
-        if (filtered.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: Text('Bu aramaya uygun coin bulunamadı.')),
+        PremiumBotOverview(
+          bot: _botState,
+          btc: btc,
+          onTap: () => setState(() => _tab = 2),
+        ),
+        const SizedBox(height: 22),
+        PremiumSectionTitle(title: 'Teknik Göstergeler (BTC)'),
+        const SizedBox(height: 10),
+        if (btc != null)
+          PremiumTechnicalOverview(
+            quote: btc,
+            onTap: () => _openCoin(btc),
+          )
+        else
+          const PremiumSurface(
+            child: Text('BTC geçmişi bekleniyor.',
+              style: TextStyle(color: PremiumColors.muted)),
           ),
-        for (final coin in filtered) _coinTile(coin),
-      ],
-    );
-  }
-
-  Widget _coinTile(CoinQuote quote) {
-    final up = quote.change24h >= 0;
-    return Card(
-      color: const Color(0xFF19212D),
-      margin: const EdgeInsets.only(bottom: 9),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _openCoin(quote),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
-          child: Row(children: [
-            CircleAvatar(
-              backgroundColor: const Color(0xFF2B3545),
-              child: Text(quote.symbol.substring(0, 1), style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 18),
+        PremiumUpdateTile(
+          version: '0.5.0',
+          onTap: _openUpdates,
+        ),
+        if (_showAllCoins) ...[
+          const SizedBox(height: 22),
+          PremiumSectionTitle(title: 'Tüm Piyasalar',
+            trailing: Text('${ordered.length} coin',
+              style: const TextStyle(
+                color: PremiumColors.muted, fontSize: 12))),
+          const SizedBox(height: 9),
+          TextField(
+            controller: _searchController,
+            onChanged: (value) => setState(() => _marketSearch = value),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: 'Altcoin ara: BTC, ADA, SOL...',
+              isDense: true,
             ),
-            const SizedBox(width: 10),
-            Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(quote.symbol, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-              Text(
-                quote.volume24hUsdt >= 1000000
-                  ? '${(quote.volume24hUsdt / 1000000).toStringAsFixed(1)}M USDT hacim'
-                  : quote.name,
-                maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 11, color: Colors.white54),
-              ),
-            ])),
-            Expanded(flex: 2, child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: MiniChart(prices: quote.sparkline, positive: up, height: 34),
-            )),
-            const SizedBox(width: 6),
-            Expanded(flex: 3, child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight,
-                child: Text(formatCoinPriceTry(quote.priceTry), style: const TextStyle(fontWeight: FontWeight.w800))),
-              Text(formatChange(quote.change24h), style: TextStyle(fontSize: 12, color: up ? const Color(0xFF43D9A3) : const Color(0xFFF27777))),
-            ])),
-          ]),
-        ),
-      ),
+          ),
+          const SizedBox(height: 10),
+          PremiumSurface(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+            child: matching.isEmpty
+                ? const Padding(
+                  padding: EdgeInsets.all(22),
+                  child: Text('Eşleşen coin bulunamadı.',
+                    style: TextStyle(color: PremiumColors.muted)),
+                )
+                : Column(children: [
+                  for (var i = 0; i < matching.length; i++) ...[
+                    PremiumMarketTile(
+                      quote: matching[i],
+                      onTap: () => _openCoin(matching[i]),
+                    ),
+                    if (i != matching.length - 1)
+                      Divider(height: 1, indent: 11, endIndent: 11,
+                        color: PremiumColors.border.withValues(alpha: .6)),
+                  ],
+                ]),
+          ),
+        ],
+      ],
     );
   }
 
@@ -619,7 +680,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
-        Text('Varlıklarım', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        _walletCard(),
+        const SizedBox(height: 22),
+        const PremiumSectionTitle(title: 'Varlıklarım'),
+        const SizedBox(height: 10),
         const SizedBox(height: 8),
         _infoLine('Kullanılabilir bakiye', formatTry(wallet.cashTry)),
         _infoLine('Açık pozisyon maliyeti', formatTry(wallet.investedCostTry)),

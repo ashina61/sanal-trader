@@ -1,5 +1,16 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.5.0 — 2026-11-22: Premium arayüz — Zümrüt & Altın
+
+- Referans premium görünüm, Flutter widget'larıyla gerçek veriye bağlı koyu zümrüt/altın tasarıma dönüştürüldü.
+- Ana sayfaya kompakt sanal portföy hero kartı, gerçek kâr/zarar, getiri ve açıklamalı BTC grafiği eklendi.
+- En hacimli coinler cam panelli piyasa listesinde, fiyat ve gerçek değişim oranlarıyla görüntüleniyor; arama için tümünü gör/daralt açılır alanı var.
+- Uzman bot kartı BTC trendini, ölçülmüş teknik doğruluğu ve piyasa riskini gösteriyor; uydurma yapay zekâ güven skoru yok.
+- BTC teknik göstergeleri RSI, MACD, trend ve oynaklık kartları olarak özetleniyor; detay ekranına geçiş korunuyor.
+- Güncelleme Geçmişi ana ekrana taşındı ve üst başlık, gezinme ile veri giriş alanları premium temaya geçirildi.
+- Görsel prototipteki örnek ₺1.248.730 gibi rakamlar uygulamaya alınmadı; ₺650 başlangıç sanal bakiyesi ve hesaplanan gerçek portföy bilgileri korundu.
+
+
 Bu dosya sürümlerin kalıcı, okunabilir kaydıdır. Uygulamanın **Güncelleme Geçmişi** ekranı aynı sürüm bilgilerini `assets/changelog.json` üzerinden okur.
 
 ## v0.4.0 — 2026-11-22: Teknik analiz ve uzman karar destek sistemi
