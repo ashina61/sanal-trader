@@ -32,7 +32,7 @@ bool eligibleUsdtSpotSymbol(String symbol) {
 /// actually returned by the exchange. Never fabricate listings or prices.
 MarketUniverse selectMarketUniverse(
   List<dynamic> raw, {
-  int limit = 240,
+  int limit = 0, // 0 means no arbitrary coin-count ceiling.
   double minimumVolumeUsdt = 1000000,
 }) {
   final candidates = <({String pair, double volume})>[];
@@ -60,7 +60,7 @@ MarketUniverse selectMarketUniverse(
     }
   }
   for (final row in candidates) {
-    if (selected.length >= limit) break;
+    if (limit > 0 && selected.length >= limit) break;
     if (selected.containsKey(row.pair)) continue;
     final base = row.pair.substring(0, row.pair.length - 4);
     selected[row.pair] = base.toLowerCase();

@@ -2,6 +2,10 @@
 
 ## v0.6.0 — 2026-11-22: Geniş piyasa radarı ve net kârla öğrenme
 
+- 240 coin üst sınırı kaldırıldı: yalnızca yeterli hacmi ve geçerli fiyatı olan Binance USDT Spot pariteleri taranır, kaç coin olduğu güncel listeye göre değişir. API ve cihaz kaynakları sınırsız değildir.
+- Ana sayfa 5 coinlik hızlı özet gösterir; tüm coinler ayrı Radar sayfasında lazy list olarak açılır.
+- Binance 24hr piyasa verileri tek tüm-piyasa REST çağrısından yenilenir, URL uzunluğu sorunu engellenir.
+
 - Net gerçekleşen kâr öğrenmesi, sahte sonuç engeli, emir komisyonu, kayıp, kazanç ve 72 üzeri coin keşfi için yeni testler.
 - Boş piyasa radarı ve boş bot satış geçmişi senaryoları arayüz testleriyle korunuyor.
 

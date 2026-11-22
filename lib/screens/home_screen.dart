@@ -41,9 +41,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _botError;
   String? _botMessage;
   final _quotes = <String, CoinQuote>{};
-  final _searchController = TextEditingController();
-  String _marketSearch = '';
-  bool _showAllCoins = false;
   Portfolio? _portfolio;
   Timer? _refreshTimer;
   bool _loadingMarket = true;
@@ -143,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _uiTimer?.cancel();
     _liveSubscription?.cancel();
     _marketService.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -563,10 +559,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _marketList() {
     final ordered = _quotes.values.toList()
       ..sort((a, b) => b.volume24hUsdt.compareTo(a.volume24hUsdt));
-    final term = _marketSearch.trim().toLowerCase();
-    final matching = ordered.where((coin) =>
-        coin.symbol.toLowerCase().contains(term) ||
-        coin.name.toLowerCase().contains(term)).toList();
     final btc = _quotes['bitcoin'];
     final featured = ordered.take(5).toList();
     return ListView(
@@ -578,12 +570,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         PremiumSectionTitle(
           title: 'Piyasa Takip Listesi',
           trailing: TextButton(
-            onPressed: () => setState(() => _showAllCoins = !_showAllCoins),
+            onPressed: () => setState(() => _tab = 1),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(_showAllCoins ? 'Daralt' : 'Tümünü gör',
+              const Text('Tümünü gör',
                 style: const TextStyle(color: PremiumColors.gold, fontSize: 12)),
               const SizedBox(width: 2),
-              Icon(_showAllCoins ? Icons.keyboard_arrow_up : Icons.chevron_right,
+              const Icon(Icons.chevron_right,
                 color: PremiumColors.gold, size: 17),
             ]),
           ),
@@ -667,44 +659,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           version: '0.6.0',
           onTap: _openUpdates,
         ),
-        if (_showAllCoins) ...[
-          const SizedBox(height: 22),
-          PremiumSectionTitle(title: 'Tüm Piyasalar',
-            trailing: Text('${ordered.length} coin',
-              style: const TextStyle(
-                color: PremiumColors.muted, fontSize: 12))),
-          const SizedBox(height: 9),
-          TextField(
-            controller: _searchController,
-            onChanged: (value) => setState(() => _marketSearch = value),
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Altcoin ara: BTC, ADA, SOL...',
-              isDense: true,
-            ),
-          ),
-          const SizedBox(height: 10),
-          PremiumSurface(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-            child: matching.isEmpty
-                ? const Padding(
-                  padding: EdgeInsets.all(22),
-                  child: Text('Eşleşen coin bulunamadı.',
-                    style: TextStyle(color: PremiumColors.muted)),
-                )
-                : Column(children: [
-                  for (var i = 0; i < matching.length; i++) ...[
-                    PremiumMarketTile(
-                      quote: matching[i],
-                      onTap: () => _openCoin(matching[i]),
-                    ),
-                    if (i != matching.length - 1)
-                      Divider(height: 1, indent: 11, endIndent: 11,
-                        color: PremiumColors.border.withValues(alpha: .6)),
-                  ],
-                ]),
-          ),
-        ],
+
       ],
     );
   }

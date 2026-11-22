@@ -21,7 +21,10 @@
         "Gerçekleşen sanal emir kaydındaki komisyon sonrası net sonuç, botun öğrenme motoruna bağlandı; piyasadaki tahminler işlem sonucu gibi kaydedilmiyor.",
         "Bot sekmesinde gerçekleşmiş sanal işlem net kârı, kapanan işlem sayısı, kazanma oranı ve Performans Merkezi kısayolu gösteriliyor.",
         "Yapay işlem sonucunun öğrenmeye sızmadığı, komisyon dahil gerçek sanal kâr, kayıp, sınırlı öğrenme etkisi ve 72 üzeri coin taraması birim testleriyle denetleniyor.",
-        "Yeni Radar ve Kâr ekranları için boş veri durumları widget testlerinde kontrol ediliyor."
+        "Yeni Radar ve Kâr ekranları için boş veri durumları widget testlerinde kontrol ediliyor.",
+        "Sabit 240 coin sayısı sınırı kaldırıldı: yeterli hacim ve doğrulanmış fiyat şartlarını geçen bütün Binance USDT spot çiftleri taranabilir.",
+        "Tüm coinler ana sayfaya yığılıp yavaşlatılmıyor; ayrı Radar ekranında kaydırarak ve arayarak görüntüleniyor.",
+        "REST yenileme bütün piyasanın tek 24 saatlik ticker yanıtıyla yapılıyor; uzun URL ve çoklu aboneliklerden kaçınılıyor."
       ]
     },
     {

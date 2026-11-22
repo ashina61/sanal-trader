@@ -106,11 +106,8 @@ class MarketService {
     final discover = !_universeLoaded || _lastUniverseRefresh == null ||
         DateTime.now().toUtc().difference(_lastUniverseRefresh!) >
           const Duration(hours: 6);
-    final uri = discover
-        ? Uri.https('data-api.binance.vision', '/api/v3/ticker/24hr')
-        : Uri.https('data-api.binance.vision', '/api/v3/ticker/24hr', {
-            'symbols': jsonEncode([..._trackedPairs.keys, 'USDTTRY']),
-          });
+    // All-market endpoint avoids an oversized URL for a large universe.
+    final uri = Uri.https('data-api.binance.vision', '/api/v3/ticker/24hr');
     final response = await _client.get(uri).timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) {
       throw Exception('HTTP ' + response.statusCode.toString());
