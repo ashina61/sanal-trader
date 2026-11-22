@@ -7,6 +7,7 @@ import '../services/market_service_v2.dart';
 import '../services/portfolio_repository.dart';
 import '../services/bot_store.dart';
 import '../services/learning_bot.dart';
+import '../services/bot_training.dart';
 import 'bot_dashboard.dart';
 import '../widgets/formatters.dart';
 import '../widgets/mini_chart.dart';
@@ -236,7 +237,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _botBusy = true;
     setState(() => _botError = null);
     try {
-      final evolved = observeBot(_botState!, _quotes.values);
+      var starting = _botState!;
+      if (starting.trainingVersion < 1) {
+        final training = trainHistoricalBot(_quotes.values, seedWeights: starting.weights);
+        if (training == null) {
+          if (mounted) setState(() {
+            _botMessage = 'Geçmiş veriden eğitim bekleniyor; yeterli fiyat geçmişi yok.';
+          });
+          return;
+        }
+        starting = starting.copyWith(
+          weights: training.weights,
+          trainingVersion: 1,
+          trainingExamples: training.trainingExamples,
+          holdoutExamples: training.holdoutExamples,
+          holdoutCorrect: training.holdoutCorrect,
+          baselineCorrect: training.baselineCorrect,
+          trainedCoins: training.coins,
+        );
+        await _botStore.save(starting);
+        if (mounted) setState(() {
+          _botState = starting;
+          _botMessage = '${training.coins} coinin geçmişiyle eğitim tamamlandı.';
+        });
+      }
+      final evolved = observeBot(starting, _quotes.values);
       final order = planBotOrder(
         state: evolved,
         wallet: _portfolio!,
@@ -268,9 +293,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     } catch (error) {
       if (mounted) setState(() {
-        _botError = 'Bot işlemi yapılmadı: $error';
-        _botMessage = 'Veri veya kayıt hatası nedeniyle işlem atlandı.';
+        // Fail closed: don't repeatedly submit orders after a storage error.
+        _botState = _botState?.copyWith(enabled: false);
+        _botError = 'Bot güvenlik nedeniyle durduruldu: $error';
+        _botMessage = 'Veri veya kayıt hatası; bot kapatıldı.';
       });
+      if (_botState != null) {
+        try { await _botStore.save(_botState!); } catch (_) {}
+      }
     } finally {
       _botBusy = false;
       if (mounted) setState(() {});
