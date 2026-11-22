@@ -27,6 +27,8 @@ class MarketService {
   final _trackedPairs = <String, String>{...trackedPairs};
   final _volumes = <String, double>{};
   bool _universeLoaded = false;
+  bool _historyReady = false;
+  DateTime? _lastHistoryAttempt;
   int get universeSize => _trackedPairs.length;
 
   final _tickers = <String, MarketMiniTick>{};
@@ -141,13 +143,19 @@ class MarketService {
       ..sort((a, b) => (_volumes[b] ?? 0).compareTo(_volumes[a] ?? 0));
     final trainingPairs = ranked.take(36).toSet();
     final history = <String, List<double>>{};
-    if (discover) {
+    final shouldLoadHistory = !_historyReady &&
+        (_lastHistoryAttempt == null ||
+         DateTime.now().toUtc().difference(_lastHistoryAttempt!) >
+           const Duration(minutes: 10));
+    if (shouldLoadHistory) {
+      _lastHistoryAttempt = DateTime.now().toUtc();
       for (var i = 0; i < ranked.length && i < 36; i += 6) {
         final batch = ranked.skip(i).take(6);
         final fetched = await Future.wait(batch.map((pair) async =>
           MapEntry(pair, await _fetchHourlyHistory(pair, rateTick.close))));
         history.addEntries(fetched);
       }
+      _historyReady = history.values.where((prices) => prices.length >= 96).length >= 3;
     }
 
     final quotes = <CoinQuote>[];

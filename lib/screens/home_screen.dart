@@ -68,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _refreshTimer?.cancel();
     _botTimer?.cancel();
     _refreshTimer = Timer.periodic(const Duration(minutes: 2), (_) {
-      if (!_marketService.isLive) _loadMarket();
+      if (!_marketService.isLive || _botState?.trainingVersion != 1) {
+        _loadMarket();
+      }
     });
     _botTimer = Timer.periodic(const Duration(seconds: 45), (_) {
       _runBotCycle();
@@ -154,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadMarket() async {
-    if (_busy || _marketService.isLive) return;
+    if (_busy || (_marketService.isLive && _botState?.trainingVersion == 1)) return;
     _busy = true;
     if (mounted) setState(() => _loadingMarket = _quotes.isEmpty);
     try {
