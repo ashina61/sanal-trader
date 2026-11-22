@@ -6,7 +6,7 @@
     "status": "WAIT"
   },
   "cashTry": 259.6594620150529,
-  "cycles": 32,
+  "cycles": 33,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "WAIT",
@@ -12299,6 +12299,10 @@
   "intradayPairs": 32,
   "journal": [
     {
+      "at": "2026-11-22T21:48:03Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T21:46:54Z",
       "message": "114 coin tarandı; AI bekle kararı: Recent performance shows negative returns and zero win rate; all candidate signals are BUY with modest momentum. Edge appears weak, so better to wait for stronger opportunity."
     },
@@ -12438,10 +12442,10 @@
     "NEARUSDT": "2026-11-22T18:12:56Z",
     "PUMPUSDT": "2026-11-22T19:45:48Z"
   },
-  "lastRunAt": "2026-11-22T21:46:54Z",
+  "lastRunAt": "2026-11-22T21:48:03Z",
   "lastScheduledTriggerAt": null,
   "lastSuccessAt": "2026-11-22T21:46:54Z",
-  "lastTriggerAt": "2026-11-22T21:46:54Z",
+  "lastTriggerAt": "2026-11-22T21:48:03Z",
   "lastTriggerEvent": "push",
   "marksTry": {
     "BNBUSDT": 28259.1057,
