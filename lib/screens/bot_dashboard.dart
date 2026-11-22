@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/learning_bot.dart';
 import '../models/coin_quote.dart';
+import '../models/portfolio.dart';
+import '../services/technical_analysis.dart';
+import 'expert_analysis_screen.dart';
 import '../widgets/formatters.dart';
 
 class BotDashboard extends StatelessWidget {
@@ -8,6 +11,7 @@ class BotDashboard extends StatelessWidget {
     super.key,
     required this.state,
     required this.quotes,
+    required this.wallet,
     required this.busy,
     required this.onEnabledChanged,
     this.error,
@@ -16,6 +20,7 @@ class BotDashboard extends StatelessWidget {
 
   final BotState? state;
   final Map<String, CoinQuote> quotes;
+  final Portfolio? wallet;
   final bool busy;
   final ValueChanged<bool> onEnabledChanged;
   final String? error;
@@ -37,6 +42,14 @@ class BotDashboard extends StatelessWidget {
     final baseline = trained && bot.holdoutExamples > 0
       ? '%${(100 * bot.baselineCorrect / bot.holdoutExamples).toStringAsFixed(1)}'
       : '—';
+    final equity = wallet?.fullMarketValue(
+      quotes.map((id, q) => MapEntry(id, q.priceTry)));
+    final peak = bot?.peakEquityTry ?? initialCashTry;
+    final drawdown = equity == null || peak <= 0 ? null :
+      (1 - equity / peak).clamp(0.0, 1.0);
+    final benchmark = quotes['bitcoin'];
+    final market = benchmark == null ? TechnicalReport.insufficient
+      : analyzeTechnical(benchmark);
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -95,6 +108,31 @@ class BotDashboard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        Card(
+          color: const Color(0xFF19212D),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Piyasa rejimi ve risk', style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              _stat('BTC piyasa göstergesi',
+                market.ready ? market.trendLabel : 'Geçmiş verisi yok'),
+              const SizedBox(height: 9),
+              Row(children: [
+                Expanded(child: _stat('Portföy zirvesi', formatTry(peak))),
+                Expanded(child: _stat('Zirveden gerileme',
+                  drawdown == null ? '—' : '%${(drawdown * 100).toStringAsFixed(1)}')),
+              ]),
+              if (drawdown != null && drawdown >= .12)
+                const Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text('Risk freni: yeni sanal alışlar durduruldu. Mevcut varlıklar için satış kontrolü devam eder.',
+                    style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
+                ),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 12),
         const Text('Nasıl öğreniyor?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         const Text(
@@ -146,7 +184,7 @@ class BotDashboard extends StatelessWidget {
           )
         else
           for (final coin in watchlist.take(20))
-            _signalRow(coin, weight),
+            _signalRow(context, coin, weight),
         if (watchlist.length > 20)
           Text('Diğer ${watchlist.length - 20} coin piyasada izleniyor.',
             style: const TextStyle(color: Colors.white54, fontSize: 11)),
@@ -185,24 +223,59 @@ class BotDashboard extends StatelessWidget {
     );
   }
 
-  Widget _signalRow(CoinQuote quote, List<double> weights) {
-    final score = botScore(quote, weights);
-    final positive = score >= botBuyThreshold;
-    final negative = score <= botSellThreshold;
-    final color = positive
-        ? const Color(0xFF43D9A3)
-        : negative ? const Color(0xFFF27777) : Colors.white54;
-    final label = positive ? 'AL sinyali' : (negative ? 'Negatif' : 'BEKLE');
+  Widget _signalRow(BuildContext context, CoinQuote quote, List<double> weights) {
+    final learningScore = botScore(quote, weights);
+    final analysis = analyzeTechnical(quote);
+    final positive = analysis.ready && analysis.score >= .35 &&
+        learningScore >= botBuyThreshold;
+    final danger = analysis.ready && analysis.score <= -.35;
+    final color = positive ? const Color(0xFF43D9A3) :
+      danger ? const Color(0xFFF27777) : Colors.white54;
+    final label = !analysis.ready ? 'VERİ YOK' :
+        positive ? 'ALIM ADAYI' : danger ? 'SATIŞ BASKISI' : 'BEKLE';
     return Card(
       color: const Color(0xFF19212D),
       margin: const EdgeInsets.only(bottom: 5),
-      child: ListTile(
+      child: ExpansionTile(
         dense: true,
         title: Text('${quote.symbol} · ${formatCoinPriceTry(quote.priceTry)}',
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-        subtitle: Text('24s ${quote.change24h.toStringAsFixed(2)}% · Puan ${score.toStringAsFixed(2)}',
-            style: const TextStyle(color: Colors.white54, fontSize: 11)),
-        trailing: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 12)),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        subtitle: Text('${analysis.trendLabel} · RSI ${analysis.rsi.toStringAsFixed(0)}'
+          ' · Teknik ${analysis.score.toStringAsFixed(2)}',
+          style: const TextStyle(color: Colors.white54, fontSize: 11)),
+        trailing: Text(label, style: TextStyle(color: color,
+          fontWeight: FontWeight.w700, fontSize: 10)),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Öğrenen strateji: ${learningScore.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 12)),
+              const SizedBox(height: 6),
+              if (!analysis.ready) const Text(
+                'Kapanış geçmişi olmadan teknik işlem önerisi yapılmaz.',
+                style: TextStyle(fontSize: 11, color: Colors.white54),
+              ),
+              for (final reason in analysis.reasons.take(3))
+                Padding(padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('• $reason', style: const TextStyle(fontSize: 11))),
+              for (final warning in analysis.warnings.take(2))
+                Padding(padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('⚠ $warning',
+                    style: const TextStyle(fontSize: 11, color: Colors.orangeAccent))),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute<void>(
+                    builder: (_) => ExpertAnalysisScreen(quote: quote),
+                  )),
+                  icon: const Icon(Icons.query_stats, size: 16),
+                  label: const Text('Detaylı teknik analiz'),
+                ),
+              ),
+            ]),
+          ),
+        ],
       ),
     );
   }

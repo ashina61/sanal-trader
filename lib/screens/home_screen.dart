@@ -257,6 +257,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() => _botError = null);
     try {
       var starting = _botState!;
+      final pricedWallet = _portfolio!.fullMarketValue(
+        _quotes.map((id, q) => MapEntry(id, q.priceTry)));
+      if (pricedWallet != null && pricedWallet.isFinite &&
+          pricedWallet > starting.peakEquityTry) {
+        starting = starting.copyWith(peakEquityTry: pricedWallet);
+      }
       if (starting.trainingVersion < 1) {
         final training = trainHistoricalBot(_quotes.values);
         if (training == null) {
@@ -414,6 +420,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               _ => BotDashboard(
                 state: _botState,
                 quotes: _quotes,
+                wallet: _portfolio,
                 busy: _botBusy,
                 error: _botError,
                 lastStatus: _botMessage,
