@@ -15,7 +15,8 @@
         "Sunucu bağlantısı kesilirse en son okunabilen kayıt tutuluyor fakat hata/güncellik durumu da gösteriliyor; sıfır bakiye uydurulmuyor.",
         "Yerel portföyün var olan işlem kayıtları ve sunucu bot-data kasası sıfırlanmadı.",
         "Flutter testindeki portföy başlığı yeni yerel cüzdan etiketine uyumlu hâle getirildi.",
-        "Flutter analizinde bulunan ValueListenable import eksikliği ve Performans sayfasının yeni sunucu parametrelerine uymayan test kurulumu düzeltildi."
+        "Flutter analizinde bulunan ValueListenable import eksikliği ve Performans sayfasının yeni sunucu parametrelerine uymayan test kurulumu düzeltildi.",
+        "Yeni ortak sunucu veri kaynağı, nakit/SHORT veri ayrımı, HTTP hata yönetimi, son çalışma gecikmesi ve hareketli işlem geçmişi için 9 Flutter birim ve widget testi eklendi."
       ]
     },
     {

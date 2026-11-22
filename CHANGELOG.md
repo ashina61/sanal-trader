@@ -2,6 +2,8 @@
 
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
+- Ortak sunucu snapshot/parsing, HTTP başarısızlığı, eski şema uyumu, LONG/SHORT görünümü ve geçmiş ekranında gerçek verinin yenilenmesi için testler eklendi.
+
 - Ortak sunucu işlem geçmişi için ValueListenable import eksikliği düzeltildi; Performans ekranı widget testi ortak sunucu durumu parametrelerine uyarlandı.
 
 - Tek bir read-only sunucu botu bağlantısı Panel, Portföy, Bot ve Kâr ekranları arasında paylaştırıldı; ayrı 650 TL yerel cüzdan korunuyor.
