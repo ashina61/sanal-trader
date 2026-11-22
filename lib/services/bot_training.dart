@@ -78,7 +78,7 @@ BotTrainingResult? trainHistoricalBot(
         holdoutExamples++;
         if ((confidence > 0 ? 1 : -1) == result) holdoutCorrect++;
         if ((dayChange >= 0 ? 1 : -1) == result) baselineCorrect++;
-      } else {
+      } else if (i + 1 < trainEnd) {
         trainingExamples++;
         active++;
         for (var k = 0; k < 3; k++) {

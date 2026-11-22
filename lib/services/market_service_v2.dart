@@ -103,7 +103,10 @@ class MarketService {
       final channel = _channel;
       if (channel != null) {
         stopLive();
-        startLive();
+        // The prior async connection may still be finishing; reconnect once
+        // it has fully settled rather than silently losing the new universe.
+        _paused = false;
+        _scheduleRetry();
       }
     }
 
