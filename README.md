@@ -36,6 +36,12 @@ Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etk
 
 Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 
+## Ücretsiz sunucu botu · v0.8.0
+
+**Yeni:** Sunucu sanal botu için GitHub Actions beş dakikalık zamanlama kuruldu. Bot `bot-data` dalına açık, kişisel veri içermeyen sanal durumunu yazar. **Bot** sekmesindeki sunucu kartı kasa/son işlem/son çalışma durumunu gösterir. Sunucu kasası ile tarayıcıdaki yerel kasa şu anda iki ayrı test kasasıdır; karışmamaları için farklı etiketlenir. Ücretsiz zamanlama tam kesinlikte çalışmayabilir.
+
+Sunucu bot yönetimi: https://github.com/ashina61/sanal-trader/actions/workflows/paper-bot.yml
+
 ## Kâr odaklı sanal işlem botu · v0.6.0
 
 **Yeni:** Ana gezinme **Panel · Radar · Portföy · Bot · Kâr** olarak ayrıldı. Radar yükselenleri, düşenleri, hacimli coinleri ve teknik sinyalleri listeler. Kâr ekranı botun gerçekten gerçekleştirdiği sanal satışlardan **komisyon dahil net sonuç** hesaplar; henüz satılmamış pozisyonlar gerçekleşmiş kâr sayılmaz.

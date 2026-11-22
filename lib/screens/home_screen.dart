@@ -10,6 +10,7 @@ import '../services/learning_bot.dart';
 import '../services/bot_training.dart';
 import '../services/walk_forward_backtest.dart';
 import 'bot_dashboard.dart';
+import '../widgets/server_paper_card.dart';
 import 'market_radar_screen.dart';
 import 'bot_performance_screen.dart';
 import 'update_history_screen.dart';
@@ -545,6 +546,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       lastStatus: _botMessage,
                       onEnabledChanged: _setBotEnabled,
                       onRetrain: _retrainBot,
+                      serverBotCard: const ServerPaperCard(),
                       onOpenPerformance: () => setState(() => _tab = 4),
                     ),
                     _ => BotPerformanceScreen(

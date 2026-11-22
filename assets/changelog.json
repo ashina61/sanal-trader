@@ -3,6 +3,20 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.8.0",
+      "date": "2026-11-22",
+      "title": "Ücretsiz tarayıcıdan bağımsız sanal işlem botu",
+      "details": [
+        "GitHub Actions her 5 dakikada bir sanal piyasa kontrolü yapacak şekilde ayarlandı; telefon/tarayıcı kapalı olabilir.",
+        "Ayrı 650 TL sanal sunucu kasası bot-data GitHub dalında kalıcı kayıt alacak; mevcut yerel sanal portföy değiştirilmedi.",
+        "Sunucu yalnızca Binance'in halka açık spot GET verilerini kullanıyor; gerçek borsa API anahtarı, gerçek emir veya para transferi yok.",
+        "Günlük emir sayısı, nakit rezervi, pozisyon büyüklüğü, stop ve kâr alma için testler eklendi.",
+        "Bot sekmesine sunucu kasasını, son çalışma zamanını, net gerçekleşmiş sanal kârı, son kararını ve son emirleri gösteren canlı yenilenebilir kart eklendi.",
+        "Sunucu botun pause/resume/reset kontrolü GitHub Actions workflow menüsünden yapılabilir; tarayıcıdaki yerel bot anahtarı ayrı tutuldu.",
+        "Kamu deposundaki veri public'tir. Zamanlama gecikebilir, düşebilir veya 60 gün hareketsizlik sonrası durabilir; gerçek kesintisiz VPS değildir."
+      ]
+    },
+    {
       "version": "0.7.0",
       "date": "2026-11-22",
       "title": "Komisyonlu ileri-test ve güvenilir bot değerlendirmesi",

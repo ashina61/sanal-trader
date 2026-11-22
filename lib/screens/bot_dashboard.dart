@@ -17,6 +17,7 @@ class BotDashboard extends StatelessWidget {
     required this.onEnabledChanged,
     this.onOpenPerformance,
     this.onRetrain,
+    this.serverBotCard,
     this.error,
     this.lastStatus,
   });
@@ -28,6 +29,7 @@ class BotDashboard extends StatelessWidget {
   final ValueChanged<bool> onEnabledChanged;
   final VoidCallback? onOpenPerformance;
   final VoidCallback? onRetrain;
+  final Widget? serverBotCard;
   final String? error;
   final String? lastStatus;
 
@@ -61,6 +63,10 @@ class BotDashboard extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
       children: [
+        if (serverBotCard != null) ...[
+          serverBotCard!,
+          const SizedBox(height: 18),
+        ],
         Text('Öğrenen sanal bot', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         Card(

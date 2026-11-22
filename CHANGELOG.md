@@ -1,5 +1,14 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.8.0 — 2026-11-22: Ücretsiz zamanlanmış sunucu sanal botu
+
+- Tarayıcıdan bağımsız GitHub Actions botu yaklaşık 5 dakikada bir Binance public spot fiyatlarını kullanarak yalnızca sanal işlem denemeleri yapar.
+- Sanal sunucu cüzdanı `bot-data/state.json` dalında tutulur. Tarayıcıdaki yerel 650 TL cüzdanı silinmez, bu cüzdanla henüz birleşmez.
+- Bot sekmesinde ayrılmış sunucu sanal kasası, son kontrol, işlem listesi ve kâr/zarar durumu salt okunur canlı olarak gösterilir.
+- GitHub workflow dispatch menüsünden run / pause / resume / reset yönetimi yapılır. Bunlar gerçek emir değildir.
+- Bu, ücretsiz GitHub cron nedeniyle garanti edilmiş saniyelik kesintisiz VPS sistemi değildir.
+
+
 ## v0.7.0 — 2026-11-22: Komisyonlu ileri-test ve bot karar incelemesi
 
 - Performans ekranındaki aşağı kaydırılarak görünen boş sonuç alanı için Flutter testine gerçek kaydırma davranışı eklendi.
