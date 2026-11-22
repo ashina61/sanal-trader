@@ -1,6 +1,6 @@
 {
   "cashTry": 337.87819,
-  "cycles": 7,
+  "cycles": 8,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "WAIT",
@@ -4167,6 +4167,10 @@
   "initialCashTry": 650.0,
   "journal": [
     {
+      "at": "2026-11-22T19:29:51Z",
+      "message": "Tekrarlanan kontrol atlandı."
+    },
+    {
       "at": "2026-11-22T19:29:03Z",
       "message": "115 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı"
     },
@@ -4195,7 +4199,7 @@
       "message": "Sanal AL NEARUSDT: 78.00 TL; Trend up, puan 0.90"
     }
   ],
-  "lastDecision": "115 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı",
+  "lastDecision": "Tekrarlanan kontrol atlandı.",
   "lastError": null,
   "lastOrder": {
     "BNBUSDT": "2026-11-22T18:21:29Z",
@@ -4203,7 +4207,7 @@
     "ETHUSDT": "2026-11-22T18:51:01Z",
     "NEARUSDT": "2026-11-22T18:12:56Z"
   },
-  "lastRunAt": "2026-11-22T19:29:03Z",
+  "lastRunAt": "2026-11-22T19:29:51Z",
   "lastSuccessAt": "2026-11-22T19:29:03Z",
   "marksTry": {
     "BNBUSDT": 28211.032199999994,
