@@ -2,6 +2,10 @@
 
 ## v0.9.2 — 2026-11-22: Otonom AL / SAT / LONG / SHORT karar motoru
 
+- Bot → Sunucu Botu ekranına katlanabilir Karar Merkezi eklendi: son otomatik karar, piyasa yönü, seçim gerekçesi, seçilen coin ve ilk beş güçlü aday.
+- Tüm kararlar sunucunun kalıcı bot-data kayıtlarından okunur; yerel bot ya da sanal kasa yerine geçmez.
+- Flutter sürüm numarası 0.9.2+11 olarak güncellendi.
+
 - Ücretsiz sunucu botu piyasa durumuna göre tek başına **spot AL (1x LONG), spot SAT (kapat), sanal 1x SHORT aç, SHORT kapat veya BEKLE** kararı verir.
 - Son görülen spot fiyat, saatlik geçmiş, BTC piyasa rejimi, oynaklık, maliyet payı, açık pozisyon, nakit ve maruziyet birlikte değerlendirilir.
 - Koruyucu pozisyon kapatma kararları yeni girişten önce işlenir, günlük emir sınırına takılmaz; aşırı eski veya tutarsız grafikle yeni işlem açılmaz.

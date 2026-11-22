@@ -67,6 +67,9 @@ class ServerPaperSnapshot {
   Map<String, dynamic> get shorts => _map('shorts');
   Map<String, dynamic> get marksTry => _map('marksTry');
   Map<String, dynamic> get directionStats => _map('directionStats');
+  /// Server-supplied evidence from the most recent autonomous decision.
+  /// Older bot-data snapshots safely show an empty analysis.
+  Map<String, dynamic> get decisionPlan => _map('decisionPlan');
 
   List<Map<String, dynamic>> get trades {
     final source = _raw['trades'];

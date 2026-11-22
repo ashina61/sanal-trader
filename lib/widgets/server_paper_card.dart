@@ -100,6 +100,18 @@ class ServerPaperCard extends StatelessWidget {
     final shorts = state?.shorts ?? {};
     final marks = state?.marksTry ?? {};
     final sideStats = state?.directionStats ?? const <String, dynamic>{};
+    final plan = state?.decisionPlan ?? const <String, dynamic>{};
+    final action = plan['action']?.toString() ?? 'WAIT';
+    final actionText = switch (action) {
+      'BUY' => 'SPOT AL / LONG',
+      'SELL' => 'SPOT SAT / LONG KAPAT',
+      'SHORT' => '1x SHORT AÇ',
+      'COVER' => '1x SHORT KAPAT',
+      _ => 'BEKLE',
+    };
+    final candidates = plan['candidates'] is List
+        ? (plan['candidates'] as List).whereType<Map>().take(5).toList()
+        : <Map>[];
     return PremiumSurface(
       gradient: const LinearGradient(
         colors: [Color(0xFF164034), Color(0xFF0D1E1B)],
@@ -228,8 +240,71 @@ class ServerPaperCard extends StatelessWidget {
                   '${updated.minute.toString().padLeft(2,'0')}',
               style: const TextStyle(
                 fontSize: 11, color: PremiumColors.muted)),
-          const SizedBox(height: 6),
-          Text(state.decision, style: const TextStyle(fontSize: 11)),
+          const SizedBox(height: 12),
+          Card(
+            color: PremiumColors.panel,
+            margin: EdgeInsets.zero,
+            child: ExpansionTile(
+              initiallyExpanded: false,
+              tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+              childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              title: const Text('Otonom Karar Merkezi',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              subtitle: Text(
+                '$actionText · ${plan['marketRegime']?.toString() ?? 'Analiz bekleniyor'}',
+                style: const TextStyle(
+                  color: PremiumColors.gold, fontSize: 11)),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    plan['reason']?.toString() ?? state.decision,
+                    style: const TextStyle(fontSize: 12)),
+                ),
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(child: _metric('Değerlendirilen',
+                    '${plan['reviewed'] is num ? plan['reviewed'] : '—'} coin')),
+                  Expanded(child: _metric('Seçilen',
+                    plan['symbol']?.toString() ?? 'İşlem yok')),
+                  Expanded(child: _metric('Sanal emir',
+                    _money(plan['amountTry']))),
+                ]),
+                if (candidates.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('En güçlü teknik adaylar',
+                      style: TextStyle(fontSize: 11,
+                        fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(height: 5),
+                  for (final candidate in candidates)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Align(alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${candidate['symbol'] ?? '?'} · '
+                          '${candidate['action'] == 'SHORT' ? 'SHORT' : 'AL'} · '
+                          'Puan ${candidate['score'] ?? '?'}',
+                          style: const TextStyle(
+                            fontSize: 10, color: PremiumColors.muted),
+                        ),
+                      ),
+                    ),
+                ],
+                const SizedBox(height: 8),
+                const Text(
+                  'Bot spot AL/SAT, 1x sanal SHORT aç/kapat veya BEKLE '
+                  'kararını kendi verir. Veri hatası, yüksek risk veya '
+                  'yetersiz sinyalde işlem açmayabilir. '
+                  'Bu bölüm geçmişte gerçekleşen gerçek sanal emirden '
+                  've yatırım tavsiyesinden farklıdır.',
+                  style: TextStyle(
+                    color: PremiumColors.muted, fontSize: 10)),
+              ],
+            ),
+          ),
           if (state.error != null)
             Text('Sunucu hatası: ${state.error}',
               style: const TextStyle(
