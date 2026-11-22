@@ -17,7 +17,7 @@ String _sideLabel(dynamic code) => switch (code) {
   _ => 'SANAL İŞLEM',
 };
 
-/// Small, shared status summary for the Panel and local Portfolio tab.
+/// Read-only status summary of the single autonomous server wallet.
 class ServerPaperSummaryTile extends StatelessWidget {
   const ServerPaperSummaryTile({
     super.key, required this.snapshot, required this.loading,
@@ -174,8 +174,8 @@ class ServerPaperCard extends StatelessWidget {
             fontSize: 11, fontWeight: FontWeight.w800)),
         const SizedBox(height: 8),
         const Text(
-          'Otonom botun tek ana sanal kasası budur. '
-          'Eski yerel demo hesap ana bakiyeye eklenmez.',
+          'Tek sanal kasa: tüm işlemleri arka plandaki sunucu botu yapar. '
+          'Uygulama yalnızca sonucu gösterir.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
         if (error != null) ...[
           const SizedBox(height: 8),
@@ -361,7 +361,7 @@ class ServerPaperCard extends StatelessWidget {
                       child: Align(alignment: Alignment.centerLeft,
                         child: Text(
                           '${candidate['symbol'] ?? '?'} · '
-                          '${candidate['action'] == 'SHORT' ? 'SHORT' : 'AL'} · '
+                          '${candidate['action'] == 'SHORT' ? 'SHORT AÇ' : 'SPOT AL'} · '
                           'Puan ${candidate['score'] ?? '?'}',
                           style: const TextStyle(
                             fontSize: 10, color: PremiumColors.muted),
@@ -407,9 +407,9 @@ class ServerPaperCard extends StatelessWidget {
           style: TextButton.styleFrom(foregroundColor: PremiumColors.gold),
         ),
         const Text(
-          'GitHub zamanlaması gecikebilir. Tarayıcıdaki yerel bot anahtarı '
-          'sunucu botunu açıp kapatmaz. Finansman/borçlanma maliyeti '
-          'bu 1x sanal SHORT modelinde hesaplanmıyor.',
+          'GitHub zamanlaması gecikebilir. İşlemleri yalnızca '
+          'sunucu botu yürütür; uygulamadan manuel emir verilmez. '
+          '1x sanal SHORT modeli borçlanma/fonlama maliyetini içermez.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
       ]),
     );

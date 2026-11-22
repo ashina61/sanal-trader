@@ -257,6 +257,7 @@ void main() {
       )),
     )));
     expect(find.textContaining('Açık SPOT'), findsOneWidget);
+    expect(find.textContaining('Tek sanal kasa:'), findsOneWidget);
     expect(find.textContaining('Açık SHORT'), findsOneWidget);
     expect(find.textContaining('SHORT ADAUSDT'), findsOneWidget);
     await tester.ensureVisible(

@@ -1,3 +1,9 @@
+## 2026-11-23 — Tek kasa arayüzünden eski demo mesajlarını kaldır
+
+- Bot ekranında kalan eski yerel bot/demodan bahseden metinler silindi; yalnızca bir sanal cüzdan ve arka plan botunun otomatik emirleri açıklanıyor.
+- Teknik adaylarda `SPOT AL` ile `SHORT AÇ` farklı ve açık adlandırılıyor.
+- Güvenlik: ön yüzde manuel emir verilemez. Sunucu sanal cüzdanı korunur.
+
 ## 2026-11-23 — v0.9.10 Spot AL/SAT etiketlerinin netleştirilmesi
 
 - Normal spot coin alımı `SPOT AL`, kapatılması `SPOT SAT` olarak Bot/Kasa/Kâr/İşlem Geçmişi ekranlarında gösterilir. Bunlar kaldıraçlı LONG kontratı değildir.
