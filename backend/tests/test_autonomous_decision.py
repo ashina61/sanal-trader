@@ -1,0 +1,122 @@
+import datetime as dt
+import unittest
+
+from backend.paper_bot import (
+    assess_decision, cycle, execute, fresh_state, pick,
+)
+from backend.short_positions import open_short
+from backend.tests.test_paper_bot import (
+    FakeMarket, NOW, candles_for, quote,
+)
+
+
+def market_prices(series, pair="BTCUSDT"):
+    state = fresh_state()
+    state["histories"][pair] = {
+        "prices": series,
+        "fetchedAt": NOW.isoformat(),
+    }
+    latest = {pair: {
+        "priceTry": series[-1], "change24h": (
+            (series[-1] / series[-25] - 1) * 100
+        ),
+    }}
+    return state, latest
+
+
+class AutonomousDecisionTests(unittest.TestCase):
+    def test_rising_market_selects_spot_buy_and_explains_why(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "BUY")
+        self.assertEqual(plan["marketRegime"], "YÜKSELİŞ")
+        self.assertEqual(plan["symbol"], "BTCUSDT")
+        self.assertGreater(plan["score"], .55)
+        self.assertIn("SPOT AL", plan["reason"])
+        self.assertGreater(plan["amountTry"], 5)
+        self.assertTrue(plan["candidates"])
+        self.assertEqual(pick(state, quotes, NOW), plan["order"])
+
+    def test_falling_market_selects_1x_short_not_spot_buy(self):
+        state, quotes = market_prices([200 - i * .5 for i in range(168)])
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "SHORT")
+        self.assertEqual(plan["marketRegime"], "DÜŞÜŞ")
+        self.assertIn("1x SHORT", plan["reason"])
+        self.assertNotIn("BTCUSDT", state["holdings"])
+
+    def test_sideways_or_missing_history_waits_instead_of_fabricating(self):
+        state, quotes = market_prices([100.0] * 168)
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "WAIT")
+        self.assertIsNone(plan["order"])
+        self.assertIn("trend/momentum", plan["reason"])
+        state["histories"].clear()
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+
+    def test_old_history_or_large_price_discrepancy_cannot_open_new_risk(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        state["histories"]["BTCUSDT"]["fetchedAt"] = (
+            NOW - dt.timedelta(hours=3)).isoformat()
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+        state["histories"]["BTCUSDT"]["fetchedAt"] = NOW.isoformat()
+        quotes["BTCUSDT"]["priceTry"] *= 1.4
+        self.assertEqual(assess_decision(state, quotes, NOW)["action"], "WAIT")
+
+    def test_spot_sell_still_works_on_existing_position_without_new_entry(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        execute(state, NOW - dt.timedelta(hours=2), "BTCUSDT", "buy", 50, 100,
+                "older spot buy")
+        quotes["BTCUSDT"]["priceTry"] = 90
+        state["todayOrders"] = 8
+        state["peakEquityTry"] = 800
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "SELL")
+        self.assertIn("zarar kes", plan["reason"])
+
+    def test_short_cover_outweighs_new_bearish_short_signal(self):
+        state, quotes = market_prices([200 - i * .5 for i in range(168)])
+        open_short(state, NOW - dt.timedelta(hours=2), "BTCUSDT", 60, 100,
+                   "previous short")
+        quotes["BTCUSDT"]["priceTry"] = 111
+        state["todayOrders"] = 8
+        state["peakEquityTry"] = 800
+        plan = assess_decision(state, quotes, NOW)
+        self.assertEqual(plan["action"], "COVER")
+        self.assertIn("zarar kes", plan["reason"])
+
+    def test_money_or_risk_limit_selects_wait(self):
+        state, quotes = market_prices([100 + i * .4 for i in range(168)])
+        state["todayOrders"] = 8
+        self.assertIn("8", assess_decision(state, quotes, NOW)["reason"])
+        state["todayOrders"] = 0
+        state["peakEquityTry"] = 1000
+        self.assertIn("gerilemesi", assess_decision(state, quotes, NOW)["reason"])
+
+    def test_decision_plan_is_persisted_without_fake_trade(self):
+        ticks = [quote("USDTTRY", 40), quote("BTCUSDT", 100)]
+        data = {"BTCUSDT": candles_for(price=100)}
+        result = cycle(fresh_state(), FakeMarket(ticks, data), NOW)
+        self.assertIsNone(result["lastError"])
+        plan = result["decisionPlan"]
+        self.assertIn(plan["action"], {"BUY", "SELL", "SHORT", "COVER", "WAIT"})
+        self.assertIn("marketRegime", plan)
+        self.assertNotIn("order", plan)
+        if plan["action"] == "WAIT":
+            self.assertEqual(result["trades"], [])
+        else:
+            self.assertEqual(len(result["trades"]), 1)
+
+    def test_feed_failure_does_not_reuse_old_action_or_open_order(self):
+        state, _ = market_prices([100 + i * .4 for i in range(168)])
+        state["decisionPlan"] = {
+            "action": "BUY", "symbol": "BTCUSDT",
+        }
+        result = cycle(state, FakeMarket([quote("BTCUSDT", 100)]), NOW)
+        self.assertIsNotNone(result["lastError"])
+        self.assertEqual(result["decisionPlan"]["action"], "WAIT")
+        self.assertEqual(result["trades"], [])
+
+
+if __name__ == "__main__":
+    unittest.main()

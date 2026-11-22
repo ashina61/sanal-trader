@@ -1,5 +1,15 @@
 # SanalTrader — Güncelleme Geçmişi
 
+## v0.9.2 — 2026-11-22: Otonom AL / SAT / LONG / SHORT karar motoru
+
+- Ücretsiz sunucu botu piyasa durumuna göre tek başına **spot AL (1x LONG), spot SAT (kapat), sanal 1x SHORT aç, SHORT kapat veya BEKLE** kararı verir.
+- Son görülen spot fiyat, saatlik geçmiş, BTC piyasa rejimi, oynaklık, maliyet payı, açık pozisyon, nakit ve maruziyet birlikte değerlendirilir.
+- Koruyucu pozisyon kapatma kararları yeni girişten önce işlenir, günlük emir sınırına takılmaz; aşırı eski veya tutarsız grafikle yeni işlem açılmaz.
+- İşlem yapılmayan döngülerde bekleme nedeni ve değerlendirilen adaylar kayda geçer; sanal başarı veya işlem uydurulmaz.
+- Uçtan uca otomatik BUY/SELL/SHORT/COVER/WAIT, veri kesintisi ve risk durum testleri eklendi.
+
+
+
 ## v0.9.1 — 2026-11-22: Sayfa bağlantıları ve sanal cüzdan bütünlüğü
 
 - Kullanıcı rehberlerindeki eski mimari ifadeleri düzeltildi; yerel bot, ayrı sunucu sanal kasası, LONG/SHORT simülasyon sınırları ve GitHub cron durumunun ayrımı açıklandı.

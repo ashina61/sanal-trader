@@ -3,6 +3,20 @@
   "updatedAt": "2026-11-22",
   "releases": [
     {
+      "version": "0.9.2",
+      "date": "2026-11-22",
+      "title": "Otonom AL/SAT/LONG/SHORT Karar Merkezi",
+      "details": [
+        "Ücretsiz sunucu botu bütün uygun adaylar arasından SPOT AL (LONG), açık spot pozisyon SAT, sanal 1x SHORT aç, SHORT kapat veya BEKLE kararlarını kendi verir.",
+        "Botun her piyasa döngüsü karar türünü, BTC piyasa rejimini, değerlendirilen aday sayısını, seçim gerekçesini, puanları ve ilk beş adayı sunucu bot-data kaydına yazar.",
+        "Açık LONG/SHORT zarar koruma ve kâr alma çıkışları yeni pozisyon girişlerinden önce değerlendirilir; koruyucu çıkışlar günlük emir ve gerileme sınırlarına takılmaz.",
+        "Son görülen spot fiyat ile tamamlanmış saatlik geçmiş birlikte analiz edilir; iki saatten eski tarihçe veya %20 üzeri fiyat tutarsızlığında yeni sinyal üretilmez.",
+        "Trend/momentum, sanal çift yönlü komisyon payı, BTC rejimi, pozisyon maruziyeti, nakit rezervi ve daha önce kapanmış yön bazlı sanal işlem getirileri değerlendirilir.",
+        "Uygun işlem yoksa emirsiz BEKLE kararı ve nedeni kaydedilir; sahte işlem veya kâr verisi üretilmez.",
+        "Güvenlik ve davranış doğrulaması için otomatik yükseliş, düşüş, yatay piyasa, fiyat sapması, risk sınırı, LONG SAT ve SHORT KAPAT testleri eklendi."
+      ]
+    },
+    {
       "version": "0.9.1",
       "date": "2026-11-22",
       "title": "Uygulama bağlantıları ve veri bütünlüğü denetimi",
