@@ -30,6 +30,13 @@ class BotDashboard extends StatelessWidget {
       '%'+ (100 * bot!.correct / bot.evaluated).toStringAsFixed(1);
     final watchlist = quotes.values.where((q) => q.isFresh).toList()
       ..sort((a, b) => botScore(b, weight).compareTo(botScore(a, weight)));
+    final trained = bot != null && bot.trainingVersion > 0;
+    final holdout = trained && bot.holdoutExamples > 0
+      ? '%${(100 * bot.holdoutCorrect / bot.holdoutExamples).toStringAsFixed(1)}'
+      : 'Henüz yok';
+    final baseline = trained && bot.holdoutExamples > 0
+      ? '%${(100 * bot.baselineCorrect / bot.holdoutExamples).toStringAsFixed(1)}'
+      : '—';
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -64,10 +71,34 @@ class BotDashboard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        Card(
+          color: const Color(0xFF19212D),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Geçmiş veriden eğitim', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              Text(trained
+                ? '${bot.trainedCoins} coin · ${bot.trainingExamples} geçmiş eğitim örneği'
+                : 'Geçmiş veriler toplanıyor; eğitimsiz bot alış emri açmaz.',
+                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              const SizedBox(height: 10),
+              Row(children: [
+                Expanded(child: _stat('Ayrılmış 24s test', holdout)),
+                Expanded(child: _stat('Basit momentum', baseline)),
+                Expanded(child: _stat('Test örneği', '${bot?.holdoutExamples ?? 0}')),
+              ]),
+              const SizedBox(height: 6),
+              const Text('Bu oranlar yön tahmini içindir; komisyon sonrası kâr veya gelecekteki başarı değildir.',
+                style: TextStyle(color: Colors.white54, fontSize: 11)),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 12),
         const Text('Nasıl öğreniyor?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         const Text(
-          'Üç basit fiyat stratejisi aynı coin için yön tahmini yapar. Yeni fiyat en az 15 dakika sonra geldiğinde tahminler karşılaştırılır; doğru yöndeki stratejilerin ağırlığı artırılır. Bu sistem bir dil modeli değildir ve başarı garantisi yoktur.',
+          'Geçmiş saatlik fiyatlardan üç stratejiyi eğitir. Son 24 saati eğitime katmadan ayrı test eder. Daha sonra canlı fiyat geldiğinde 15 dakikadan eski tahminleri gerçek hareketlerle karşılaştırır. Bu sistem bir dil modeli değildir ve başarı garantisi yoktur.',
           style: TextStyle(color: Colors.white70, fontSize: 12),
         ),
         const SizedBox(height: 14),
@@ -98,7 +129,11 @@ class BotDashboard extends StatelessWidget {
         ),
 
         const SizedBox(height: 10),
-        const Text('Canlı bot sinyalleri', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Row(children: [
+          const Text('Canlı bot sinyalleri', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Spacer(),
+          Text('${watchlist.length} izleniyor', style: const TextStyle(color: Colors.white54, fontSize: 11)),
+        ]),
         const SizedBox(height: 4),
         const Text('Sinyaller işlem garantisi değildir; nakit ve risk sınırları ayrıca kontrol edilir.',
           style: TextStyle(color: Colors.white54, fontSize: 11)),
@@ -110,8 +145,11 @@ class BotDashboard extends StatelessWidget {
               style: TextStyle(color: Colors.white54, fontSize: 12)),
           )
         else
-          for (final coin in watchlist)
+          for (final coin in watchlist.take(20))
             _signalRow(coin, weight),
+        if (watchlist.length > 20)
+          Text('Diğer ${watchlist.length - 20} coin piyasada izleniyor.',
+            style: const TextStyle(color: Colors.white54, fontSize: 11)),
         const SizedBox(height: 10),
         const Text('Risk sınırları', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
