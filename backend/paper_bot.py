@@ -22,6 +22,13 @@ UTC = dt.timezone.utc
 INITIAL = 650.0
 FEE = .001
 MIN_ORDER = 5.0
+
+# Fee-aware observation phase. Limits fresh entries, never safety exits.
+MAX_DAILY_NEW_ENTRIES = 6
+MAX_OPEN_POSITIONS = 6
+MIN_OPEN_INTERVAL_SECONDS = 3600
+MAX_ENTRY_EXPOSURE = .60
+MIN_ENTRY_CASH_RESERVE = .38
 CORE = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT")
 STABLE = {"USDT","USDC","FDUSD","TUSD","USDD","DAI","USDP","BUSD","EUR","TRY","BRL","GBP","AUD","PAXG","XAUT","EURI","AEUR","USTC","LUNA","WBTC","WETH","BFUSD","RLUSD","PYUSD","USD1","USDG","USDJ"}
 API = "https://data-api.binance.vision"
@@ -389,23 +396,25 @@ def assess_decision(state, latest, t):
         amount = pos["quantity"] * current
         if short_value(pos, current) <= pos["marginTry"] * .10:
             exits.append((130, pair, "cover", amount, "SHORT teminat koruması", technical))
-        elif adverse >= .06:
+        elif adverse >= .045:
             exits.append((120 + adverse, pair, "cover", amount,
                           f"SHORT zarar kes: ters hareket %{adverse*100:.1f}", technical))
-        elif adverse <= -.08:
+        elif adverse <= -.035:
             exits.append((100 - adverse, pair, "cover", amount,
                           f"SHORT kâr al: düşüş %{abs(adverse)*100:.1f}", technical))
         elif (state.get("troughMarksTry", {}).get(pair) is not None
-              and 1 - state["troughMarksTry"][pair] / entry >= .035
-              and adverse <= -.008
-              and current / state["troughMarksTry"][pair] - 1 >= .018):
+              and 1 - state["troughMarksTry"][pair] / entry >= .015
+              and adverse <= -.004
+              and current / state["troughMarksTry"][pair] - 1 >= .009):
             exits.append((91, pair, "cover", amount,
                           "SHORT takip eden kâr koruması: dipten dönüş", technical))
         elif (cooled(pair) and quick(pair) is not None
-              and quick(pair)["momentum1h"] >= .75 and adverse < -.002):
+              and quick(pair)["momentum1h"] >= .75 and adverse <= -.006):
             exits.append((85, pair, "cover", amount,
                           "15dk mumları: SHORT aleyhine hızlı dönüş", technical))
-        elif cooled(pair) and technical and technical["score"] >= .50:
+        elif (cooled(pair) and technical and technical["score"] >= .50
+              and (adverse >= .025 or adverse <= -.005)):
+
             exits.append((80 + technical["score"], pair, "cover", amount,
                           "Yükseliş trendi SHORT pozisyonla ters düştü", technical))
 
@@ -418,31 +427,31 @@ def assess_decision(state, latest, t):
         move = quote["priceTry"] / cost - 1
         technical = current_tech(pair)
         # Protective exits can close small remaining dust positions too.
-        if move <= -.06:
+        if move <= -.045:
             exits.append((120 - move, pair, "sell", amount,
                           f"Spot zarar kes: düşüş %{abs(move)*100:.1f}", technical))
-        elif move >= .08:
+        elif move >= .035:
             exits.append((100 + move, pair, "sell", amount,
                           f"Spot kâr al: yükseliş %{move*100:.1f}", technical))
         elif (state.get("peakMarksTry", {}).get(pair) is not None
-              and state["peakMarksTry"][pair] / cost - 1 >= .035
-              and move >= .008
-              and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.018):
+              and state["peakMarksTry"][pair] / cost - 1 >= .015
+              and move >= .004
+              and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.009):
             exits.append((91, pair, "sell", amount,
                           "SPOT takip eden kâr koruması: zirveden dönüş", technical))
         elif (cooled(pair) and quick(pair) is not None
-              and quick(pair)["momentum1h"] <= -.75 and move > .002):
+              and quick(pair)["momentum1h"] <= -.75 and move >= .006):
             exits.append((85, pair, "sell", amount,
                           "15dk mumları: SPOT kâr koruyan hızlı çıkış", technical))
-        elif cooled(pair) and technical and technical["score"] < -.50:
+        elif (cooled(pair) and technical and technical["score"] < -.50
+              and (move >= .005 or move <= -.025)):
+
             exits.append((80 - technical["score"], pair, "sell", amount,
                           "Momentum düşüşe döndü; açık SPOT satılıyor", technical))
 
-    # EARLY EXPOSURE RELIEF: A portfolio at capacity may stay frozen for
-    # hours even when a held coin has a confirmed 4h deterioration. Only
-    # close a genuinely underperforming existing paper position; never
-    # fabricate a profitable replacement or bypass the original hard stops.
-    # At most two such exits per UTC day, >=90 minutes apart.
+    # Only severe CONFIRMED weakness can free a saturated paper wallet.
+    # No routine -0.35% churn: fees made repeated tiny exits unprofitable.
+    # One such defensive early exit per UTC day, no automatic replacement.
     used_now = exposure(state, latest)
     if used_now is not None and used_now >= total * .64:
         recent_exits = [
@@ -452,14 +461,13 @@ def assess_decision(state, latest, t):
         ]
         recent_exits = [at for at in recent_exits
                         if at and at.date() == t.date()]
-        if (len(recent_exits) < 2 and not any(
-                (t - at).total_seconds() < 5400 for at in recent_exits)):
+        if not recent_exits:
             for pair, pos in state["holdings"].items():
                 mark = latest.get(pair, {}).get("priceTry")
                 if not mark or pos.get("quantity", 0) <= 0:
                     continue
                 last_open = as_date(state.get("lastOrder", {}).get(pair))
-                if last_open is None or (t - last_open).total_seconds() < 5400:
+                if last_open is None or (t - last_open).total_seconds() < 10800:
                     continue
                 fast = quick(pair)
                 tech = current_tech(pair)
@@ -467,10 +475,10 @@ def assess_decision(state, latest, t):
                     continue
                 entry = pos["costTry"] / pos["quantity"]
                 pnl = mark / entry - 1
-                if (-.025 <= pnl <= -.0035
-                        and fast["momentum4h"] <= -.70
-                        and fast["momentum1h"] <= .15
-                        and tech["momentum6"] < .70):
+                if (-.045 < pnl <= -.025
+                        and fast["momentum4h"] <= -1.5
+                        and fast["momentum1h"] <= -.35
+                        and tech["momentum6"] < 0):
                     exits.append((82, pair, "sell", pos["quantity"] * mark,
                         "Risk azaltımı: uzun süren zayıf 15dk momentum "
                         "ile dolu portföyün zararı sınırlanıyor", tech))
@@ -492,10 +500,9 @@ def assess_decision(state, latest, t):
     if used is None:
         return wait("Açık pozisyonlar için güvenilir piyasa değeri yok")
 
-    # One cautious SPOT portfolio rotation per UTC day. When nearly at
-    # capacity, allow selling a fading, nearly flat position ONLY when a
-    # verified stronger candidate is available. No forced trade without edge.
-    # Existing protective exits still take precedence above this block.
+    # Rotate ONLY a net-profitable held spot position. Chasing another
+    # token by selling a losing position incurred four losing closes and
+    # repeated fees in the first paper session. Protect cash first.
     if (used >= total * .60 and state.get("todayOrders", 0) <= 14
             and btc and btc["direction"] != "down"):
         rotation_times = [
@@ -507,7 +514,7 @@ def assess_decision(state, latest, t):
                           if when is not None and when.date() == t.date()]
         recently_rotated = any(
             (t - when).total_seconds() < 5400 for when in rotation_times)
-        if len(rotation_times) < 3 and not recently_rotated:
+        if len(rotation_times) < 1 and not recently_rotated:
             leaders = []
             for pair in latest:
                 if (pair in state["holdings"] or pair in state.get("shorts", {})
@@ -540,7 +547,7 @@ def assess_decision(state, latest, t):
                     fast = quick(pair)
                     hourly_fading = (tech["score"] <= .35 and tech["momentum6"] < 0)
                     fast_fading = fast is not None and fast["momentum1h"] <= -.45
-                    if (-.0075 <= pnl_ratio <= .015
+                    if (.007 <= pnl_ratio <= .03
                             and (hourly_fading or fast_fading)
                             and best_score - tech["score"] >= .50):
                         fading.append((tech["score"], pair, tech))
@@ -560,11 +567,25 @@ def assess_decision(state, latest, t):
                         "Yeni pozisyon ancak sonraki doğrulanmış döngüde açılabilir.",
                         tech["score"])
 
-    if used >= total * .65:
-        return wait("Toplam SPOT+SHORT maruziyeti %65 sınırında; "
-                    "uygun güvenli rotasyon adayı yok")
-    if state["cashTry"] <= total * .30:
-        return wait("Minimum %30 sanal nakit rezervi korunuyor")
+    if used >= total * MAX_ENTRY_EXPOSURE:
+        return wait("SPOT+SHORT pozisyon payı %60 seviyesinde; "
+                    "zararına rotasyon yapılmıyor")
+    if state["cashTry"] <= total * MIN_ENTRY_CASH_RESERVE:
+        return wait("Yeni giriş için minimum %38 nakit rezervi korunuyor")
+    if len(state["holdings"]) + len(state.get("shorts", {})) >= MAX_OPEN_POSITIONS:
+        return wait("En fazla 6 açık pozisyon kuralı; yeni giriş bekliyor")
+
+    opening_times = [
+        as_date(trade.get("at")) for trade in state.get("trades", [])
+        if isinstance(trade, dict) and trade.get("side") in ("buy", "short")
+    ]
+    opening_times = [at for at in opening_times if at is not None]
+    if sum(at.date() == t.date() for at in opening_times) >= MAX_DAILY_NEW_ENTRIES:
+        return wait("Günlük 6 yeni sanal giriş hakkı doldu; mevcut "
+                    "pozisyonlar ve koruyucu çıkışlar izleniyor")
+    if any(0 <= (t - at).total_seconds() < MIN_OPEN_INTERVAL_SECONDS
+           for at in opening_times):
+        return wait("Yeni girişler arasında minimum 60 dakika kontrol")
 
     candidates = []
     reasons = {}
@@ -581,8 +602,8 @@ def assess_decision(state, latest, t):
         if tech is None:
             rejected("Yetersiz / eski mum")
             continue
-        if tech["volatility"] > 18:
-            rejected("Aşırı oynaklık")
+        if tech["volatility"] > 7.5:
+            rejected("Fazla oynaklık / komisyon riski")
             continue
         plan["reviewed"] += 1
         # The observed movement must exceed round-trip 0.2% fees plus
@@ -591,25 +612,39 @@ def assess_decision(state, latest, t):
             rejected("Zayıf 6s momentum")
             continue
         fast = quick(pair)
+        # Production has 15-minute caches; never open an unconfirmed mover.
+        # Existing historical/fake-market tests without intraday provider
+        # can still exercise the hourly deterministic fallback.
+        if state.get("intraday") and fast is None:
+            rejected("Taze 15dk mum yok")
+            continue
         if fast is not None:
             if (tech["direction"] == "up"
-                    and fast["momentum1h"] < -.35):
+                    and (fast["momentum1h"] < .15 or
+                         fast["momentum4h"] < .60)):
                 rejected("15dk ters trend")
                 continue
             if (tech["direction"] == "down"
-                    and fast["momentum1h"] > .35):
+                    and (fast["momentum1h"] > -.15 or
+                         fast["momentum4h"] > -.60)):
                 rejected("15dk ters trend")
+                continue
+            if (abs(fast["momentum1h"]) > 1.8 or
+                    abs(fast["momentum4h"]) > 5):
+                rejected("Aşırı hızlı yükseliş/düşüş kovalama")
                 continue
         if pair != "BTCUSDT" and btc is None:
             rejected("BTC grafik verisi yok")
             continue
         mode = None
-        if tech["direction"] == "up" and tech["score"] >= .55:
+        if (tech["direction"] == "up" and tech["score"] >= .85
+                and 1.0 <= tech["momentum6"] <= 4.5):
             if pair == "BTCUSDT" or btc["direction"] != "down":
                 mode = "buy"
             else:
                 rejected("BTC rejimi")
-        elif tech["direction"] == "down" and tech["score"] <= -.70:
+        elif (tech["direction"] == "down" and tech["score"] <= -.85
+                and -4.5 <= tech["momentum6"] <= -1.0):
             if pair == "BTCUSDT" or btc["direction"] != "up":
                 mode = "short"
             else:
@@ -619,9 +654,9 @@ def assess_decision(state, latest, t):
         if mode is None:
             continue
         upper = min(
-            total * .12, state["cashTry"] / 1.001,
-            (state["cashTry"] - total * .30) / 1.001,
-            total * .25, total * .65 - used,
+            total * .10, state["cashTry"] / 1.001,
+            (state["cashTry"] - total * MIN_ENTRY_CASH_RESERVE) / 1.001,
+            total * .25, total * MAX_ENTRY_EXPOSURE - used,
         )
         scale = (.4 if tech["volatility"] > 9 else
                  .65 if tech["volatility"] > 6 else 1.0)
@@ -861,6 +896,8 @@ def cycle(state, market, t):
         state["decisionPlan"]["intradayPairs"] = state.get("intradayPairs", 0)
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = 16
+        state["decisionPlan"]["dailyNewEntryLimit"] = MAX_DAILY_NEW_ENTRIES
+        state["decisionPlan"]["strategy"] = "Fee-Aware v2 · confirm 15m / limit churn"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
