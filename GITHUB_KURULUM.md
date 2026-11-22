@@ -1,5 +1,7 @@
 # SanalTrader'ı GitHub sitesi üzerinden başlatma
 
+> **Güncel tercih: Codespaces/web geliştirme.** Depo hazırdır, yeniden oluşturman veya ZIP yüklemen gerekmez. Doğrudan [CODESPACES.md](CODESPACES.md) ile başlayabilirsin. APK workflow'u sadece manuel çalıştırılır.
+
 ## 1. Yeni depo oluştur
 
 1. GitHub hesabında oturum aç: https://github.com/new

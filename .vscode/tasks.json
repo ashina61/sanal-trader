@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "SanalTrader: Web önizleme",
+      "type": "shell",
+      "command": "bash scripts/start_web.sh",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "SanalTrader: Testler",
+      "type": "shell",
+      "command": "$HOME/flutter/bin/flutter test",
+      "problemMatcher": []
+    },
+    {
+      "label": "SanalTrader: Kod analizi",
+      "type": "shell",
+      "command": "$HOME/flutter/bin/flutter analyze --no-fatal-infos --no-fatal-warnings",
+      "problemMatcher": []
+    }
+  ]
+}

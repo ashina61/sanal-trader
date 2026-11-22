@@ -19,9 +19,21 @@ Gerçek kripto piyasası TRY fiyatlarını **sadece sanal ₺650** başlangıç 
 
 Bu MVP'de **limit emir, kaldıraç, haber/AI analizi, gerçek mum grafikleri, gerçek zamanlı WebSocket ve çok kullanıcılı yarışma YOKTUR**. Grafik, CoinGecko'nun 7 günlük fiyat serisinden çizilen çizgidir; canlı mum grafiği değildir.
 
-## GitHub üzerinden geliştirme (bilgisayarda kurulum zorunlu değil)
+## Şimdi Codespaces ile geliştiriyoruz (APK gerekmez)
 
-Bu proje GitHub sitesinden düzenleme ve otomatik APK oluşturma için hazırlanmıştır. Yeni depo açma, dosyaları yükleme, GitHub Actions ile APK alma ve Codespaces web önizlemesi adımları: **[GITHUB_KURULUM.md](GITHUB_KURULUM.md)**.
+**Başlangıç:** GitHub'da **Code → Codespaces → Create codespace on main**. İlk kurulumdan sonra Codespaces terminalinden:
+
+```bash
+bash scripts/start_web.sh
+```
+
+**Ports** sekmesinde **3000 → Open in Browser** ile uygulamayı aç. Alternatif olarak VS Code içinden **Terminal → Run Build Task → SanalTrader: Web önizleme** görevini kullan.
+
+Tüm adımlar, sınırlar ve hata çözümleri: **[CODESPACES.md](CODESPACES.md)**.
+
+Her push işleminde yalnızca Flutter web analiz/test/derlemesi kontrol edilir. **Android APK workflow'u otomatik çalışmaz**; ileride istersek GitHub Actions'tan elle başlatabiliriz.
+
+Eski GitHub kurulum notları: [GITHUB_KURULUM.md](GITHUB_KURULUM.md).
 
 ## 1. Android'de başlatma (Firebase gerekmiyor)
 
