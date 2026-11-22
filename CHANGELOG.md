@@ -2,6 +2,9 @@
 
 ## v0.9.2 — 2026-11-22: Otonom AL / SAT / LONG / SHORT karar motoru
 
+- Flutter'daki Karar Merkezi son sunucu kararını ve adayları açılır panelde gösterir; eski bot-data şeması ile mobil dar ekranda yeni testler eklendi.
+- README üzerinde spot AL = 1x LONG yönü; ayrı kaldıraçlı LONG kontratı bulunmadığı ve SHORT'un ayrı simülasyon olduğu netleştirildi.
+
 - Bot → Sunucu Botu ekranına katlanabilir Karar Merkezi eklendi: son otomatik karar, piyasa yönü, seçim gerekçesi, seçilen coin ve ilk beş güçlü aday.
 - Tüm kararlar sunucunun kalıcı bot-data kayıtlarından okunur; yerel bot ya da sanal kasa yerine geçmez.
 - Flutter sürüm numarası 0.9.2+11 olarak güncellendi.

@@ -157,8 +157,68 @@ void main() {
     expect(find.textContaining('Açık LONG'), findsOneWidget);
     expect(find.textContaining('Açık SHORT'), findsOneWidget);
     expect(find.textContaining('SHORT ADAUSDT'), findsOneWidget);
+    await tester.ensureVisible(
+      find.text('Sunucu işlemleri ve hesap geçmişi'));
     await tester.tap(find.text('Sunucu işlemleri ve hesap geçmişi'));
     expect(clicked, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('Server decision plan survives JSON parsing and legacy migration', () {
+    final source = paperState();
+    source['decisionPlan'] = {
+      'action': 'SHORT',
+      'marketRegime': 'DÜŞÜŞ',
+      'symbol': 'ADAUSDT',
+      'reason': 'Düşüş teyidi',
+      'reviewed': 12,
+      'amountTry': 70,
+      'candidates': [
+        {'symbol': 'ADAUSDT', 'action': 'SHORT', 'score': 0.9},
+      ],
+    };
+    final snapshot = ServerPaperSnapshot.fromJson(source);
+    expect(snapshot.decisionPlan['action'], 'SHORT');
+    expect(snapshot.decisionPlan['marketRegime'], 'DÜŞÜŞ');
+    final older = ServerPaperSnapshot.fromJson(paperState());
+    expect(older.decisionPlan, isEmpty);
+  });
+
+  testWidgets('Decision center expands and explains autonomous SHORT logic',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    final state = paperState(withShort: true);
+    state['decisionPlan'] = {
+      'action': 'SHORT',
+      'marketRegime': 'DÜŞÜŞ',
+      'symbol': 'ADAUSDT',
+      'reason': 'Piyasa düşüyor, sanal 1x SHORT sinyali uygun',
+      'reviewed': 12,
+      'amountTry': 50.0,
+      'score': .91,
+      'candidates': [
+        {'symbol': 'ADAUSDT', 'action': 'SHORT', 'score': .91},
+      ],
+    };
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      body: SingleChildScrollView(child: ServerPaperCard(
+        snapshot: ServerPaperSnapshot.fromJson(state),
+        loading: false, error: null,
+        onRefresh: () {}, onOpenTrades: () {},
+      )),
+    )));
+    expect(find.text('Otonom Karar Merkezi'), findsOneWidget);
+    expect(find.textContaining('1x SHORT AÇ'), findsOneWidget);
+    await tester.ensureVisible(find.text('Otonom Karar Merkezi'));
+    await tester.tap(find.text('Otonom Karar Merkezi'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Piyasa düşüyor'), findsOneWidget);
+    expect(find.textContaining('ADAUSDT · SHORT'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -16,7 +16,8 @@
         "Güvenlik ve davranış doğrulaması için otomatik yükseliş, düşüş, yatay piyasa, fiyat sapması, risk sınırı, LONG SAT ve SHORT KAPAT testleri eklendi.",
         "Flutter Bot → Sunucu Botu kartına açılır Otonom Karar Merkezi eklendi: AL, SAT, SHORT aç, SHORT kapat veya BEKLE; BTC rejimi, neden, coin, tutar, taranan adaylar gösteriliyor.",
         "Sunucu karar verileri backend kararPlan alanından tek paylaşılan read-only kaynaktan okunuyor; henüz güncellenmemiş eski kayıtta güvenli bekleme görünümü var.",
-        "Flutter uygulama sürümü 0.9.2+11 olarak güncellendi."
+        "Flutter uygulama sürümü 0.9.2+11 olarak güncellendi.",
+        "Karar Merkezi için eski bot-data uyumluluğu, SHORT karar özeti ve mobilde açılır aday listesi Flutter widget testleri eklendi."
       ]
     },
     {

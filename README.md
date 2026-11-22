@@ -36,7 +36,13 @@ Ana sayfada **Bot** sekmesine gir, riskleri oku ve **Botu aç** anahtarını etk
 
 Ayrıntılı rehber: **[BOT_REHBERI.md](BOT_REHBERI.md)**.
 
-## Ücretsiz sunucu botu · v0.9.1
+### Otonom işlem kararları (v0.9.2)
+
+Sunucu botu uygun fiyata ve açık pozisyona göre **spot AL / LONG**, **spot SAT / LONG kapat**, **1x sanal SHORT aç**, **SHORT kapat** veya **BEKLE** seçer. Bot kendi kendine yeni pozisyon açıp kapatabilir; kullanıcıdan her işlem için onay istemez. Güçlü ve taze teknik veri yoksa, nakit/maruziyet riski yüksekse veya maliyet payını karşılamayan sinyal varsa **BEKLE** seçer.
+
+**Bot → Sunucu Botu → Otonom Karar Merkezi** bölümünde son piyasa rejimi, karar, işlem gerekçesi, seçilen coin ve ilk beş güçlü aday görünür. Bu kararlar GitHub Actions çalıştığında yenilenir; sürekli saniyelik analiz veya gerçek borsa emirleri değildir. Spot AL ile LONG aynı yönlü pozisyondur; sunucuda ayrı kaldıraçlı LONG kontratı yoktur. SHORT ayrı 1x sanal teminat kullanır.
+
+## Ücretsiz sunucu botu · v0.9.2
 
 **Çalışan sunucu simülasyonu:** GitHub Actions üzerinde yaklaşık her beş dakikada bir planlanan Python motoru, yalnızca herkese açık Binance spot verileriyle **1x sanal LONG/SHORT** alım ve kapatmalarını değerlendirebilir. Sonuçları herkese açık `bot-data/state.json` dalında saklar. GitHub zamanlayıcısı gecikebilir veya işlemi atlayabilir; bu VPS gibi kesintisiz gerçek zamanlı bot değildir.
 
