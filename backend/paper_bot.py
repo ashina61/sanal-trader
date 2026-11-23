@@ -792,7 +792,7 @@ def assess_decision(state, latest, t):
             "contextKey": context_key(side, plan["marketRegime"],
                                       tech["volatility"]),
         }
-        for score, pair, side, _, tech in candidates[:5]
+        for score, pair, side, _, tech in candidates[:8]
     ]
     if not candidates:
         primary = next(iter(plan["rejectReasons"].items()), None)
