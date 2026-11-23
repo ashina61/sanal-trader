@@ -304,6 +304,10 @@ void main() {
       'reviewed': 12,
       'amountTry': 50.0,
       'score': .91,
+      'minutePairs': 37,
+      'signalStats': {
+        'spot:breakout': {'closed': 5, 'wins': 3, 'netTry': 1.5},
+      },
       'candidates': [
         {'symbol': 'ADAUSDT', 'action': 'SHORT', 'score': .91},
       ],
@@ -322,6 +326,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Piyasa düşüyor'), findsOneWidget);
     expect(find.textContaining('ADAUSDT · SHORT'), findsOneWidget);
+    expect(find.text('Gerçek 1dk mum'), findsOneWidget);
+    expect(find.text('37 coin'), findsOneWidget);
+    expect(find.text('5 kapanış'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

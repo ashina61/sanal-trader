@@ -122,6 +122,11 @@ class ServerPaperCard extends StatelessWidget {
       'COVER' => '1x SHORT KAPAT',
       _ => 'BEKLE',
     };
+    final learnedClosures = plan['signalStats'] is Map
+        ? (plan['signalStats'] as Map).values.whereType<Map>()
+            .fold<int>(0, (sum, item) =>
+                sum + ((item['closed'] as num?)?.toInt() ?? 0))
+        : 0;
     final candidates = plan['candidates'] is List
         ? (plan['candidates'] as List).whereType<Map>().take(5).toList()
         : <Map>[];
@@ -320,6 +325,17 @@ class ServerPaperCard extends StatelessWidget {
                   Expanded(child: _metric('Grafik bulunan',
                     '${plan['historyPairs'] is num ? plan['historyPairs'] : '—'} coin')),
                 ]),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child: _metric('Gerçek 1dk mum',
+                    '${plan['minutePairs'] is num ? plan['minutePairs'] : '—'} coin')),
+                  Expanded(child: _metric('Gerçek öğrenme',
+                    '$learnedClosures kapanış')),
+                ]),
+                const SizedBox(height: 5),
+                const Text('Sinyal öğrenimi sadece gerçekleşen sanal kapanışla '
+                  'güncellenir; ilk 5 kapanışta seçim puanına etkisi yoktur.',
+                  style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(child: _metric('Seçilen',

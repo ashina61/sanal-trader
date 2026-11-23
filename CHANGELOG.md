@@ -1,3 +1,9 @@
+## 2026-11-23 — Bot kararında gerçek 1dk veri ve öğrenme ilerlemesi
+
+- Bot karar ekranı gerçek 1 dakika mum verisi okunan coin sayısını ve sinyal bazında gerçekleşmiş sanal kapanışları gösterir.
+- Henüz açılış sinyali kaydedilmemiş eski pozisyonların satışı öğrenmeye eklenmez; sahte örneklem yaratılmaz.
+- Flutter mobil ekran testi bu yeni bilgi alanlarını doğrular.
+
 ## 2026-11-23 — İki dakikalık dış zamanlayıcı ve gerçek kısa aralık döngüsü
 
 - Cloudflare Worker yapılandırması `*/2 * * * *` olarak değiştirildi; GitHub botunun 150 saniyelik kısa-aralık deduplikasyonu 75 saniye oldu.

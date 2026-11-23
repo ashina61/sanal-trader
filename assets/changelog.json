@@ -16,7 +16,8 @@
         "Günlük emir kotasının yerine %78 azami toplam sanal maruziyet, en az %20 nakit rezervi, eski zarar durdurma ve komisyon kontrolleri risk korunumu olarak kalır.",
         "Eski sanal bakiye, sekiz açık pozisyon, başlangıç 650 TL ve tüm geçmiş işlem kayıtları sıfırlanmaz. Hızlı katlama veya sürekli kâr garantisi yoktur.",
         "Cloudflare Cron 5 dakikadan 2 dakikaya ayarlandı; 75 saniyelik tekrar kontrol koruması ve iki dakikalık döngü testi eklendi. Cloudflare'a otomatik deploy uygulandığı ayrıca doğrulanmalı.",
-        "Flutter sürümü 0.9.12+18 olarak güncellendi."
+        "Flutter sürümü 0.9.12+18 olarak güncellendi.",
+        "Bot Karar Merkezi artık taranan gerçek 1dk mum coin sayısını ve gerçekten kapanmış sinyal-öğrenme işlemi sayısını gösterir; geçmiş işlemleri öğrenmiş gibi saymaz."
       ]
     },
     {
