@@ -15,6 +15,7 @@ import urllib.request
 from collections import defaultdict
 
 from backend.smart_money import _address, _date, _number, _stamp
+from backend.dex_token_security import inspect as inspect_token_security
 
 UTC = dt.timezone.utc
 ORIGIN = "https://api.geckoterminal.com/api/v2"
@@ -263,5 +264,18 @@ def refresh(previous=None, now=None, *, fetcher=None, sleep=None):
     if not batches and not errors:
         state["status"] = "OBSERVING"
         state["reason"] = "Ücretsiz havuz taramasında filtreye uygun havuz yok"
+    # Read-only GoPlus token contract diagnostics: only already-observed
+    # pools. Never upgrades an on-chain cluster to verified profitable wallets.
+    unique_pools = list({(p["chain"], p["token"]): p
+                         for p, _ in batches}.values())
+    try:
+        state["tokenRisk"] = inspect_token_security(unique_pools)
+    except Exception as exc:
+        state["tokenRisk"] = {
+            "status": "UNAVAILABLE", "checked": 0, "results": [],
+            "riskFlagged": 0, "unknown": 0,
+            "reason": "GoPlus gözlemi alınamadı: " + type(exc).__name__,
+            "automaticOrder": False, "tokenSafetyVerified": False,
+        }
     state["requestsMade"] = calls
     return state
