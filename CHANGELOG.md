@@ -1,3 +1,14 @@
+## 2026-11-23 — v0.9.17 Hızlandırılmış grafik tarama, gerçekleşen sonuçlara göre giriş freni
+
+- Ölçülen performans sorunu: GitHub Actions 2 dakikada bir tetiklense de bazı taramalar ~40-75 saniye sürüyordu; bot 50+ coinin kısa süreli mum isteklerini sırayla bekliyordu.
+- Yeni backend/scan_engine.py en fazla altı bağımsız Binance kamu grafik isteğini eşzamanlı ve sınırlandırılmış şekilde yapıyor. 1s/15dk/1dk veri sorguları deterministik biçimde birleştirilir; emir/portföy güncellemesi hâlâ tek merkezde sıralı çalışır. API hataları sahte barlara dönüşmez.
+- Taramanın gerçek istek sayısı, başarılı/başarısız 1s-15dk-1dk fiyat serisi sayısı ve API grafik tarama süresi state.json + Bot Karar Merkezi'ne işlendi. Veriler CI/GitHub hazırlık ve Groq gecikmesini kapsamaz.
+- Gözlemlenen yeni sinyal performansında 21 sonuç ortalama net ~−%0,92, SHORT 7 sonucun 0 kazanan olması nedeniyle yeni giriş riskine kanıta dayalı koruma uygulandı. Son 12 SPOT gözlemi ortalama ≤−%0,30 ve isabet ≤%35 olduğunda SPOT; en az 6 SHORT gözlemi ortalama ≤−%0,45 ve isabet ≤%34 olduğunda yeni SHORT girişleri geçici olarak bekletilir. Bu eşikler kârlılık tahmini değil kayıp azaltma tercihidir.
+- Sinyal geçmişi kayar pencereyle yenilenir; emir açılmasa bile salt-okunur araştırma botu fiyat izlemeyi sürdürür ve yeni gözlemler zamanla olumluysa engel otomatik kalkabilir. Koruyucu SAT/COVER işlem onayı bu giriş engeline bağlanmaz.
+- Araştırma sinyalinin AI tarafından gerçekten seçilip seçilmediğini ölçmek için gerçek canlı kararın simge ve yönü yalnız gözlem meta verisine eklendi; ikinci kasa veya kurgusal emir yok.
+- Regresyon testleri altı paralel işçinin veri okuması, ağ hatasında fail-closed davranışı, zayıf getiride risk freni, olumlu yeni gözlemler sonrası açılması, dolu cüzdanda araştırma ve kasa bütünlüğünü kapsar.
+- Başlangıcı 650 TL olan tek sanal portföy, açık pozisyonları, P&L ve işlem geçmişi korunur. Flutter sürümü 0.9.17+23; ücretsiz zamanlayıcının kesin 7/24 çalışması veya kâr garantisi yoktur.
+
 ## 2026-11-23 — v0.9.16 Geri bildirimli risk yönetimi ve pozisyon çıkışları
 
 - Canlı sanal cüzdanın 7 SPOT ve 2 SHORT konumunda eksi taşıması sonrası mevcut emir mantığı incelendi. Bu sürüm kâr vaat etmez; yeni risk sınırları ve ölçülebilir çıkış şartları ekler.
