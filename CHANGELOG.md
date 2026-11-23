@@ -1,3 +1,15 @@
+## 2026-11-23 — v0.9.16 Geri bildirimli risk yönetimi ve pozisyon çıkışları
+
+- Canlı sanal cüzdanın 7 SPOT ve 2 SHORT konumunda eksi taşıması sonrası mevcut emir mantığı incelendi. Bu sürüm kâr vaat etmez; yeni risk sınırları ve ölçülebilir çıkış şartları ekler.
+- Kısa vadeli SHORT pozisyonu 45 dakikadan uzun açık, en az %0,6 aleyhte, BTC + geniş piyasa yukarı yönde ve pozisyonun 15dk+1dk momentumu da yükselişi doğruluyorsa, sert %4,5 stopa ulaşmadan doğrulanmış ters trend çıkışı planlanabilir. Her zıplamada otomatik panik satışı yapılmaz.
+- SPOT uzun pozisyon en az 2 saat açık, −%0,7 veya daha kötü ve 1s/15dk/1dk grafikler aynı yönde ciddi bozulmuşsa aşırı beklemeye karşı kontrollü çıkış adayı olur. Hard stop, tepe/dip izleme, kâr koruma ve teminat limitleri önceliğini korur.
+- Yakın zamanda gerçekten zararla kapatılmış coine 90dk boyunca tekrar giriş yapılmaz; kârla kapanışlar etkilenmez ve koruyucu çıkışlara kilit uygulanmaz.
+- BTC yükselirken en az 12 likit coinin %70+ kısmı yükseliyorsa yeni SHORT açılmaz. İleri gözlemlerde son 6 SHORT sinyali tümü zararlı ise yeni SHORT büyüklüğü yarıya kadar iner; aksi hâlde yeni SHORT, normal büyüklüğün en fazla %75'iyle açılır.
+- Önceki model tam dolu portföyde yeni teknik adayları incelemeden BEKLE döndüğünden öğrenme verisi toplayamıyordu. Aynı gerçek piyasa verisini ve mevcut filtreleri kullanan salt-okunur araştırma taraması artık kasa doluyken de sinyalleri kaydeder. Bu tarama cüzdana emir eklemez veya ikinci portföy oluşturmaz.
+- Her açık SPOT/SHORT için gözlenen son fiyatla hesaplanan yaklaşık komisyon sonrası kapanış kâr-zararı ve tutulma saati karar ekranına eklendi; görülmeyen fiyat uydurulmaz.
+- Birim testleri: çoklu zaman diliminde teyitli SHORT ters trend, süresi dolan SPOT trend bozulması, sahte/eksik onayla çıkış olmaması, kaybeden coine 90dk yeniden giriş, küçük örneklemden temkinli SHORT miktarı, tam portföyde araştırma adayları, ücret sonrası pozisyon analizi.
+- Başlangıçta 650 TL olan tek sanal kasa, mevcut bakiyeler, gerçek sanal kapanışlar ve açık pozisyonlar sıfırlanmadı. Flutter sürümü 0.9.16+22. Gerçek borsa işlemi yoktur.
+
 ## 2026-11-23 — v0.9.15 Gözlenen ileri sinyal sonuçları ve kronolojik piyasa testi
 
 - Yeni backend/shadow_validation.py: Ana botun onaylı teknik adaylarının gerçek giriş anı fiyatını ve yönünü ikinci kasa/emir oluşturmadan araştırma kaydına yazar. Bir saat sonraki gözlenen fiyatı ölçer; 20 dakika gecikme dışında fiyat yoksa sinyali sonuçsuz bırakır.
