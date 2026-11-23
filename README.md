@@ -304,3 +304,17 @@ ile yalnızca doğrulanmış sağlayıcı beslemesi kabul eden katman ayrı duru
 veya ayrı kasa oluşturulmaz.
 
 Kurallar ve sınırlar: [Ücretsiz DEX Radar rehberi](docs/free-dex-radar.md).
+
+## Altı aşamalı karar denetimi + kompakt mobil UI (v0.9.24)
+
+Tek sunucu kasasında her yeni BUY/SHORT adayı için seçici Binance public
+emir defteri denetimi uygulanır: PULSE/IMPACT/EDGE/SIZE/ENTRY.
+EXIT, her zaman önce çalışan mevcut koruyucu satış/kapama mekanizmasıdır.
+Bu bir otomatik fiyat tahmin modeli veya gerçek emir yollayan 6 ayrı AI ajanı
+değildir. Sadece görünür emir derinliği ve işlem maliyetinin engelleyici
+sinyalleri kullanılır. Veri yoksa yeni risk engellenir; mevcut pozisyonlar
+ve önceki zarar/kâr kayıtları korunur.
+
+Kasa, Radar, Bot ve Kâr sayfaları önce temel bilgiyi gösterir;
+gelişmiş tanılar açılır. Kâr sayfasında büyük kasa özeti yinelenmez.
+[Karar aşamaları ve mobil düzen ayrıntıları](docs/decision-pipeline-compact-ui.md).
