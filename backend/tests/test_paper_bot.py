@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from backend.paper_bot import (
-    FEE, MIN_ORDER, as_date, closes, cycle, eligible, equity, execute,
+    FEE, MIN_ORDER, as_date, assess_decision, closes, cycle, eligible, equity, execute,
     fresh_state, indicators, load, pick, quotes, record_trigger,
     record_performance, update_price_extremes, save, stamp,
 )
@@ -56,6 +56,23 @@ class PaperBotTests(unittest.TestCase):
         self.assertFalse(eligible("USDCUSDT"))
         self.assertFalse(eligible("BTCUPUSDT"))
         self.assertFalse(eligible("BTCTRY"))
+        # Binance bStocks are listed on the spot ticker, but must not enter
+        # a cryptocurrency-only strategy. Never block an existing exit.
+        for symbol in ("CRCLBUSDT", "INTCBUSDT", "METABUSDT",
+                       "SPCXBUSDT", "NVDABUSDT", "AAPLBUSDT"):
+            self.assertFalse(eligible(symbol))
+        self.assertTrue(eligible("BNBUSDT"))
+        self.assertTrue(eligible("TRXUSDT"))
+
+    def test_legacy_stock_token_position_still_gets_protective_sell(self):
+        state = fresh_state()
+        execute(state, NOW, "CRCLBUSDT", "buy", 50, 100, "legacy position")
+        live = {"CRCLBUSDT": {"symbol": "CRCLBUSDT", "priceTry": 93,
+                               "entryEligible": False}}
+        decision = assess_decision(state, live, NOW,
+                                   exits_only=True, price_only=True)
+        self.assertEqual(decision["action"], "SELL")
+        self.assertEqual(decision["symbol"], "CRCLBUSDT")
 
     def test_missing_fx_stops_paper_trading(self):
         with self.assertRaises(ValueError):
