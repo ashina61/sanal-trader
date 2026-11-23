@@ -102,12 +102,13 @@ def settle(state, latest, t):
     return summary(state)
 
 
-def record(state, latest, plan, t):
+def record(state, latest, plan, t, ai_meta=None):
     """Record max 3 verified engine candidates. Never make an order here."""
     research = migrate(state)
     if not isinstance(plan, dict):
         return 0
     new_count = 0
+    ai_status = (ai_meta or {}).get("status", "NOT_CONFIGURED")
     for candidate in plan.get("candidates", [])[:8]:
         if not isinstance(candidate, dict):
             continue
@@ -132,6 +133,11 @@ def record(state, latest, plan, t):
             "regime": plan.get("marketRegime", "UNKNOWN"),
             "setup": candidate.get("setupTag", "hourly"),
             "candidateScore": candidate.get("score"),
+            "aiStatus": str(ai_status)[:32],
+            "selectedByAi": bool(
+                ai_status == "TRADE"
+                and plan.get("action") == side
+                and plan.get("symbol") == symbol),
         })
         new_count += 1
         if new_count >= MAX_NEW_PER_CYCLE:
@@ -165,6 +171,11 @@ def summary(state):
                   else "COLLECTING",
         "spot": part([x for x in rows if x.get("action") == "BUY"]),
         "short": part([x for x in rows if x.get("action") == "SHORT"]),
+        "aiApproved": part([
+            x for x in rows if x.get("aiStatus") == "TRADE"
+            and x.get("selectedByAi") is True]),
+        "aiWaited": part([
+            x for x in rows if x.get("aiStatus") == "WAIT"]),
     })
     return out
 
