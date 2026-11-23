@@ -120,8 +120,10 @@ def record(state, latest, plan, t):
         # duplicates when the scheduler checks every two minutes.
         all_records = research["pending"] + research["completed"]
         same = [row for row in all_records
-                if row.get("symbol") == symbol and row.get("action") == side]
-        recent = _date(same[-1].get("at")) if same else None
+                if isinstance(row, dict)
+                and row.get("symbol") == symbol and row.get("action") == side]
+        seen_times = [_date(row.get("at")) for row in same]
+        recent = max((v for v in seen_times if v is not None), default=None)
         if recent is not None and (t - recent).total_seconds() < PER_SYMBOL_COOLDOWN_SECONDS:
             continue
         research["pending"].append({
