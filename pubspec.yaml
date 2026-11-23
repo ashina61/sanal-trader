@@ -1,7 +1,7 @@
 name: sanal_trader
 publish_to: 'none'
 description: Yalnızca sunucudaki 650 TL sanal kripto portföyünü gösteren uygulama.
-version: 0.9.24+30
+version: 0.9.25+31
 
 environment:
   sdk: '>=3.6.0 <4.0.0'

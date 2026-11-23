@@ -25,9 +25,17 @@ HISTORY = dt.timedelta(hours=24)
 POOLS_PER_CHAIN = 2
 MIN_POOL_USD = 200_000
 MIN_TRADE_USD = 100
+# Shared public API: keep below 10 requests/minute on a dedicated runner.
+PUBLIC_REQUEST_GAP_SECONDS = 6
 MAX_BYTES = 1_500_000
 STABLE_SYMBOLS = {"SOL", "WSOL", "USDC", "USDT", "WETH", "ETH", "WBTC",
                   "BTC", "DAI", "USDE", "CBBTC", "FDUSD"}
+
+
+def _error_label(exc):
+    if isinstance(exc, urllib.error.HTTPError):
+        return f"HTTP_{exc.code}"
+    return type(exc).__name__
 
 
 def _initial(now, status, reason):
@@ -235,21 +243,21 @@ def refresh(previous=None, now=None, *, fetcher=None, sleep=None):
         try:
             # Do not hammer free shared infrastructure.
             if calls:
-                delay(1)
+                delay(PUBLIC_REQUEST_GAP_SECONDS)
             pools_response = fetch(f"/networks/{chain}/trending_pools")
             calls += 1
             pools = _select_pools(pools_response, chain)
             for pool in pools:
                 try:
-                    delay(1)
+                    delay(PUBLIC_REQUEST_GAP_SECONDS)
                     calls += 1
                     trades = fetch(
                         f"/networks/{chain}/pools/{pool['pool']}/trades")
                     batches.append((pool, trades))
                 except (ValueError, OSError, UnicodeError, KeyError) as exc:
-                    errors.append(f"{chain}:trades:{type(exc).__name__}")
+                    errors.append(f"{chain}:trades:{_error_label(exc)}")
         except (ValueError, OSError, UnicodeError, KeyError) as exc:
-            errors.append(f"{chain}:pools:{type(exc).__name__}")
+            errors.append(f"{chain}:pools:{_error_label(exc)}")
     state = analyze_batches(batches, prev, now, errors)
     # No valid pools != provider outage; distinguish lack of matches.
     if not batches and not errors:

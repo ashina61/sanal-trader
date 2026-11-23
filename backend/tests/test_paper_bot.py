@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from backend.paper_bot import (
-    FEE, MIN_ORDER, as_date, closes, cycle, eligible, equity, execute,
+    FEE, MIN_ORDER, as_date, assess_decision, closes, cycle, eligible, equity, execute,
     fresh_state, indicators, load, pick, quotes, record_trigger,
     record_performance, update_price_extremes, save, stamp,
 )
@@ -37,6 +37,17 @@ class FakeMarket:
         return self.ticks
     def candles(self, symbol):
         return self.history.get(symbol, [])
+    def depth(self, symbol):
+        # Explicit, realistic public-book fixture. Tests must not bypass
+        # the new-entry gate merely because an API is absent.
+        tick = next((r for r in self.ticks if r.get("symbol") == symbol), None)
+        if tick is None:
+            raise ValueError("No simulated book for missing ticker")
+        mid = float(tick["lastPrice"])
+        return {
+            "bids": [[str(mid * 0.9995), "100000"]],
+            "asks": [[str(mid * 1.0005), "100000"]],
+        }
 
 class PaperBotTests(unittest.TestCase):
     def test_eligible_only_plain_spot_usdt(self):
@@ -45,6 +56,23 @@ class PaperBotTests(unittest.TestCase):
         self.assertFalse(eligible("USDCUSDT"))
         self.assertFalse(eligible("BTCUPUSDT"))
         self.assertFalse(eligible("BTCTRY"))
+        # Binance bStocks are listed on the spot ticker, but must not enter
+        # a cryptocurrency-only strategy. Never block an existing exit.
+        for symbol in ("CRCLBUSDT", "INTCBUSDT", "METABUSDT",
+                       "SPCXBUSDT", "NVDABUSDT", "AAPLBUSDT"):
+            self.assertFalse(eligible(symbol))
+        self.assertTrue(eligible("BNBUSDT"))
+        self.assertTrue(eligible("TRXUSDT"))
+
+    def test_legacy_stock_token_position_still_gets_protective_sell(self):
+        state = fresh_state()
+        execute(state, NOW, "CRCLBUSDT", "buy", 50, 100, "legacy position")
+        live = {"CRCLBUSDT": {"symbol": "CRCLBUSDT", "priceTry": 93,
+                               "entryEligible": False}}
+        decision = assess_decision(state, live, NOW,
+                                   exits_only=True, price_only=True)
+        self.assertEqual(decision["action"], "SELL")
+        self.assertEqual(decision["symbol"], "CRCLBUSDT")
 
     def test_missing_fx_stops_paper_trading(self):
         with self.assertRaises(ValueError):

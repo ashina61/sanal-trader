@@ -318,3 +318,24 @@ ve önceki zarar/kâr kayıtları korunur.
 Kasa, Radar, Bot ve Kâr sayfaları önce temel bilgiyi gösterir;
 gelişmiş tanılar açılır. Kâr sayfasında büyük kasa özeti yinelenmez.
 [Karar aşamaları ve mobil düzen ayrıntıları](docs/decision-pipeline-compact-ui.md).
+
+## Denetim düzeltmeleri (v0.9.25)
+
+Emir defteri kaynağı hiç mevcut değilse bile yeni BUY/SHORT kararı onay
+alamaz. Sağlayıcı testi de geçerli derinlik verisi vermelidir. Satış ve
+koruyucu SHORT kapatma önceliği korunur. Ücretsiz GeckoTerminal istekleri
+artık rate-limit riskini düşürmek için 6 saniye arayla yapılır ve kaynak
+HTTP hata kodları açıkça görünür; veri çalışmazsa sinyal üretilmez.
+Manuel kasa sıfırlama seçeneği GitHub Actions/CLI menüsünden çıkarıldı.
+Botun tek sanal kasası ve geçmişi korunur. Bu değişiklikler kâr
+garantisi veya devamlı WebSocket takibi sağlamaz.
+
+### Kripto dışı tokenize menkul kıymet filtresi
+
+Resmî Binance duyurusunda bStocks sınıfında bulunan tokenler (örn.
+CRCLB, INTCB, METAB, SPCXB, NVDAB, AAPLB) yeni kripto stratejisi
+pozisyonuna alınmaz. Mevcut kasa bunlardan pozisyon tutuyorsa satılacak
+fiyatları alınmaya ve stop/koruyucu çıkışlar çalışmaya devam eder.
+Bu sadece bilinen semboller için denetlenmiş bir sınıflandırma listesidir;
+yeni listelenen tokenize menkul kıymetleri otomatik tanımaz.
+Kaynak: https://www.binance.com/en/support/announcement/detail/4fea39f8b6e54e1b88e388fc90ce323e

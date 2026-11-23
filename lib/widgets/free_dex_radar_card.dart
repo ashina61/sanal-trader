@@ -20,6 +20,10 @@ class FreeDexRadarCard extends StatelessWidget {
     final status = data['status']?.toString() ?? 'NOT_STARTED';
     final available = status == 'OBSERVING';
     final partial = status == 'DEGRADED';
+    final providerErrors = data['errors'] is List
+        ? (data['errors'] as List).take(3).map((value) => value.toString())
+            .join(' · ')
+        : '';
     final wallets = data['walletsObserved'] is List
         ? (data['walletsObserved'] as List).whereType<Map>().take(8).toList()
         : <Map>[];
@@ -53,6 +57,12 @@ class FreeDexRadarCard extends StatelessWidget {
           data['reason']?.toString() ??
               'Solana ve Base için ilk ücretsiz veri taraması bekleniyor.',
           style: const TextStyle(fontSize: 12)),
+        if (providerErrors.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text('Kaynak hata kodu: $providerErrors',
+              style: const TextStyle(fontSize: 11,
+                  color: PremiumColors.gold)),
+        ],
         const SizedBox(height: 10),
         Row(children: [
           Expanded(child: _count('Havuz', data['poolsScreened'])),

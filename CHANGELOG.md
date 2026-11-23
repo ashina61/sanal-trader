@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.25 Denetim: güvenli veri kaynağı ve kasa sıfırlama koruması
+
+- Ücretsiz GeckoTerminal veri kaynağı istekleri arasında en az 6 saniye bırakılır; herkese açık altyapıda hız sınırı riskini azaltır. HTTP hata kodu (ör. 429) artık net olarak kaydedilir ve DEX Radar ekranında görünür. Servisin her zaman erişilebilir olacağı iddia edilmez.
+- Kamu veri kaynağının depth yöntemini hiç sağlamadığı durumlar, test sağlayıcısı dâhil, yeni sanal BUY/SHORT işlemi için kesin ret oldu. Daha önce testlerde kaynak yoksa planı olduğu gibi geçiren yol kaldırıldı. Sahte piyasa sağlayıcıları açıkça gerçekçi emir defteri örneği sağlamalı.
+- Manuel GitHub Actions ve Python CLI akışındaki reset seçeneği kaldırıldı. Duraklat ve sürdür seçenekleri korunur; tek 650 TL başlangıçlı sanal kasanın mevcut 48+ işlem geçmişi yerinde kalır.
+- Binance'in resmî duyurusunda belirtilen bStocks tokenize menkul kıymetleri (CRCLB, INTCB, METAB, SPCXB vb.) artık kripto-odaklı yeni giriş adaylarından açık kod listesiyle çıkarıldı; hâlihazırda tutulan pozisyonlar fiyatla izlenir ve koruyucu SAT engellenmez. Yeni listelenebilecek bStocks için liste düzenli güncellenmelidir.
+- Mevcut stop/koruyucu SPOT SAT ve SHORT KAPAT önceliği değişmedi. Hiçbir gerçek borsa emri veya yeni portföy oluşturulmadı. Ücretsiz DEX sinyalleri hâlâ doğrulanmış akıllı cüzdan kârını kanıtlamaz.
+- Erişilemeyen veri durumları ve eksik emir defteri için regresyon testleri sıkılaştırıldı. Flutter v0.9.25+31.
+
 ## 2026-11-23 — v0.9.24 6 aşamalı karar denetimi ve kompakt mobil ekranlar
 
 - Ücretli çoklu ajan servisi yerine tek Python beynine 6 aşamalı saydam emir ön kontrolü eklendi: PULSE (görünür emir baskısı), IMPACT (20 kademe kayma), EDGE (gerçekçi maliyet; geleceğe dair alpha iddiası yok), SIZE (eski risk bütçesi ve defter derinliği), ENTRY (yalnız sanal fiyat), EXIT (mevcut koruyucu çıkış önceliği).

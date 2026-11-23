@@ -82,8 +82,9 @@ class BookTests(unittest.TestCase):
     def test_unavailable_fake_provider_is_explicit_not_fake_positive(self):
         revised, trace = guard_plan(plan(), object(),
                                     {"BTCUSDT": {"priceTry": 4000}}, 40)
-        self.assertEqual(revised["action"], "BUY")
-        self.assertEqual(trace["status"], "UNSUPPORTED")
+        self.assertEqual(revised["action"], "WAIT")
+        self.assertIsNone(revised["order"])
+        self.assertEqual(trace["status"], "BLOCKED")
         self.assertFalse(trace["bookObserved"])
 
 
