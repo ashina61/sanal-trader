@@ -132,6 +132,8 @@ class ServerPaperCard extends StatelessWidget {
             .fold<int>(0, (sum, item) =>
                 sum + ((item['closed'] as num?)?.toInt() ?? 0))
         : 0;
+    final marketPulse = plan['marketPulse'] is Map
+        ? (plan['marketPulse'] as Map) : const <String, dynamic>{};
     final newsStatus = plan['newsStatus']?.toString() ?? 'UNAVAILABLE';
     final newsHeadlines = plan['newsHeadlines'] is List
         ? (plan['newsHeadlines'] as List).whereType<Map>().take(3).toList()
@@ -349,6 +351,21 @@ class ServerPaperCard extends StatelessWidget {
                   'üretilmez.',
                   style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
                 const SizedBox(height: 9),
+                Align(alignment: Alignment.centerLeft, child: Text(
+                  'Piyasa genişliği · 24s',
+                  style: const TextStyle(color: PremiumColors.gold,
+                    fontSize: 11, fontWeight: FontWeight.w800),
+                )),
+                const SizedBox(height: 4),
+                Text(
+                  'Yükselen: ${marketPulse['up'] ?? '—'} · '
+                  'Düşen: ${marketPulse['down'] ?? '—'} · '
+                  'Yatay: ${marketPulse['flat'] ?? '—'} · '
+                  'Ortanca: ${marketPulse['medianChange24hPct'] ?? '—'}%',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 10),
+                ),
+                const SizedBox(height: 10),
                 Align(alignment: Alignment.centerLeft, child: Text(
                   'Haber radarı · $newsStatus',
                   style: const TextStyle(color: PremiumColors.gold,
