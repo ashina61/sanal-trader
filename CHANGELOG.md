@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.24 6 aşamalı karar denetimi ve kompakt mobil ekranlar
+
+- Ücretli çoklu ajan servisi yerine tek Python beynine 6 aşamalı saydam emir ön kontrolü eklendi: PULSE (görünür emir baskısı), IMPACT (20 kademe kayma), EDGE (gerçekçi maliyet; geleceğe dair alpha iddiası yok), SIZE (eski risk bütçesi ve defter derinliği), ENTRY (yalnız sanal fiyat), EXIT (mevcut koruyucu çıkış önceliği).
+- Yalnızca teknik ve AI denetimlerinden geçmiş nihai sanal BUY/SHORT için ücretsiz Binance public 20 kademeli order book sorgulanır. Boş/çapraz defter, eski fiyat-derinlik uyumsuzluğu, yüksek makas/kayma, yetersiz hacim yeni sanal girişi engeller. API hata verirse gerçek Market yeni risk açmaz; koruyucu çıkışlar beklemez.
+- Yeni girişler varsayımsal emir defteri ağırlıklı fiyatı ile kaydedilir; gerçek gerçekleşme, arbitraj veya tahmin garantisi yoktur. Hiçbir gerçek emir gönderilmez. Tek 650 TL sanal kasa, SPOT/SHORT geçmişi ve maliyet modeli korunur.
+- Kasa net bakiye ve ana metrikleri tek bakışta gösteren kompakt karta taşındı; pozisyonlar ve sağlık ayrıntıları açılır oldu. Radar teknik aday/DEX/akıllı cüzdanı ayrı açılır bölümlerle özetler. Bot altı aşama ve kısa kararı öne çıkarır, gelişmiş analiz artık varsayılan açık değildir.
+- Kâr sayfasında ikinci dev kasa kartı kaldırılıp net P&L, kazanma oranı, ücretler ve risk özeti öne çıkarıldı; grafik ve hesap detayları açılır bölüme taşındı. Ekranlardan hiçbir işlem geçmişi silinmedi.
+- Emir defteri geçerlilik/red/çıkış önceliği ve 320 piksel mobil kompakt görünüm için testler eklendi. Uygulama 0.9.24+30.
+
 ## 2026-11-23 — v0.9.23 Ücretsiz Solana / Base DEX Keşfi
 
 - Abonelik, Arkham, Grok veya ücretli API anahtarı istemeyen GeckoTerminal herkese açık REST havuz/işlem gözlemi eklendi. Solana ve Base üzerindeki trend havuzlarındaki işlemler örneklenir; her zincirden en fazla iki likit havuz incelenir.
