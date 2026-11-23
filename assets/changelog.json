@@ -3,6 +3,19 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.24",
+      "date": "2026-11-23",
+      "title": "6 aşamalı karar denetimi ve kompakt mobil sayfalar",
+      "details": [
+        "Tek sanal işlem beyni içinde PULSE/IMPACT/EDGE/SIZE/ENTRY/EXIT gözlem aşamaları eklendi. Bu aşamalar ücretli veya bağımsız altı yapay zekâ değildir.",
+        "Binance public depth20 yalnızca seçilmiş yeni BUY/SHORT giriş adayında okunur; defter makası, görünür derinlik, fiyat uyumu ve giriş maliyeti denetlenir. Yetersiz veri yeni girişe izin vermez; SELL/COVER korumaları önceliklidir.",
+        "Yeni sanal giriş tahmini ağırlıklı defter fiyatını kullanır. Gerçek emir, kesin dolum, alpha veya kazanç garantisi yoktur; önceki tek 650 TL kasası ve geçmiş korunur.",
+        "Kasa tek ekranda özet hâle geldi; pozisyon ve sistem tanıları açılır. Radar teknik/DEX/akıllı para gözlemlerini özet ve açılır bölümlerle ayırır. Bot altı aşamalı karar panelini ve kısa durumu öne çıkarır.",
+        "Kâr sayfasında tekrarlanan büyük kasa özeti varsayılan ekrandan kaldırıldı. Net sonuç, ücretler, kazanma oranı, gerileme ilk kartta; grafik ve tam geçmiş erişilebilir.",
+        "320px Android ve emir defteri hata/derinlik testleri eklendi. Flutter 0.9.24+30."
+      ]
+    },
+    {
       "version": "0.9.23",
       "date": "2026-11-23",
       "title": "API anahtarsız ücretsiz Solana / Base DEX Keşfi",
