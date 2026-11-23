@@ -21,6 +21,27 @@ Yalnızca başlangıç değeri **650 TL** olan tek bir sanal portföyü takip ed
 **Ekranlar:** Kasa (net bakiye ve açık pozisyonlar), Radar (gerçek bot adayları
 ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapanışlar).
 
+## Net kasa büyümesi ve strateji değerlendirmesi (v0.9.20)
+
+Ana değer, gözlenen fiyatlardan hesaplanan **tahmini kapanış komisyonu sonrası
+net tasfiye değeri**dir. Önceden ödenmiş ücretler tekrar düşülmez. Tek kasa ve
+geçmiş korunur; yeni net grafik eski brüt noktaları yeniden yazmaz.
+
+SPOT trend/kırılım ve SHORT girişlerinin bir saatlik gözlem sonuçları ayrı
+izlenir. Yeterli örnekte aynı giriş türü ve rejim için son gözlemler kullanılır;
+az örnekte yön geneline geri dönülür. SHORT ayrıca genel yön frenini korur.
+Bu, kötü giriş türlerini bekleten temkinli bir kuraldır; istatistiksel kâr kanıtı
+veya geçmişe bakarak garanti verilen bir strateji seçimi değildir.
+
+`python3 -m backend.strategy_replay --out strategy-comparison.json` dört sabit
+politikayı aynı altı coin ve aynı kronolojik dönemde karşılaştırır. 15dk kapanış
+ve en fazla 4 saat gözlem modeli, %0,3 varsayımsal toplam ücret/kayma içerir.
+Gelecek veri giriş koşullarına girmez; eksik mumlar tamamlanmış sayılmaz.
+Üretimin 1dk/AI/haber/gerçek likidite akışını yeniden üretmez. İkinci kasa,
+kurgusal katlanan sermaye veya otomatik strateji değişimi oluşturmaz.
+İlk raporda yeterli olumlu geliştirme sonucu yoktur. Yeni adaylar için yeni
+ileri gözlemler gerekir. Araştırma mevcut ücretsiz günlük akışta saklanır.
+
 ## Bot durumu ve çıkış önceliği (v0.9.19)
 
 Kasa ve Bot ekranlarındaki **Botun durumu**, aynı sunucu kasasının son kontrolünü

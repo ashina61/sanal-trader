@@ -3,6 +3,23 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.20",
+      "date": "2026-11-23",
+      "title": "Net kasa hedefi, strateji bazında öğrenen giriş freni ve eşit koşullarda karşılaştırma",
+      "details": [
+        "Ana başarı ölçütü tek sanal kasanın tahmini kapanış komisyonları sonrası net tasfiye değeri oldu. Açılış ve geçmiş kapanış komisyonları iki kez düşülmez; açık SPOT ve 1x sanal SHORT aynı mevcut muhasebe modeliyle hesaplanır. Fiyat eksikse yeni net değer uydurulmaz.",
+        "Ana kasa, kâr ekranı ve yeni grafik noktaları net tasfiye değerini kullanır. Önceki brüt fiyat gözlemleri değiştirilmez; yeni net grafik geçmiş brüt noktalarla karıştırılmaz. Kapanış fiyatı, spread veya kayma garanti edilmez.",
+        "Giriş freni artık yön, giriş türü ve piyasa rejimiyle eşleşen son gözlemleri ayırır. En az 12 SPOT örneği varsa aynı tür/rejim kendi sonuçlarıyla değerlendirilir; az örnekte yön geneline geri döner. SHORT yön genelinin zarar frenini de korur. Eşikler değiştirilmedi; olumlu sonuç kâr kanıtı sayılmaz.",
+        "Böylece zayıf trend alımları, iyi sonuç veren başka bir giriş türünün ortalamasıyla gizlenmez. Farklı giriş türünün zararları yeterince ölçülmüş başka bir SPOT türüne otomatik mal edilmez. Koruyucu SAT/KAPAT ve mevcut pozisyonlar bu yeni giriş freninden etkilenmez.",
+        "AI bağlamına net kasa hedefi eklendi. Teknik aday puanı getiri tahmini veya kazanma olasılığı değildir; birkaç kârlı kapanış pozitif beklentinin kanıtı olarak yorumlanmamalıdır. AI yine yalnızca motorun onayladığı adayları seçebilir.",
+        "Yeni araştırma dört sabit politikayı karşılaştırır: SPOT trend, SPOT kırılım, SPOT geri çekilme sonrası toparlanma ve SHORT kırılım. Altı coin aynı gerçek kapanmış 15dk mumları, aynı kronolojik %70 geliştirme/%30 değerlendirme bölümü ve aynı 4 saate kadar gözlenen kapanış modeliyle incelenir.",
+        "Karşılaştırma toplam %0,3 varsayımsal komisyon/kayma içerir. Eksik mumda durur, gelecekteki fiyat girişe sızmaz, bölüm sınırını aşan geliştirme sonuçları ayrılır. İkinci kasa, portföy katlama hesabı veya otomatik kazanan strateji terfisi oluşturulmaz. 1dk/AI/haber/gerçek emir defteri ve borçlanma şartları bu araştırma vekilinde yoktur.",
+        "İlk gerçek altı coinlik araştırmada dört politikanın hiçbiri yeterli olumlu geliştirme sonucu vermedi; birçok değerlendirme örneği 30dan azdı. Bu sonuçlar kazandıran strateji bulundu şeklinde sunulmaz. Günlük mevcut ücretsiz araştırma akışı yeni karşılaştırmayı raporlar ve artifact olarak saklar.",
+        "Bot ekranında giriş türlerinin gözlem sayısı, ortalama varsayımsal net sonucu ve giriş freni görünür. Yeni ileri sinyaller motor sürümünü taşır; geçmiş veriler karıştırılıp yeniden yazılmaz.",
+        "Mevcut 650 TL başlangıçlı tek sanal kasa, açık pozisyonlar ve geçmiş işlemler korunur. Yeni ücretli servis veya gerçek emir yoktur. 137 Python ve 6 zamanlayıcı testi geçti; web kontrolleri yayında ayrıca çalışır. Flutter 0.9.20+26."
+      ]
+    },
+    {
       "version": "0.9.19",
       "date": "2026-11-23",
       "title": "Bot durum paneli, güncel veri ve öncelikli toplu koruyucu çıkışlar",

@@ -65,11 +65,41 @@ jobs:
               f.write("\n".join(lines) + "\n")
           PY
 
+      - name: Compare fixed entry policies on the same chronological market data
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        run: python3 -m backend.strategy_replay --out strategy-comparison.json
+
+      - name: Summarize strategy comparison without promoting a winner
+        if: github.event_name != 'pull_request' && always()
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path('strategy-comparison.json')
+          lines = ['\n## Fixed strategy comparison', '',
+                   'Research proxy. No second wallet or automatic strategy switch.', '']
+          if path.exists():
+              report = json.loads(path.read_text())
+              lines += ['| Policy | Development samples | Holdout samples | Holdout mean net % |',
+                        '|---|---:|---:|---:|']
+              for row in report['policies']:
+                  lines.append(f"| {row['policy']} | {row['development']['samples']} | "
+                               f"{row['holdout']['samples']} | {row['holdout']['meanNetPct']} |")
+              lines += ['', 'Limitations: ' + '; '.join(report['limitations'])]
+          else:
+              lines += ['No valid comparison; no fabricated research result.']
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+              stream.write('\n'.join(lines) + '\n')
+          PY
+
       - name: Attach historical report (independent of paper wallet)
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: evidence-backtest-report
-          path: validation-report.json
+          path: |
+            validation-report.json
+            strategy-comparison.json
           if-no-files-found: warn
           retention-days: 14

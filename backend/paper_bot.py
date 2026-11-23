@@ -21,7 +21,8 @@ from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
 from backend.market_breadth import market_breadth
 from backend.scan_engine import fetch_candle_batch
 from backend.runtime_status import start as start_runtime, market_seen, finish as finish_runtime
-from backend.evidence_guard import entry_gate, gate_summary
+from backend.evidence_guard import gate_summary, strategy_gate, strategy_summary
+from backend.net_objective import net_liquidation
 from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
     short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
     spot_profit_lock_exit, position_monitor)
@@ -808,9 +809,10 @@ def assess_decision(state, latest, t, research_only=False,
             rejected("Zayıf trend/sinyal")
         if mode is None:
             continue
-        if (not research_only and entry_gate(
-                state, "BUY" if mode == "buy" else "SHORT")["blocked"]):
-            rejected("Son gözlenen sinyal sonuçları negatif; yeni risk bekletildi")
+        gate = strategy_gate(state, "BUY" if mode == "buy" else "SHORT",
+                             setup_for(micro, mode), plan["marketRegime"])
+        if not research_only and gate["blocked"]:
+            rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
             continue
         if (not research_only and mode == "short" and
                 broad_risk_on(state.get("marketPulse", {}),
@@ -865,6 +867,8 @@ def assess_decision(state, latest, t, research_only=False,
             "momentum5mPct": round(minute(pair)["momentum5"], 3)
                 if minute(pair) is not None else None,
             "setupTag": setup_for(minute(pair), side),
+            "strategyGate": strategy_gate(state, "BUY" if side == "buy" else "SHORT",
+                setup_for(minute(pair), side), plan["marketRegime"]),
             "contextKey": context_key(side, plan["marketRegime"],
                                       tech["volatility"]),
             "policyExcluded": bool(
@@ -890,6 +894,8 @@ def assess_decision(state, latest, t, research_only=False,
          "momentum5mPct": round(minute(pair)["momentum5"], 3)
              if minute(pair) is not None else None,
          "setupTag": setup_for(minute(pair), side),
+         "strategyGate": strategy_gate(state, "BUY" if side == "buy" else "SHORT",
+             setup_for(minute(pair), side), plan["marketRegime"]),
          "contextKey": context_key(side, plan["marketRegime"],
                                    tech["volatility"])}
         for score, pair, side, amount, tech in candidates[:8]
@@ -943,12 +949,15 @@ def update_price_extremes(state, latest):
 
 def record_performance(state, t):
     """Only observed simulated equity and closed-trade P&L, never forecasts."""
-    current = numeric(state.get("equityTry"))
+    mark_value = numeric(state.get("equityTry"))
+    net_value = numeric(state.get("netLiquidationTry"))
+    current = net_value if net_value is not None else mark_value
     initial = numeric(state.get("initialCashTry"))
     if current is None or initial is None or initial <= 0:
         return
-    peak = max(numeric(state.get("peakEquityTry")) or current, current)
-    state["peakEquityTry"] = peak
+    peak_key = "peakNetLiquidationTry" if net_value is not None else "peakEquityTry"
+    peak = max(numeric(state.get(peak_key)) or initial, current)
+    state[peak_key] = peak
     closed = [item for item in state.get("trades", [])
               if isinstance(item, dict) and item.get("side") in ("sell", "cover")]
     wins = sum(1 for item in closed
@@ -968,8 +977,11 @@ def record_performance(state, t):
               if points and isinstance(points[-1], dict) else None)
     if recent and (t - recent).total_seconds() < 120:
         return
-    points.append({"at": stamp(t), "equityTry": round(current, 4),
-                   "cashTry": round(state["cashTry"], 4)})
+    point = {"at": stamp(t), "equityTry": round(mark_value, 4),
+             "cashTry": round(state["cashTry"], 4)}
+    if net_value is not None:
+        point["netLiquidationTry"] = round(net_value, 4)
+    points.append(point)
     state["equityHistory"] = points[-576:]
 
 
@@ -998,7 +1010,15 @@ def update_wallet_marks(state, latest, t):
     value = equity(state, latest)
     if value is not None:
         state["equityTry"] = value
+        objective = net_liquidation(state, latest)
+        state["objective"] = {**objective, "at": stamp(t)}
+        state["netLiquidationTry"] = objective["netLiquidationTry"]
         record_performance(state, t)
+    else:
+        # A previous estimate must not look like a fresh observed net value.
+        state.pop("netLiquidationTry", None)
+        state["objective"] = {"metric": "unavailable", "at": stamp(t),
+            "reason": "Açık pozisyon fiyatı eksik; net tasfiye hesaplanamadı"}
     active = set(state["holdings"]) | set(state.get("shorts", {}))
     state["marksTry"] = {
         pair: latest[pair]["priceTry"] for pair in active if pair in latest
@@ -1313,6 +1333,7 @@ def cycle(state, market, t, clock=None):
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
         state["decisionPlan"]["scanStats"] = state.get("scanStats", {})
         state["decisionPlan"]["evidenceGuard"] = gate_summary(state)
+        state["decisionPlan"]["strategyGuard"] = strategy_summary(state)
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]

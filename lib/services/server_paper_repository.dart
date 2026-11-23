@@ -12,7 +12,8 @@ class ServerPaperSnapshot {
     if (json['schema'] != 1) {
       throw const FormatException('Sunucu cüzdan sürümü desteklenmiyor');
     }
-    for (final key in ['cashTry', 'equityTry', 'initialCashTry']) {
+    for (final key in ['cashTry', 'equityTry', 'initialCashTry',
+        if (json.containsKey('netLiquidationTry')) 'netLiquidationTry']) {
       final number = json[key];
       if (number is! num || !number.toDouble().isFinite || number < 0) {
         throw FormatException('Sunucu kasasında geçersiz alan: $key');
@@ -34,7 +35,9 @@ class ServerPaperSnapshot {
   }
 
   double get cashTry => number('cashTry')!;
-  double get equityTry => number('equityTry')!;
+  double get markEquityTry => number('equityTry')!;
+  bool get hasNetLiquidation => number('netLiquidationTry') != null;
+  double get equityTry => number('netLiquidationTry') ?? markEquityTry;
   double get startingTry => number('initialCashTry')!;
   double get pnlTry => equityTry - startingTry;
   double get realizedTry => number('realizedTry') ?? 0.0;

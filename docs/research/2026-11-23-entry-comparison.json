@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "status": "RESEARCH_ONLY_NO_AUTOMATIC_PROMOTION",
+  "createdAt": "2026-11-23T19:03:14.431742+00:00",
+  "policies": [
+    {
+      "policy": "spot_trend",
+      "development": {
+        "samples": 24,
+        "meanNetPct": -0.7094,
+        "medianNetPct": -0.7478,
+        "winRatePct": 20.83,
+        "profitFactor": 0.1597,
+        "sufficientSample": false
+      },
+      "holdout": {
+        "samples": 9,
+        "meanNetPct": -0.3383,
+        "medianNetPct": -0.3319,
+        "winRatePct": 22.22,
+        "profitFactor": 0.2898,
+        "sufficientSample": false
+      }
+    },
+    {
+      "policy": "spot_breakout",
+      "development": {
+        "samples": 10,
+        "meanNetPct": -0.8466,
+        "medianNetPct": -0.8237,
+        "winRatePct": 10.0,
+        "profitFactor": 0.0698,
+        "sufficientSample": false
+      },
+      "holdout": {
+        "samples": 3,
+        "meanNetPct": -0.5235,
+        "medianNetPct": -0.4814,
+        "winRatePct": 33.33,
+        "profitFactor": 0.2824,
+        "sufficientSample": false
+      }
+    },
+    {
+      "policy": "spot_pullback",
+      "development": {
+        "samples": 5,
+        "meanNetPct": -0.8703,
+        "medianNetPct": -0.6019,
+        "winRatePct": 20.0,
+        "profitFactor": 0.0312,
+        "sufficientSample": false
+      },
+      "holdout": {
+        "samples": 3,
+        "meanNetPct": -0.7301,
+        "medianNetPct": -0.3319,
+        "winRatePct": 0.0,
+        "profitFactor": 0.0,
+        "sufficientSample": false
+      }
+    },
+    {
+      "policy": "short_breakdown",
+      "development": {
+        "samples": 38,
+        "meanNetPct": -0.3248,
+        "medianNetPct": -0.547,
+        "winRatePct": 39.47,
+        "profitFactor": 0.5461,
+        "sufficientSample": true
+      },
+      "holdout": {
+        "samples": 20,
+        "meanNetPct": -0.0583,
+        "medianNetPct": 0.3809,
+        "winRatePct": 70.0,
+        "profitFactor": 0.8839,
+        "sufficientSample": false
+      }
+    }
+  ],
+  "symbols": [
+    "BNBUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT"
+  ],
+  "commonBars": 2999,
+  "firstBarMs": 1792762199999,
+  "lastBarMs": 1795460399999,
+  "holdoutStartsMs": 1794651299999,
+  "developmentFraction": 0.7,
+  "developmentLeader": null,
+  "developmentLeaderHoldout": null,
+  "assumedRoundTripCostPct": 0.3,
+  "exitModel": "15m observed closes; stop -4.5%, target +3.5%, profit protection, 4h timeout",
+  "limitations": [
+    "No second wallet or portfolio return is calculated",
+    "15m price proxy excludes production 1m confirmation, news and AI",
+    "Current fixed symbol basket has selection/survivorship bias",
+    "Correlated signals and multiple policies require fresh forward validation",
+    "No real spread, order book, SHORT borrow or funding represented",
+    "Observed close exit prices are not guaranteed execution prices"
+  ],
+  "source": "Binance public, closed 15m klines; backend.walk_forward.fetch_klines"
+}

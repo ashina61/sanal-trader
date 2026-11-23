@@ -13,21 +13,23 @@ SHORT_MIN = 6
 WINDOW = 12
 
 
-def _observations(state, side):
+def _observations(state, side, setup=None, regime=None):
     research = state.get("forwardEvidence", {})
     rows = research.get("completed", []) if isinstance(research, dict) else []
     return [row["netReturnPct"] for row in rows
             if isinstance(row, dict)
             and row.get("action") == side
+            and (setup is None or row.get("setup") == setup)
+            and (regime is None or row.get("regime") == regime)
             and isinstance(row.get("netReturnPct"), (int, float))
             and math.isfinite(row["netReturnPct"])][-WINDOW:]
 
 
-def entry_gate(state, side):
+def entry_gate(state, side, setup=None, regime=None):
     """Reasoned guard with a rolling window, never a sell/short order."""
     if side not in ("BUY", "SHORT"):
         return {"blocked": False, "samples": 0, "reason": "not an entry"}
-    values = _observations(state, side)
+    values = _observations(state, side, setup, regime)
     n = len(values)
     required = BUY_MIN if side == "BUY" else SHORT_MIN
     mean = statistics.mean(values) if values else None
@@ -45,6 +47,40 @@ def entry_gate(state, side):
                    "new " + side + " risk held for fresh evidence")
                   if blocked else "Insufficient or nonnegative evidence to pause",
     }
+
+
+def strategy_gate(state, side, setup, regime):
+    """Scope the existing loss guard to comparable entry setups.
+
+    An under-sampled lane inherits the directional guard. A measured SPOT lane
+    may be evaluated on its own, rather than inheriting losses of a different
+    setup. SHORT also retains its directional guard. Neither a nonblocked lane
+    nor a positive mean is a prediction of profitable trades.
+    """
+    lane = entry_gate(state, side, setup, regime)
+    broad = entry_gate(state, side)
+    required = BUY_MIN if side == "BUY" else SHORT_MIN
+    scoped = lane["samples"] >= required
+    selected = lane if scoped else broad
+    blocked = selected["blocked"] or (side == "SHORT" and broad["blocked"])
+    return {**selected, "blocked": bool(blocked),
+            "scope": "setup-regime" if scoped else "direction-fallback",
+            "setup": setup, "regime": regime,
+            "laneSamples": lane["samples"],
+            "label": side + ":" + setup + ":" + regime,
+            "reason": ("Bu giriş türünün gözlenen net sonuçları zayıf; yeni risk bekletildi"
+                       if blocked else "Giriş freni yok; kârlılık doğrulaması değildir")}
+
+
+def strategy_summary(state):
+    rows = state.get("forwardEvidence", {}).get("completed", [])
+    lanes = sorted({(r.get("action"), r.get("setup"), r.get("regime"))
+                    for r in rows if isinstance(r, dict)
+                    and r.get("action") in ("BUY", "SHORT")
+                    and isinstance(r.get("setup"), str)
+                    and isinstance(r.get("regime"), str)})
+    return [strategy_gate(state, side, setup, regime)
+            for side, setup, regime in lanes]
 
 
 def gate_summary(state):

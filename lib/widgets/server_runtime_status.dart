@@ -55,6 +55,9 @@ class ServerRuntimeStatusCard extends StatelessWidget {
     final exits = runtime['exitOrders'];
     final duration = runtime['cycleElapsedSec'];
     final coverage = runtime['scanCoverage'];
+    final rawStrategies = state?.decisionPlan['strategyGuard'];
+    final strategies = rawStrategies is List
+        ? rawStrategies.whereType<Map>().take(6).toList() : <Map>[];
     final metrics = <Widget>[
       _metric('Son fiyat gözlemi',
         _age(state?.runtimeDate('marketObservedAt'), clock)),
@@ -124,6 +127,30 @@ class ServerRuntimeStatusCard extends StatelessWidget {
           Text(state?.decisionPlan['scanSkippedReason']?.toString()
               ?? 'Bu tetikte geniş mum taraması tamamlanmadı.',
             style: const TextStyle(fontSize: 14, color: PremiumColors.muted)),
+        ],
+        if (detailed && strategies.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const Text('Giriş türlerinin gözlenen sonuçları',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          for (final lane in strategies)
+            Padding(padding: const EdgeInsets.only(top: 10),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${lane['label'] ?? 'Giriş türü'}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  Text('${lane['samples'] ?? 0} gözlem · '
+                    'ortalama net ${lane['avgNetPct'] ?? '—'}% · '
+                    '${lane['blocked'] == true ? 'GİRİŞ BEKLETİLİYOR' : 'GİRİŞ FRENİ YOK'}',
+                    style: TextStyle(fontSize: 14, color: lane['blocked'] == true
+                      ? PremiumColors.gold : PremiumColors.muted)),
+                  if (lane['scope'] == 'direction-fallback')
+                    const Text('Bu türde örnek az; yön genelinin sonucu kullanılıyor.',
+                      style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
+                ],
+              )),
+          const SizedBox(height: 8),
+          const Text('Bir saatlik fiyat gözlemleridir. İşlem getirisi veya kâr kanıtı değildir.',
+            style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
         ],
         const SizedBox(height: 10),
         const Text('Fiyatlar sunucudaki periyodik kontrollerde yenilenir.',

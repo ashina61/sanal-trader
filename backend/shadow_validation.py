@@ -128,6 +128,7 @@ def record(state, latest, plan, t, ai_meta=None):
         if recent is not None and (t - recent).total_seconds() < PER_SYMBOL_COOLDOWN_SECONDS:
             continue
         research["pending"].append({
+            "engineVersion": "0.9.20",
             "at": _stamp(t), "symbol": symbol, "action": side,
             "entryPriceTry": price,
             "regime": plan.get("marketRegime", "UNKNOWN"),

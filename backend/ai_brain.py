@@ -22,6 +22,9 @@ def _ask_groq(context, api_key, model):
              "You review PAPER trades only. Choose ONE supplied candidate or WAIT. "
              "Do not invent prices, signals, tickers or trades. Maximize risk-adjusted "
              "simulation performance AFTER fees, not number of trades. "
+             "The objective is growth of the ONE wallet's estimated net liquidation value. "
+             "A candidate score is a ranking, NOT a return forecast or probability. "
+             "Never call a high score or a few profitable closes proof of positive expectancy. "
              "Favor credible risk-adjusted compounding with a cash reserve. "
              "Use current candidate strength, recent and multi-hour momentum, "
              "volatility, regime and round-trip fees as primary evidence. "
@@ -86,6 +89,7 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
         "openLongs": list(state.get("holdings", {})),
         "openShorts": list(state.get("shorts", {})),
         "observedPerformance": state.get("performance") or {},
+        "netWalletObjective": state.get("objective") or {},
         "roundTripPaperFeePct": 0.2,
         "closedOutcomeSampleSize": sum(
             1 for trade in state.get("trades", [])

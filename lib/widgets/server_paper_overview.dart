@@ -27,7 +27,8 @@ class ServerPaperOverview extends StatelessWidget {
         ? null : growth! / s.startingTry * 100;
     final positive = (growth ?? 0) >= 0;
     final points = (s?.equityHistory ?? const <Map<String, dynamic>>[])
-        .map((e) => e['equityTry']).whereType<num>()
+        .map((e) => e[s?.hasNetLiquidation == true
+            ? 'netLiquidationTry' : 'equityTry']).whereType<num>()
         .map((n) => n.toDouble()).where((n) => n.isFinite && n >= 0)
         .toList(growable: false);
     final ai = s?.decisionPlan['aiBrain'];
@@ -67,7 +68,7 @@ class ServerPaperOverview extends StatelessWidget {
               Text('OTONOM BOT · ANA SANAL KASA',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900,
                   letterSpacing: .5, color: PremiumColors.gold)),
-              Text('Hedef: net büyüme ve risk kontrolü',
+              Text('Hedef: masraflar sonrası sanal kasayı büyütmek',
                 style: TextStyle(fontSize: 10, color: PremiumColors.muted)),
             ],
           )),
@@ -82,6 +83,9 @@ class ServerPaperOverview extends StatelessWidget {
         const SizedBox(height: 10),
         Text(s == null ? '—' : formatTry(s.equityTry),
           style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
+        if (s?.hasNetLiquidation == true)
+          const Text('Tahmini kapanış komisyonu dahil',
+            style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
         const SizedBox(height: 4),
         Text(growth == null ? 'Güncel değer bekleniyor'
             : '${growth >= 0 ? '+' : ''}${formatTry(growth)} · '
@@ -91,8 +95,9 @@ class ServerPaperOverview extends StatelessWidget {
               positive ? PremiumColors.emerald : PremiumColors.danger)),
         const SizedBox(height: 12),
         if (points.length > 1) ...[
-          const Text('GERÇEK SANAL KASA EĞRİSİ',
-            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800,
+          Text(s?.hasNetLiquidation == true ? 'MASRAF SONRASI KASA EĞRİSİ'
+              : 'GERÇEK SANAL KASA EĞRİSİ',
+            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800,
               letterSpacing: .5, color: PremiumColors.muted)),
           const SizedBox(height: 6),
           SizedBox(height: 70, width: double.infinity,
