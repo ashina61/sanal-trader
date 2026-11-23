@@ -125,7 +125,7 @@ class ServerRuntimeStatusCard extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
         ],
         if (detailed && liquidSymbols.isNotEmpty)
-          ExpansionTile(
+          Material(color: Colors.transparent, child: ExpansionTile(
             tilePadding: EdgeInsets.zero,
             title: Text('İzlenen pariteler (${liquidSymbols.length})',
               style: const TextStyle(fontSize: 14)),
@@ -134,7 +134,7 @@ class ServerRuntimeStatusCard extends StatelessWidget {
                 for (final symbol in liquidSymbols) Text(symbol,
                   style: const TextStyle(fontSize: 14, color: PremiumColors.muted)),
               ]))],
-          ),
+          )),
         if (absent.isNotEmpty) ...[
           const SizedBox(height: 10),
           Text('Fiyatı alınamayan açık pozisyon: $absent',

@@ -9,6 +9,8 @@
 - İsteğe bağlı grafik sorguları yaklaşık 45 saniyelik tarama bütçesiyle sınırlıdır; sonraki güncel fiyat sorgusu bu grafik bütçesine bağlanmaz. Bekleyen ağ istekleri ve diğer işlemler nedeniyle bu bir tüm döngü süre garantisi değildir. Okuma eşzamanlılığı en fazla altı olarak kalır.
 - Daha geniş grafik önbelleği nedeniyle state.json makine için kompakt JSON olarak kaydedilir; kasa, işlemler ve geçmiş silinmez. Bot sayfasında izlenen paritelerin adları açılır listeden incelenebilir.
 - Geniş evrene sırayla erişim, açık pozisyon önceliği, gerçek başarılı kapsam sayımı, API beklemesi ve grafik süre bütçesi için yeni testler eklendi. 145 Python testi geçti; Flutter kontrolleri yayın akışında çalışır. Daha çok parite izlemek kâr garantisi değildir. Flutter 0.9.21+27.
+- Flutter telefon testinde parite açılır listesinin kart arka planı üzerinde Material yüzeyi gerektirdiği görüldü; liste kendi şeffaf Material yüzeyiyle düzeltildi. Test beklentisi kaldırılmadı.
+
 
 ## 2026-11-23 — v0.9.20 Net kasa ve strateji bazında giriş değerlendirmesi
 
