@@ -142,6 +142,16 @@ class ServerPaperCard extends StatelessWidget {
     final forwardWins = forward['winRatePct'] is num
         ? '${(forward['winRatePct'] as num).toStringAsFixed(1)}%'
         : '—';
+    final aiApproved = forward['aiApproved'] is Map
+        ? (forward['aiApproved'] as Map) : const <String, dynamic>{};
+    final aiWaited = forward['aiWaited'] is Map
+        ? (forward['aiWaited'] as Map) : const <String, dynamic>{};
+    final aiApprovedMean = aiApproved['avgNetPct'] is num
+        ? '${(aiApproved['avgNetPct'] as num).toStringAsFixed(2)}%'
+        : '—';
+    final aiWaitedMean = aiWaited['avgNetPct'] is num
+        ? '${(aiWaited['avgNetPct'] as num).toStringAsFixed(2)}%'
+        : '—';
     final marketPulse = plan['marketPulse'] is Map
         ? (plan['marketPulse'] as Map) : const <String, dynamic>{};
     final newsStatus = plan['newsStatus']?.toString() ?? 'UNAVAILABLE';
@@ -377,6 +387,15 @@ class ServerPaperCard extends StatelessWidget {
                   'puanına etkisi yoktur.',
                   style: const TextStyle(
                     color: PremiumColors.muted, fontSize: 9)),
+                const SizedBox(height: 5),
+                Text(
+                  'AI onayladığı: ${aiApproved['samples'] ?? 0} sinyal · '
+                  'ort. $aiApprovedMean  |  '
+                  'AI beklediği: ${aiWaited['samples'] ?? 0} sinyal · '
+                  'ort. $aiWaitedMean',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 9),
+                ),
                 const SizedBox(height: 9),
                 Align(alignment: Alignment.centerLeft, child: Text(
                   'Piyasa genişliği · 24s',
