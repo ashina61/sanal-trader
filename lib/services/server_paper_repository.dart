@@ -52,6 +52,39 @@ class ServerPaperSnapshot {
 
   DateTime? get lastSuccessAt => _date('lastSuccessAt');
   DateTime? get lastRunAt => _date('lastRunAt');
+  Map<String, dynamic> get runtimeStatus => _map('runtimeStatus');
+  DateTime? runtimeDate(String key) {
+    final value = runtimeStatus[key];
+    return value is String ? DateTime.tryParse(value)?.toUtc() : null;
+  }
+
+  String runtimeLabelAt(DateTime time) {
+    if (!enabled) return 'Bot duraklatıldı';
+    if (error != null || runtimeStatus['phase'] == 'ERROR') {
+      return 'Kontrol tamamlanamadı';
+    }
+    final last = lastSuccessAt;
+    final now = time.toUtc();
+    if (last == null) return 'Başarılı kontrol bekleniyor';
+    if (last.isAfter(now)) return 'Kontrol zamanı doğrulanamadı';
+    if (now.difference(last) >= const Duration(minutes: 5)) {
+      return 'Piyasa kontrolü gecikti';
+    }
+    final quote = runtimeDate('oldestQuoteAt');
+    if (quote != null && (quote.isAfter(now) ||
+        now.difference(quote) >= const Duration(minutes: 5))) {
+      return 'Piyasa verisi eski';
+    }
+    return switch (runtimeStatus['phase']) {
+      'SKIPPED' => 'Tekrarlanan tetik atlandı',
+      'PROTECTED' => 'Koruyucu çıkışlar kaydedildi',
+      'DEGRADED' => 'Kontrol tamamlandı · kısmi mum verisi',
+      'COMPLETE' => decisionPlan['action'] == 'WAIT'
+          ? 'Kontrol güncel · fırsat bekleniyor'
+          : 'Kontrol güncel · karar kaydedildi',
+      _ => 'Ayrıntılı durum kaydı bekleniyor',
+    };
+  }
   DateTime? get lastTriggerAt => _date('lastTriggerAt');
   DateTime? get lastScheduledTriggerAt => _date('lastScheduledTriggerAt');
   String? get lastTriggerEvent {
@@ -61,9 +94,14 @@ class ServerPaperSnapshot {
   }
   bool isHealthyAt(DateTime time) {
     final last = lastSuccessAt;
+    final runtime = runtimeStatus;
+    final source = runtimeDate('oldestQuoteAt');
     return enabled && error == null && last != null &&
+        runtime['phase'] != 'ERROR' && runtime['phase'] != 'DEGRADED' &&
+        (source == null || (!source.isAfter(time.toUtc()) &&
+          time.toUtc().difference(source) < const Duration(minutes: 5))) &&
         !last.isAfter(time.toUtc()) &&
-        time.toUtc().difference(last) < const Duration(minutes: 20);
+        time.toUtc().difference(last) < const Duration(minutes: 5);
   }
 
   Map<String, dynamic> _map(String key) {

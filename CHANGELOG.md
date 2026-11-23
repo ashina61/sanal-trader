@@ -1,3 +1,14 @@
+## 2026-11-23 — v0.9.19 Bot durumu ve öncelikli koruyucu çıkış
+
+- Kasa ve Bot ekranlarına aynı sunucu kaydından beslenen Botun Durumu alanı eklendi. Başarılı kontrol, fırsat bekleme, kısmi mum verisi, hata, duraklama ve atlanan tekrar tetik ayrı gösterilir.
+- Son fiyat gözlemi ile borsanın fiyat zamanı ayrıldı. Döngü süresi, likit evren, kısa liste, fiyatı kontrol edilen pozisyonlar ve gerçekleşen koruyucu çıkış sayısı kaydedilir. Panel yenileme hatası eski kasanın güncelmiş gibi sunulmasını engeller.
+- Fiyatla çalışan mevcut stop, kâr al ve gözlenen tepe/dip korumaları, geniş mum taraması, RSS ve AI beklenmeden kontrol edilir. Aynı gözlemde birden fazla SPOT veya 1x sanal SHORT çıkışı varsa tek kasada sırayla kapatılır. Bu döngü yeni pozisyon açmaz; geniş araştırma sonraki kontrole bırakılır.
+- Başka bir açık pozisyonun fiyatı eksik olsa da güncel fiyatı olan pozisyonun koruyucu çıkışı engellenmez. Kapanan işlemler korunur; kalan fiyat eksikliği açık hata olarak kaydedilir. Eksik fiyatla yeni işlem veya uydurma toplam değer oluşturulmaz.
+- Canlı motor her fiyat yanıtını yanıt alındığı zamana göre doğrular; 90 saniyeden eski veya 5 saniyeden fazla gelecek zamanlı fiyatı kullanmaz. Geniş grafik taramasından sonra fiyatlar tekrar alınır. Son kapanmış mumu aşırı eski olan grafik, yeni teknik onay sayılmaz.
+- Teknik çıkış kararı da haber sorgusunu beklemez. Yeniden fiyat kontrolünde çıkış koşulu kaybolursa o karar yeni girişe çevrilmez. Alım, satım, SHORT açma ve kapatma aynı muhasebe yolunu kullanır.
+- Veri tazeliği, çoklu koruyucu çıkış, eksik pozisyon fiyatında sağlam kalan stop, tekrar tetik ve küçük telefon ekranı için regresyon kapsamı eklendi. Bot periyodik GitHub Actions altyapısındadır; bu sürüm sürekli WebSocket bağlantısı kurmaz.
+- Mevcut 650 TL başlangıçlı tek sanal kasa, geçmiş zarar/kâr, açık pozisyonlar ve işlem geçmişi sıfırlanmaz. Gerçek borsa emri veya yeni ücretli hizmet yoktur. Flutter 0.9.19+25.
+
 ## 2026-11-23 — v0.9.18 Gerçek işlem şeridi, BEKLE açıklaması, zirveden kâr koruma
 
 - Gerçek veri denetimi: 30 sanal emir (18 AL, 8 SAT, 2 SHORT, 2 COVER) gerçekleşmişti ancak son emrin üzerinden yaklaşık 3 saat geçmişti. Portföy 10 SPOT coinle ~%78 dolu, 650 TL başlangıca karşı ~637 TL idi. Botun piyasa kontrolleri çalışıyordu; yeni emir çıkmamasının ana nedeni onaylı sinyal bulunamaması ve dolu portföydü.

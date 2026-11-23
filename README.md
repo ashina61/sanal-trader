@@ -21,6 +21,28 @@ Yalnızca başlangıç değeri **650 TL** olan tek bir sanal portföyü takip ed
 **Ekranlar:** Kasa (net bakiye ve açık pozisyonlar), Radar (gerçek bot adayları
 ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapanışlar).
 
+## Bot durumu ve çıkış önceliği (v0.9.19)
+
+Kasa ve Bot ekranlarındaki **Botun durumu**, aynı sunucu kasasının son kontrolünü
+ayrı alanlarda gösterir: fiyat gözlem saati, borsanın en eski fiyat zamanı,
+kontrol süresi, kısa liste, mum sorgularının başarılı/eksik sayısı ve çıkış denetimi.
+Tekrar tetik, eksik veri, hata veya gecikme başarılı yeni tarama gibi gösterilmez.
+
+Her döngü önce güncel fiyatlarla **tüm fiyat temelli koruyucu çıkışları** kontrol eder.
+Stop, kâr al ve gözlenen zirve/dip koruması tetiklenirse grafik/RSS/AI sorgusu
+beklenmeden aynı gözlemde birden fazla pozisyon sırayla kapanabilir. O döngüde
+ilave giriş yapılmaz; araştırma sonraki kontrolde sürer. Başka pozisyonun fiyatının
+eksik olması, fiyatı doğrulanan pozisyonun stopunu engellemez. Kalan eksiklik
+hata olarak işaretlenir; fiyatı olmayan pozisyon için değer veya satış uydurulmaz.
+
+Canlı motor fiyatı yanıtı aldığı saate göre doğrular (en fazla 90 saniye eski,
+en fazla 5 saniye ileri). Geniş grafik sorgularından sonra yeni fiyat alır.
+Yeni teknik onayda son kapanmış 1dk/15dk/1s mum sırasıyla en fazla
+180/1800/7200 saniye eski olabilir. Mevcut kuralların stop/kar-al eşikleri değişmez.
+
+Bu **periyodik REST** altyapısıdır; kesintisiz WebSocket takibi veya aradaki
+fiyatlardan garantili stop gerçekleşmesi iddiası yoktur. Tek kasa ve geçmiş korunur.
+
 ## Öğrenen piyasa ve haber takibi (v0.9.14)
 
 - Binlerce gerçek coin fiyatından likidite elemesi yapılır. Kısa liste için

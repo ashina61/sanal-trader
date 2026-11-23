@@ -21,7 +21,7 @@ class ServerPaperOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = snapshot;
-    final healthy = s?.isHealthyAt(DateTime.now()) ?? false;
+    final healthy = error == null && (s?.isHealthyAt(DateTime.now()) ?? false);
     final growth = s == null ? null : s.equityTry - s.startingTry;
     final growthPct = s == null || s.startingTry <= 0
         ? null : growth! / s.startingTry * 100;

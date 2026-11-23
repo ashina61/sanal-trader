@@ -20,6 +20,7 @@ from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
     REFRESH_INTERVAL_SECONDS)
 from backend.market_breadth import market_breadth
 from backend.scan_engine import fetch_candle_batch
+from backend.runtime_status import start as start_runtime, market_seen, finish as finish_runtime
 from backend.evidence_guard import entry_gate, gate_summary
 from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
     short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
@@ -191,7 +192,7 @@ class Market:
         articles, failures = fetch_rss(t)
         return news_snapshot(articles, t, failures)
 
-def quotes(raw, t):
+def quotes(raw, t, max_age=600):
     if not isinstance(raw, list):
         raise ValueError("Malformed ticker list")
     result = {}
@@ -205,10 +206,12 @@ def quotes(raw, t):
         close_time = numeric(item.get("closeTime"))
         if not sym or price is None or price <= 0 or volume is None or volume < 0:
             continue
-        if close_time is None or abs(t.timestamp() - close_time / 1000) > 600:
+        if (close_time is None or t.timestamp() - close_time / 1000 > max_age
+                or close_time / 1000 - t.timestamp() > 5):
             continue
         result[sym] = {
             "symbol": sym, "usdt": price, "volume": volume,
+            "sourceAt": stamp(dt.datetime.fromtimestamp(close_time / 1000, UTC)),
             "change": (price / open_price - 1) * 100
                         if open_price and open_price > 0 else 0.0,
         }
@@ -217,7 +220,7 @@ def quotes(raw, t):
         raise ValueError("Missing fresh USDT/TRY market exchange rate")
     return result, fx["usdt"]
 
-def closes(data, t, fx):
+def closes(data, t, fx, max_age=None):
     if not isinstance(data, list):
         return []
     points = []
@@ -230,6 +233,9 @@ def closes(data, t, fx):
             continue
         points.append((end, close * fx))
     points = sorted(dict(points).items())
+    if max_age is not None and (not points or
+            t.timestamp() - points[-1][0] / 1000 > max_age):
+        return []
     return [float(p) for _, p in points][-168:]
 
 def ema(series, period):
@@ -362,7 +368,8 @@ def execute(state, t, symbol, side, amount, price, reason):
         f" {symbol}: {amount:.2f} TL; {reason}")
     return rec
 
-def assess_decision(state, latest, t, research_only=False):
+def assess_decision(state, latest, t, research_only=False,
+                    exits_only=False, price_only=False):
     """Choose SPOT BUY, SPOT SELL, virtual SHORT, SHORT COVER or WAIT.
 
     Decisions use observed public market marks and existing closed hourly
@@ -394,7 +401,7 @@ def assess_decision(state, latest, t, research_only=False):
     if not state.get("enabled", False):
         return wait("Sunucu botu duraklatılmış")
     total = equity(state, latest)
-    if total is None or not math.isfinite(total) or total <= 0:
+    if not price_only and (total is None or not math.isfinite(total) or total <= 0):
         return wait("Açık pozisyonların fiyatı güvenilir şekilde değerlenemedi")
 
     def cooled(pair):
@@ -402,6 +409,8 @@ def assess_decision(state, latest, t, research_only=False):
         return last is None or (t - last).total_seconds() >= 600
 
     def quick(pair):
+        if price_only:
+            return None
         record = state.get("intraday", {}).get(pair, {})
         when = as_date(record.get("fetchedAt"))
         if when is None or when > t or (t - when).total_seconds() > 1500:
@@ -410,6 +419,8 @@ def assess_decision(state, latest, t, research_only=False):
             record.get("prices", []), latest.get(pair, {}).get("priceTry"))
 
     def minute(pair):
+        if price_only:
+            return None
         record = state.get("micro", {}).get(pair, {})
         fetched = as_date(record.get("fetchedAt"))
         if fetched is None or fetched > t or (t - fetched).total_seconds() > 420:
@@ -429,6 +440,8 @@ def assess_decision(state, latest, t, research_only=False):
         return (t - opened).total_seconds() if opened and opened <= t else None
 
     def current_tech(pair):
+        if price_only:
+            return None
         record = state.get("histories", {}).get(pair, {})
         fetched = as_date(record.get("fetchedAt"))
         if fetched and (
@@ -604,6 +617,8 @@ def assess_decision(state, latest, t, research_only=False):
 
     plan["openPositionsChecked"] = (
         len(state["holdings"]) + len(state.get("shorts", {})))
+    plan["missingPositionQuotes"] = sorted(
+        (set(state["holdings"]) | set(state.get("shorts", {}))) - set(latest))
     plan["protectiveExitCandidates"] = len(exits)
     if exits and not research_only:
         priority, pair, side, amount, reason, technical = max(
@@ -611,6 +626,9 @@ def assess_decision(state, latest, t, research_only=False):
         plan["reviewed"] = len(latest)
         return choose(pair, side, amount, reason,
                       technical["score"] if technical else None)
+
+    if exits_only:
+        return wait("Gözlenen fiyatlarda koruyucu çıkış koşulu oluşmadı")
 
     # Controls below block NEW positions only, never protective exits.
     if not research_only and total < state.get("peakEquityTry", total) * .88:
@@ -955,8 +973,44 @@ def record_performance(state, t):
     state["equityHistory"] = points[-576:]
 
 
-def cycle(state, market, t):
+def apply_order(state, latest, t, planned):
+    """One accounting path for both early protection and regular decisions."""
+    pair, side, gross, reason = planned["order"]
+    price = latest[pair]["priceTry"]
+    if side == "short":
+        executed = open_short(state, t, pair, gross, price, reason)
+    elif side == "cover":
+        executed = close_short(state, t, pair, price, reason)
+    else:
+        executed = execute(state, t, pair, side, gross, price, reason)
+    if side in ("buy", "short"):
+        record_open(state, pair, side, planned.get("setupTag") or "hourly",
+                    gross, stamp(t))
+        context_record_entry(state, pair, planned.get("contextKey"), gross, stamp(t))
+    else:
+        record_close(state, pair, executed["realizedPnlTry"])
+        context_record_exit(state, pair, executed["realizedPnlTry"])
+    return executed
+
+
+def update_wallet_marks(state, latest, t):
+    """Persist only an entirely valued wallet; retain error on partial quotes."""
+    value = equity(state, latest)
+    if value is not None:
+        state["equityTry"] = value
+        record_performance(state, t)
+    active = set(state["holdings"]) | set(state.get("shorts", {}))
+    state["marksTry"] = {
+        pair: latest[pair]["priceTry"] for pair in active if pair in latest
+    }
+
+
+def cycle(state, market, t, clock=None):
     state = json.loads(json.dumps(state))
+    began = time.perf_counter()
+    observed_time = clock if callable(clock) else lambda: t
+    runtime = start_runtime(t, state.get("lastSuccessAt"))
+    state["runtimeStatus"] = runtime
     state["lastRunAt"] = stamp(t)
     state["cycles"] += 1
     if not state.get("enabled", False):
@@ -967,6 +1021,7 @@ def cycle(state, market, t):
             "reason": "Bot durduruldu", "reviewed": 0, "candidates": [],
         }
         log(state, t, "Sunucu botu duraklatılmış.")
+        finish_runtime(runtime, state, "PAUSED", observed_time(), began)
         return state
     last = as_date(state.get("lastSuccessAt"))
     if last and (t - last).total_seconds() < 75:
@@ -975,14 +1030,18 @@ def cycle(state, market, t):
         state["journal"] = ([{"at": stamp(t), "message":
             "Tekrarlanan kontrol atlandı; önceki karar korundu."}] +
             state.get("journal", []))[:40]
+        finish_runtime(runtime, state, "SKIPPED", observed_time(), began)
+        runtime["reason"] = "Tekrarlanan tetik atlandı; yeni piyasa kontrolü yapılmadı"
         return state
+    latest = {}
     try:
-        lookup, rate = quotes(market.tickers(), t)
+        raw_quotes = market.tickers()
+        t = observed_time()
+        lookup, rate = quotes(raw_quotes, t, max_age=90)
+        runtime["quotesReceived"] = len(lookup)
         eligible_pairs = [v for v in lookup.values() if eligible(v["symbol"])
                           and v["volume"] >= 1_000_000]
         eligible_pairs.sort(key=lambda x: x["volume"], reverse=True)
-        if not eligible_pairs:
-            raise ValueError("No liquid spot quotes")
         # Scan more than the first 24 liquid symbols. Recent gainers and
         # losers provide broader LONG / SHORT opportunities; all still pass
         # volume, volatility, history, and risk filters before any paper order.
@@ -1000,7 +1059,58 @@ def cycle(state, market, t):
             if v is None:
                 continue
             latest[pair] = {"symbol": pair, "priceTry": v["usdt"] * rate,
-                            "volumeUsdt": v["volume"], "change24h": v["change"]}
+                            "volumeUsdt": v["volume"], "change24h": v["change"],
+                            "sourceAt": v["sourceAt"]}
+        market_seen(runtime, latest, t)
+        state["tracked"] = len(eligible_pairs)
+        state["screened"] = len(latest)
+        runtime["exitCheckedAt"] = stamp(t)
+        runtime["positionsChecked"] = len(state["holdings"]) + len(state.get("shorts", {}))
+        runtime["missingPositionQuotes"] = sorted(
+            (set(state["holdings"]) | set(state.get("shorts", {}))) - set(latest))
+        runtime["positionsTotal"] = runtime["positionsChecked"]
+        runtime["positionsChecked"] -= len(runtime["missingPositionQuotes"])
+        day = t.strftime("%Y-%m-%d")
+        if state["day"] != day:
+            state["day"] = day
+            state["todayOrders"] = 0
+        # Price-only protection runs BEFORE any chart, RSS or AI call. All
+        # currently triggered positions close serially at the observed mark.
+        # Missing quotes for another position must not prevent a valid stop.
+        update_price_extremes(state, latest)
+        first_exit = None
+        early_orders = []
+        for _ in range(runtime["positionsTotal"]):
+            protective = assess_decision(state, latest, t,
+                exits_only=True, price_only=True)
+            if not protective.get("order"):
+                break
+            if first_exit is None:
+                first_exit = protective
+            early_orders.append(apply_order(state, latest, t, protective))
+        runtime["exitOrders"] = len(early_orders)
+        if early_orders:
+            state["decisionPlan"] = {
+                key: value for key, value in first_exit.items()
+                if key not in ("order", "aiChoices")
+            }
+            state["decisionPlan"].update({
+                "exitBatch": early_orders,
+                "reason": f"{len(early_orders)} koruyucu sanal çıkış: " + first_exit["reason"],
+                "scanSkippedReason": "Koruyucu çıkış önceliği; geniş tarama sonraki kontrolde",
+                "positionHealth": position_monitor(state, latest, t),
+                "aiBrain": {"status": "PROTECTIVE_EXIT", "provider": "Rules"},
+            })
+            state["aiBrain"] = state["decisionPlan"]["aiBrain"]
+            update_wallet_marks(state, latest, t)
+            if runtime["missingPositionQuotes"]:
+                raise ValueError("Protective closes saved; another position quote is missing")
+            state["lastSuccessAt"] = stamp(t)
+            state["lastError"] = None
+            finish_runtime(runtime, state, "PROTECTED", t, began)
+            return state
+        if not eligible_pairs:
+            raise ValueError("No liquid spot quotes")
         # Every held coin must be freshly valued, even when off the top 24.
         if equity(state, latest) is None:
             raise ValueError("Held position price is missing; no trade")
@@ -1013,7 +1123,7 @@ def cycle(state, market, t):
         ]
         hour_bars, hour_stats = fetch_candle_batch(
             market.candles, due_hourly,
-            lambda rows: closes(rows, t, rate), minimum=60)
+            lambda rows: closes(rows, t, rate, max_age=7200), minimum=60)
         for pair, prices in hour_bars.items():
             cache[pair] = {"fetchedAt": stamp(t), "prices": prices}
         for symbol in list(cache):
@@ -1039,7 +1149,7 @@ def cycle(state, market, t):
             ]
             fast_bars, fast_stats = fetch_candle_batch(
                 fast_provider, due_fast,
-                lambda rows: closes(rows, t, rate), minimum=20)
+                lambda rows: closes(rows, t, rate, max_age=1800), minimum=20)
             for pair, prices in fast_bars.items():
                 fast_cache[pair] = {
                     "fetchedAt": stamp(t), "prices": prices,
@@ -1067,7 +1177,7 @@ def cycle(state, market, t):
         if callable(minute_provider):
             minute_bars, minute_stats = fetch_candle_batch(
                 minute_provider, minute_symbols,
-                lambda rows: closes(rows, t, rate), minimum=35)
+                lambda rows: closes(rows, t, rate, max_age=180), minimum=35)
             # Fail closed: never silently reuse 1m confirmation after an
             # individual endpoint fails. Held positions still have hard stops.
             for pair in minute_symbols:
@@ -1094,6 +1204,7 @@ def cycle(state, market, t):
                  (hour_stats, fast_stats, minute_stats)), 3),
             "workers": 6,
         }
+        runtime["scanCompleted"] = True
         state["marketPulse"] = market_breadth(latest)
         state["historyPairs"] = sum(
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
@@ -1106,7 +1217,28 @@ def cycle(state, market, t):
         state["peakEquityTry"] = max(before, state["peakEquityTry"])
         # Headline polling is deliberately much slower than market polling:
         # RSS is best-effort context, never a reason to stop stop-loss exits.
-        provider = getattr(market, "news", None)
+        # The entry scan may be slow. Get another observed quote before the
+        # final decision, even on WAIT, to avoid valuing the wallet at old marks.
+        if callable(clock):
+            refreshed = market.tickers()
+            t = observed_time()
+            fresh_lookup, fresh_fx = quotes(refreshed, t, max_age=90)
+            latest = {
+                pair: {"symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
+                       "volumeUsdt": fresh_lookup[pair]["volume"],
+                       "change24h": fresh_lookup[pair]["change"],
+                       "sourceAt": fresh_lookup[pair]["sourceAt"]}
+                for pair in latest if pair in fresh_lookup
+            }
+            market_seen(runtime, latest, t)
+            runtime["missingPositionQuotes"] = sorted(
+                (set(state["holdings"]) | set(state.get("shorts", {}))) - set(latest))
+            if equity(state, latest) is None:
+                raise ValueError("Held quote missing after chart scan")
+            update_price_extremes(state, latest)
+        # Technical exits also bypass news and AI latency.
+        pre_news = assess_decision(state, latest, t, exits_only=True)
+        provider = None if pre_news.get("order") else getattr(market, "news", None)
         last_news_at = as_date(state.get("newsPulse", {}).get("checkedAt"))
         if callable(provider) and (last_news_at is None or
                 (t - last_news_at).total_seconds() >= REFRESH_INTERVAL_SECONDS):
@@ -1122,27 +1254,34 @@ def cycle(state, market, t):
         if state["day"] != day:
             state["day"] = day
             state["todayOrders"] = 0
-        planned = assess_decision(state, latest, t)
+        runtime["exitCheckedAt"] = stamp(t)
+        planned = pre_news if pre_news.get("order") else assess_decision(state, latest, t)
         if planned["order"]:
             # Scanning charts can take tens of seconds. NEVER simulate a fill
             # against the older pre-scan ticker. Reprice from a fresh public
             # snapshot and require the entire entry/exit decision to remain
             # valid at the observed execution mark, before asking the AI.
-            fresh_lookup, fresh_fx = quotes(market.tickers(), t)
+            refreshed = market.tickers()
+            t = observed_time()
+            fresh_lookup, fresh_fx = quotes(refreshed, t, max_age=90)
             latest = {
                 pair: {
                     "symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
                     "volumeUsdt": fresh_lookup[pair]["volume"],
                     "change24h": fresh_lookup[pair]["change"],
+                    "sourceAt": fresh_lookup[pair]["sourceAt"],
                 }
                 for pair in latest if pair in fresh_lookup
             }
+            market_seen(runtime, latest, t)
             refreshed_equity = equity(state, latest)
             if refreshed_equity is None:
                 raise ValueError("Position quote missing during fill revalidation")
             update_price_extremes(state, latest)
             state["peakEquityTry"] = max(refreshed_equity, state["peakEquityTry"])
-            planned = assess_decision(state, latest, t)
+            was_exit = planned["action"] in ("SELL", "COVER")
+            planned = assess_decision(state, latest, t, exits_only=was_exit)
+            runtime["exitCheckedAt"] = stamp(t)
             planned["priceRechecked"] = True
         planned, ai_meta = apply_ai_brain(
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
@@ -1181,47 +1320,34 @@ def cycle(state, market, t):
         state["decisionPlan"]["strategy"] = "Adaptive v9 · transparent trade tape + fee-positive peak profit lock"
         choice = planned["order"]
         if choice:
-            pair, side, gross, reason = choice
-            price = latest[pair]["priceTry"]
-            if side == "short":
-                executed = open_short(state, t, pair, gross, price, reason)
-            elif side == "cover":
-                executed = close_short(state, t, pair, price, reason)
-            else:
-                executed = execute(state, t, pair, side, gross, price, reason)
-            if side in ("buy", "short"):
-                record_open(state, pair, side,
-                            planned.get("setupTag") or "hourly",
-                            gross, stamp(t))
-                context_record_entry(state, pair, planned.get("contextKey"),
-                                     gross, stamp(t))
-            else:
-                record_close(state, pair, executed["realizedPnlTry"])
-                context_record_exit(state, pair, executed["realizedPnlTry"])
+            executed = apply_order(state, latest, t, planned)
+            runtime["exitOrders"] += int(executed["side"] in ("sell", "cover"))
         else:
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 + planned["reason"])
-        state["equityTry"] = equity(state, latest)
         state["decisionPlan"]["positionHealth"] = position_monitor(
             state, latest, t)
-        # Store last observed marks of open paper positions for Flutter.
-        active = set(state["holdings"]) | set(state.get("shorts", {}))
-        state["marksTry"] = {
-            pair: latest[pair]["priceTry"] for pair in active if pair in latest
-        }
-        record_performance(state, t)
+        update_wallet_marks(state, latest, t)
         state["lastSuccessAt"] = stamp(t)
         state["lastError"] = None
+        failures = sum(x.get("failed", 0) for x in (hour_stats, fast_stats, minute_stats))
+        finish_runtime(runtime, state, "DEGRADED" if failures else "COMPLETE", t, began)
     except Exception as exc:
         state["lastError"] = str(exc)[:200]
+        already_closed = runtime["exitOrders"] > 0
+        saved_exits = (state.get("decisionPlan") or {}).get("exitBatch", []) if already_closed else []
         state["decisionPlan"] = {
             "at": stamp(t), "action": "WAIT", "symbol": None,
             "amountTry": None, "score": None,
             "marketRegime": "VERİ HATASI",
-            "reason": "Veri hatası nedeniyle yeni sanal emir engellendi",
+            "reason": ("Koruyucu çıkışlar kaydedildi; kalan pozisyon fiyatı eksik"
+                       if already_closed else "Veri hatası nedeniyle yeni sanal emir engellendi"),
             "reviewed": 0, "candidates": [],
+            "exitBatch": saved_exits,
         }
-        log(state, t, "İşlem yapılmadı: piyasa verisi hatası. " + state["lastError"])
+        update_wallet_marks(state, latest, t)
+        log(state, t, state["decisionPlan"]["reason"] + ". " + state["lastError"])
+        finish_runtime(runtime, state, "ERROR", observed_time(), began)
     return state
 
 def record_trigger(state, t, event):
@@ -1254,7 +1380,7 @@ def main():
         log(state, t, "Ayrı sunucu sanal kasası 650 TL'ye sıfırlandı.")
     else:
         state = record_trigger(state, t, os.getenv("TRIGGER_EVENT", ""))
-        state = cycle(state, Market(), t)
+        state = cycle(state, Market(), t, clock=now_utc)
     save(args.state, state)
     print(json.dumps({
         "enabled": state["enabled"], "cashTry": round(state["cashTry"], 4),

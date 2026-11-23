@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/server_paper_repository.dart';
 import '../widgets/server_paper_card.dart';
 import '../widgets/server_paper_overview.dart';
+import '../widgets/server_runtime_status.dart';
 import '../widgets/premium_theme.dart';
 import '../widgets/formatters.dart';
 import 'update_history_screen.dart';
@@ -87,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           onOpenBot: () => setState(() => _tab = 2),
           onOpenTrades: _showTrades, onRefresh: _refresh,
         ),
+        const SizedBox(height: 14),
+        ServerRuntimeStatusCard(snapshot: s, error: _error),
         const SizedBox(height: 14),
         ServerPaperPositionsPanel(
           snapshot: s, onOpenTrades: _showTrades),
@@ -235,6 +238,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     physics: const AlwaysScrollableScrollPhysics(),
     padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
     children: [
+      ServerRuntimeStatusCard(snapshot: _snapshot, error: _error, detailed: true),
+      const SizedBox(height: 14),
       ServerPaperCard(snapshot: _snapshot, loading: _loading,
         error: _error, onRefresh: _refresh,
         onOpenTrades: _showTrades),

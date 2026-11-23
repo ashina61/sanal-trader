@@ -30,7 +30,7 @@ class ServerPaperSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final healthy = snapshot?.isHealthyAt(DateTime.now()) ?? false;
+    final healthy = error == null && (snapshot?.isHealthyAt(DateTime.now()) ?? false);
     final status = snapshot == null
         ? (loading ? 'Sunucu verisi yükleniyor' : (error ?? 'Bağlantı bekleniyor'))
         : !snapshot!.enabled ? 'Durduruldu'
@@ -95,7 +95,7 @@ class ServerPaperCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = snapshot;
     final updated = state?.lastSuccessAt?.toLocal();
-    final healthy = state?.isHealthyAt(DateTime.now()) ?? false;
+    final healthy = error == null && (state?.isHealthyAt(DateTime.now()) ?? false);
     final longs = state?.holdings ?? {};
     final shorts = state?.shorts ?? {};
     final plan = state?.decisionPlan ?? const <String, dynamic>{};
