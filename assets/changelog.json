@@ -3,6 +3,19 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.26",
+      "date": "2026-11-23",
+      "title": "DEX sözleşme riskleri, maliyet stres testi ve kapanmış işlemlerden öğrenme",
+      "details": [
+        "Ücretsiz GeckoTerminal Solana/Base token keşfinde en fazla dört token için GoPlus public security API ile salt okunur sözleşme riskleri gözlenir. Honeypot/mint/transfer/vergiler uyarı üretir; eksik veri güvenli kabul edilmez.",
+        "GoPlus ve GeckoTerminal kaynakları başarısızsa güvenlik UNKNOWN/UNAVAILABLE görünür; LP kilidi ve satış güvenliği kanıtı olmadığı açıkça belirtilir. DEX taraması otomatik emir üretmez.",
+        "Binance 20 kademeli emir defteri tahmini artık giriş miktarını ilk kademeye sabitlemek yerine tam USDT işlem bütçesine göre hesaplar.",
+        "Mevcut tek kasa net değerini değiştirmeden ayrı 5 baz puan ek çıkış fiyat kayması stres senaryosu gösterilir. İşlem geçmişi silinmez; gerçekleşen ücretler iki kez düşülmez.",
+        "Kapanan SPOT SAT/SHORT KAPAT işlemleri için son 10 net sonuç, kayıp serisi, kapanış türleri, net kâr/zarar faktörü ve spot/short kırılımı eklenir. Rapor işlem emri yetkisi değildir.",
+        "Radar altında sözleşme riskleri açılır gösterilir, Bot/Kâr sayfaları kompakt öğrenme kartını içerir. Ücretsiz veri ve cron sınırlamaları devam eder. Flutter 0.9.26+32."
+      ]
+    },
+    {
       "version": "0.9.25",
       "date": "2026-11-23",
       "title": "Kapsamlı denetim: DEX hız sınırı, kesin giriş freni, kasa geçmişi koruması",
