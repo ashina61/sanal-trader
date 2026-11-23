@@ -1,3 +1,14 @@
+## 2026-11-23 — v0.9.14 Haber radarı, piyasayı tanıma ve gerçekleşen işlemlerden öğrenme
+
+- Taranan coinlerin gerçek 24 saatlik değişiminden piyasa genişliği hesaplandı: yükselen, düşen, yatay coin sayısı, medyan değişim, en güçlü/en zayıf adaylar. Bu, gözlemdir; otomatik kâr tahmini değildir.
+- CoinDesk ve Cointelegraph ücretsiz RSS kaynakları için backend/news_radar.py eklendi. Kaynak, yayın tarihi, URL/alan adı, makul boyut ve yaş kontrolü var. Yaklaşık 20 dakikalık sunucu önbelleğiyle çalışma yükü sınırlandırıldı.
+- Kritik hack/exploit, delist, iflas ve bazı regülasyon başlıkları yalnızca açıkça eşleştirilen coin için en fazla iki saat süreyle yeni girişleri engelleyebilir. Genel uyarı için birden fazla bağımsız kaynak aranır. Haberler otomatik SAT/SHORT açmaz veya koruyucu kapanışları durdurmaz. RSS kesilmesi fiyat analizini engellemez.
+- Açılıştaki piyasa rejimi, işlem yönü ve oynaklık sınıfından bağlam anahtarı oluşturulur. Yeni bağlam öğrenimi tamamlanmış sanal işlem net sonuçlarından güncellenir; geçmiş sonuçlar uydurulmaz. Üç gerçek sonuçtan sonra, az örneklem çekmesiyle yalnızca küçük bir aday sıralama etkisi olabilir.
+- AI başka teknik adayı seçtiğinde o adayın bağlamı korunur; sistem hatalı sembolün deneyimini başka pozisyona yazmaz.
+- Bot Karar Merkezi'ne piyasa genişliği, haber durumu ve son üç başlık ile bağlam öğrenmesi kapanış sayısı eklendi. Bölüm varsayılan olarak kapalı tutulur.
+- Birim testleri: güncel RSS / kaynak doğrulama, coin ve genel haber uyarıları, düşük örneklemde öğrenme, kapanan gerçek sonuçlar ve piyasa genişliği. Eski 650 TL sanal kasa, işlem geçmişi ve açık pozisyonlar sıfırlanmadı.
+- Uygulama sürümü 0.9.14+20. Bu değişiklikler kâr garantisi değildir ve gerçek borsa emirleri açmaz.
+
 ## 2026-11-23 — v0.9.13 Tam grafik kapsamı, kaliteli aday seçimi ve emir öncesi fiyat doğrulaması
 
 - Sunucuda 2 dakikalık Cloudflare tetikleme döngüleri workflow_dispatch ile art arda başarılı çalışırken tek sanal cüzdanın korunması doğrulandı. GitHub Actions / Worker altyapısı milisaniyelik veya kesintisiz 7/24 emir hizmeti değildir.
