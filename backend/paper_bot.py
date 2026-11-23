@@ -18,6 +18,7 @@ from backend.context_learning import (context_key, adjustment as context_adjustm
     record_entry as context_record_entry, record_exit as context_record_exit)
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
     REFRESH_INTERVAL_SECONDS)
+from backend.market_breadth import market_breadth
 from backend.signal_learning import (minute_signal, setup_for, signal_bias,
     record_open, record_close)
 
@@ -68,7 +69,8 @@ def fresh_state():
                 lastScheduledTriggerAt=None, intraday={}, peakMarksTry={},
                 troughMarksTry={}, equityHistory=[], performance={},
                 micro={}, signalStats={}, openSignals={},
-                contextStats={}, openContexts={}, newsPulse={})
+                contextStats={}, openContexts={}, newsPulse={},
+                marketPulse={})
 
 def load(path):
     if not path.exists():
@@ -92,9 +94,10 @@ def load(path):
     obj.setdefault("contextStats", {})
     obj.setdefault("openContexts", {})
     obj.setdefault("newsPulse", {})
+    obj.setdefault("marketPulse", {})
     if any(not isinstance(obj[field], dict) for field in
            ("intraday", "micro", "signalStats", "openSignals",
-            "contextStats", "openContexts", "newsPulse")):
+            "contextStats", "openContexts", "newsPulse", "marketPulse")):
         raise ValueError("Invalid minute/learning paper cache")
     obj.setdefault("peakMarksTry", {})
     obj.setdefault("troughMarksTry", {})
@@ -1011,6 +1014,7 @@ def cycle(state, market, t):
             for pair in minute_symbols)
         state["tracked"] = len(eligible_pairs)
         state["screened"] = len(latest)
+        state["marketPulse"] = market_breadth(latest)
         state["historyPairs"] = sum(
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
         )
@@ -1072,6 +1076,7 @@ def cycle(state, market, t):
         state["decisionPlan"]["minutePairs"] = state.get("minutePairs", 0)
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
+        state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
