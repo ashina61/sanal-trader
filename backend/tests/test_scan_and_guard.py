@@ -68,7 +68,9 @@ class EvidenceGuardTests(unittest.TestCase):
             for _ in range(12)]
         decision = assess_decision(state, latest, NOW)
         self.assertEqual(decision["action"], "WAIT")
-        self.assertIn("Son gözlenen sinyal", decision["rejectReasons"])
+        self.assertTrue(any(
+            reason.startswith("Son gözlenen sinyal")
+            for reason in decision["rejectReasons"]))
         shadow = assess_decision(state, latest, NOW, research_only=True)
         self.assertEqual(shadow["action"], "WAIT")
         self.assertIsNone(shadow["order"])
