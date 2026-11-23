@@ -98,7 +98,6 @@ class ServerPaperCard extends StatelessWidget {
     final healthy = state?.isHealthyAt(DateTime.now()) ?? false;
     final longs = state?.holdings ?? {};
     final shorts = state?.shorts ?? {};
-    final marks = state?.marksTry ?? {};
     final positionHealth = (state?.decisionPlan?['positionHealth'] is List)
         ? (state!.decisionPlan!['positionHealth'] as List)
             .whereType<Map>().take(12).toList()
