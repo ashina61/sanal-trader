@@ -3,6 +3,20 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.13",
+      "date": "2026-11-23",
+      "title": "Tam dakika grafiği, doğru aday sıralaması ve güncel emir fiyatı",
+      "details": [
+        "Cloudflare dış zamanlayıcısının yaklaşık iki dakikada bir çalışması ve birbirini izleyen başarılı GitHub Actions sanal bot döngüleri canlı kayıtlarla doğrulandı; anlık veya garantili kesintisiz işlem iddia edilmiyor.",
+        "Daha önce taranan 53 coinin yalnızca 39'una 1 dakikalık ve 36'sına 15 dakikalık mum çekiliyordu. Artık seçilen tüm aday coinlerde iki grafik türü de alınmaya çalışılıyor; eksik gerçek veriyle işlem yapılmıyor.",
+        "Onaylanmış SPOT AL ve 1x sanal SHORT adayları, trend puanına ek olarak taze 1dk/15dk takip momentumu, kırılım ve oynaklık cezası ile sıralanıyor. Bu, kâr garantisi veya sahte tahmin değildir.",
+        "Bir emir açılacak veya pozisyon kapatılacaksa grafik taraması sonrasında kamu spot fiyatı ikinci kez çekiliyor; yeni fiyatta aynı kararın hâlâ geçerli olduğu tekrar doğrulanıyor. Eski sinyalle hayalî fiyat üzerinden emir yok.",
+        "Groq'un seçebildiği risk-onaylı aday listesi beşten sekize çıkarıldı; %78 mevcut toplam pozisyon sınırı metindeki yanlış %60 etiketi yerine gösteriliyor.",
+        "Yeni Python testleri tüm kısa listedeki dakika grafiklerini, kısa/uzun yön kalite skorlarını ve fiyat güncellemesinde geçersizleşen alımın iptalini kapsıyor.",
+        "README iki dakikalık dış tetikleme ve mevcut gerçek kısıtlarla güncellendi. Flutter sürümü 0.9.13+19. Önceki 650 TL sanal kasa, kar/zarar, işlemler ve açık pozisyonlar korunur."
+      ]
+    },
+    {
       "version": "0.9.12",
       "date": "2026-11-23",
       "title": "Gerçek 1dk sinyal motoru ve öğrenen hızlı sanal kararlar",
