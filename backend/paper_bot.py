@@ -16,6 +16,7 @@ from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
 from backend.smart_money import refresh as refresh_smart_money
+from backend.free_dex_radar import refresh as refresh_free_dex_radar
 from backend.context_learning import (context_key, adjustment as context_adjustment,
     record_entry as context_record_entry, record_exit as context_record_exit)
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
@@ -84,7 +85,7 @@ def fresh_state():
                 troughMarksTry={}, equityHistory=[], performance={},
                 micro={}, signalStats={}, openSignals={},
                 contextStats={}, openContexts={}, newsPulse={},
-                marketPulse={}, forwardEvidence={}, smartMoney={})
+                marketPulse={}, forwardEvidence={}, smartMoney={}, freeDexRadar={})
 
 def load(path):
     if not path.exists():
@@ -111,6 +112,7 @@ def load(path):
     obj.setdefault("marketPulse", {})
     migrate_forward(obj)
     obj.setdefault("smartMoney", {})
+    obj.setdefault("freeDexRadar", {})
     if any(not isinstance(obj[field], dict) for field in
            ("intraday", "micro", "signalStats", "openSignals",
             "contextStats", "openContexts", "newsPulse", "marketPulse")):
@@ -1495,6 +1497,19 @@ def main():
         # Isolated research-only indexer: never changes the single paper wallet,
         # blocks protective exits, or converts a DEX token to a Binance pair.
         state["smartMoney"] = refresh_smart_money(state.get("smartMoney"), now_utc())
+        # Free, read-only DEX sample. Separate from qualified wallet signals,
+        # single paper wallet, and risk-priority exits.
+        try:
+            state["freeDexRadar"] = refresh_free_dex_radar(
+                state.get("freeDexRadar"), now_utc())
+        except Exception as exc:
+            state["freeDexRadar"] = {
+                "status": "UNAVAILABLE", "source": "GeckoTerminal public API",
+                "mode": "UNVERIFIED_DEX_OBSERVATION",
+                "reason": "Ücretsiz DEX verisi kontrol edilemedi",
+                "errors": [type(exc).__name__], "automaticOrder": False,
+                "notSmartWalletProof": True, "history": [],
+            }
     save(args.state, state)
     print(json.dumps({
         "enabled": state["enabled"], "cashTry": round(state["cashTry"], 4),

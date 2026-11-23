@@ -287,3 +287,20 @@ Bu modül sunulan kanıtları bağımsız zincir üzerinden yeniden doğrulamaz.
 fiyat ve gerçekçi dolum olmadan yeni sanal emir açmaz, hiçbir gerçek alım/satım
 yapmaz ve ana 650 TL sanal kasayı değiştirmez. Ayrıntılı veri şeması ve
 kısıtlar: [Smart Money bağlantı rehberi](docs/smart-money-feed.md).
+
+## Ücretsiz DEX keşfi (v0.9.23)
+
+Solana ve Base için ücretsiz, API anahtarsız GeckoTerminal havuz/işlem
+örneklemesi eklendi. Github Actions sunucu botu çalıştığında son 12 dakika
+içinde tarama yapılmamışsa her ağdan en fazla iki havuzu inceler, işlem
+gönderen adresleri 20 dakikalık pencerede sayar ve üç farklı adresin aynı
+tokeni almasını doğrulanmamış araştırma gözlemi olarak gösterir.
+
+Bu adresler kanıtlanmış başarılı akıllı cüzdanlar değildir; herkese açık
+işlem örneklemesi cüzdanın 30 günlük kârını, bağımsız sahibini, fonun kaynağını
+ve token LP/mint/blacklist güvenliğini doğrulamaz. Önceki SMART_WALLET_FEED_URL
+ile yalnızca doğrulanmış sağlayıcı beslemesi kabul eden katman ayrı durur.
+Ücretsiz veri bulunmazsa hata görünür; veri uydurulmaz. Hiçbir DEX işlemi
+veya ayrı kasa oluşturulmaz.
+
+Kurallar ve sınırlar: [Ücretsiz DEX Radar rehberi](docs/free-dex-radar.md).
