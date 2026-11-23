@@ -3,6 +3,22 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.17",
+      "date": "2026-11-23",
+      "title": "Hızlı grafik tarama ve zarar eden sinyallere otomatik fren",
+      "details": [
+        "Canlı gözlemlerde grafik taramasının çok uzun sürdüğü tespit edildi. Binance'in kamuya açık 1 saat, 15 dakika ve 1 dakika mumları artık en fazla altı bağımsız paralel istekle alınır. Emirler ve sanal kasa tamamen tek merkezden ve sıralı yönetilir.",
+        "Botun karar ekranı artık mum tarama süresini, gerçek kamu grafik istek sayısını ve eşzamanlı okuma sayısını gösterir. Bu rakamlar GitHub Actions hazırlık veya Groq bekleme süresi değildir.",
+        "Grafik API'si bir coin için erişilemezse sahte mum eklenmez. Eksik 1 dakikalık onay yeniden kullanılmaz; teknik girişin doğrulanması beklenir.",
+        "İleriye dönük fiyat takip sisteminde son 12 SPOT sinyalinin ortalaması -%0,30 veya daha kötü ve kazanma oranı %35'i geçmiyorsa yeni SPOT alımına geçici fren konulur. En az 6 SHORT sonucunda ortalama -%0,45 veya kötü ve kazanma oranı en fazla %34 ise yeni SHORT açılmaz.",
+        "Fren sadece yeni girişler içindir; stop-loss, kâr koruması, SPOT SAT veya SHORT KAPAT işlemleri her koşulda öncelikli kalır. Açık pozisyonlar sırf bu sonuçlar yüzünden zorla satılmaz.",
+        "Bot fırsat araştırmasını durdurmaz; yeni gerçek saatlik sinyal sonuçları biriktikçe son gözlemleri tekrar hesaplar, iyileşme varsa giriş sınırları kendiliğinden kalkabilir. Bu, kanıtlanmış kazanç veya istatistiksel kesinlik iddiası değildir.",
+        "Groq tarafından gerçekten seçilen adayın simgesi ve yönü, ayrı sanal kasa oluşturmadan araştırma gözlemine doğru şekilde etiketlenir.",
+        "Yeni otomatik testler sınırlı paralel grafik akışını, veri eksikliğinde korumayı, risk freni kararlarını ve yeni sonuçlarla yeniden açılmayı doğrular.",
+        "Başlangıç 650 TL'lik sanal kasanın geçmişi, açık pozisyonlar, işlem listesi ve P&L sıfırlanmaz. Sürüm 0.9.17+23. Gerçek yatırım veya garantili getiri yoktur."
+      ]
+    },
+    {
       "version": "0.9.16",
       "date": "2026-11-23",
       "title": "Zarar sonrası öğrenme, daha iyi satış kararları ve risk kontrolü",
