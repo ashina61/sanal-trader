@@ -132,6 +132,16 @@ class ServerPaperCard extends StatelessWidget {
             .fold<int>(0, (sum, item) =>
                 sum + ((item['closed'] as num?)?.toInt() ?? 0))
         : 0;
+    final forward = plan['forwardEvidence'] is Map
+        ? (plan['forwardEvidence'] as Map) : const <String, dynamic>{};
+    final forwardCount = (forward['samples'] as num?)?.toInt() ?? 0;
+    final forwardPending = (forward['pending'] as num?)?.toInt() ?? 0;
+    final forwardAvg = forward['avgNetPct'] is num
+        ? '${(forward['avgNetPct'] as num).toStringAsFixed(2)}%'
+        : '—';
+    final forwardWins = forward['winRatePct'] is num
+        ? '${(forward['winRatePct'] as num).toStringAsFixed(1)}%'
+        : '—';
     final marketPulse = plan['marketPulse'] is Map
         ? (plan['marketPulse'] as Map) : const <String, dynamic>{};
     final newsStatus = plan['newsStatus']?.toString() ?? 'UNAVAILABLE';
@@ -350,6 +360,23 @@ class ServerPaperCard extends StatelessWidget {
                   'yapılır. Az örneklemde etki çok düşüktür; geçmişte olmayan sonuç '
                   'üretilmez.',
                   style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
+                const SizedBox(height: 11),
+                const Text('İleriye dönük sinyal doğrulaması · 60 dk',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+                    color: PremiumColors.gold)),
+                const SizedBox(height: 6),
+                Row(children: [
+                  Expanded(child: _metric('Ölçülen', '$forwardCount sinyal')),
+                  Expanded(child: _metric('Bekleyen', '$forwardPending sinyal')),
+                  Expanded(child: _metric('Ort. net', forwardAvg)),
+                ]),
+                const SizedBox(height: 5),
+                Text('Komisyon + varsayılan kayma sonrası isabet: $forwardWins. '
+                  'Gerçek emir değil: seçilen sinyalin bir saat sonraki '
+                  'gözlenen fiyatı ölçülür. İlk 30 sonuçtan önce öğrenme '
+                  'puanına etkisi yoktur.',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 9)),
                 const SizedBox(height: 9),
                 Align(alignment: Alignment.centerLeft, child: Text(
                   'Piyasa genişliği · 24s',
