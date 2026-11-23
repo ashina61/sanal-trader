@@ -136,6 +136,37 @@ ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapan�
 - Bu değişiklik doğrudan kâr üretmez. Önce gecikmenin düştüğü,
   sonra güvenilir yeni verilerde net sonuçların iyileştiği doğrulanmalıdır.
 
+## Neden üç saattir işlem yok? İşlem şeridi ve çıkış incelemesi (v0.9.18)
+
+- 23 Kasım öğleye doğru canlı bot-data kasasında **30 geçmiş sanal emir**
+  vardı: 18 SPOT AL, 8 SPOT SAT, 2 SHORT AÇ, 2 SHORT KAPAT.
+  Son yeni emir saat 06:44 UTC civarında gerçekleşmişti. Bot çalışmayı
+  sürdürüyordu; sadece artık uygun giriş bulamamıştı.
+- O andaki kasa 650 TL başlangıca karşı **yaklaşık 637 TL**, 10 SPOT
+  pozisyonu açık, nakit ~141 TL; sermayenin yaklaşık %78'i açıktaydı.
+  Piyasa 1dk/15dk teyidi yetersiz gördüğünde emir verilmez.
+- **Ana ekran ve Bot ekranı** şimdi son 4 gerçek sanal emri doğrudan
+  gösterir: SPOT AL/SAT, SHORT AÇ/KAPAT, coin adı, işlem tutarı
+  veya satışın gerçekten kapanmış net kâr/zararı. Geçmişte
+  gerçekleşmeyen sanal işlem uydurulmaz.
+- Ana ekranda **son emir saati**, açık pozisyon yüzdesi ve son
+  BEKLE kararının gerçek nedeni de görünür. Bot kartında incelenen
+  açık pozisyon sayısı ve koruyucu çıkış adayı sayısı gösterilir.
+  Tüm işlemler ayrı **İşlemler** sayfasında kalıcıdır.
+- Yeni **spot kâr koruma** kuralı, yalnızca geçmişte gerçekten
+  gözlenen zirve maliyetin en az %1,2 üzerine çıkmışsa, emir en az
+  45 dakikadır açıksa, güncel fiyat zirveden en az %0,45 düşmüşse,
+  pozisyon maliyeti üzerinde en az %0,65 kalıyorsa ve gerçek 1dk
+  mumları tersine dönüşü doğruluyorsa koruyucu SPOT SAT planlar.
+  Çıkış komisyonu sonrası hâlâ pozitif kâr şartı gözetilir;
+  teyitsiz sinyaller satış üretmez.
+- Bu bir **kâr garantisi veya işlemi artırma kotası değildir**.
+  Bot sırf kullanıcı daha çok işlem görmek istiyor diye para
+  kaybettiren al-sat döngüsüne zorlanmaz. Sürekli piyasa taraması
+  ve doğrulanmış stoplar önceki gibi sürer.
+- 650 TL başlangıçlı **tek sanal kasa**, 30 geçmiş işlem,
+  nakit ve açık pozisyonlar sıfırlanmaz; gerçek para kullanılmaz.
+
 ## Neden bazen işlem yapmıyor?
 
 Botun amacı işlem sayısını yükseltmek değil, **sanal sermayeyi komisyon

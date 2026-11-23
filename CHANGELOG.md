@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.18 Gerçek işlem şeridi, BEKLE açıklaması, zirveden kâr koruma
+
+- Gerçek veri denetimi: 30 sanal emir (18 AL, 8 SAT, 2 SHORT, 2 COVER) gerçekleşmişti ancak son emrin üzerinden yaklaşık 3 saat geçmişti. Portföy 10 SPOT coinle ~%78 dolu, 650 TL başlangıca karşı ~637 TL idi. Botun piyasa kontrolleri çalışıyordu; yeni emir çıkmamasının ana nedeni onaylı sinyal bulunamaması ve dolu portföydü.
+- Ana Sanal Kasa paneli ve Otonom Bot sayfasında son dört **gerçek** AL/SAT/SHORT/KAPAT işlemi doğrudan görünür hale getirildi. Yön, coin, işlem tutarı veya gerçekleşmiş net satış sonucu gösterilir; ikinci cüzdan veya sahte işlem yoktur.
+- Ana sayfa son emir saati, açık sermaye oranı ve gerçek BEKLE gerekçesini gösterir. Bot kartı kaç pozisyonun koruyucu çıkış açısından incelendiğini ve kaç teknik çıkış adayı bulunduğunu açıklar.
+- Yeni koruyucu SPOT satış fonksiyonu, yalnızca gözlenen zirvenin maliyetten ≥%1,2 yüksek, canlı fiyatın maliyet üzerinde ≥%0,65, zirveden çekilmenin ≥%0,45, pozisyon yaşının ≥45dk ve gerçek 1dk mikro hareketinin düşüş teyidi durumunda çalışır. Eski stop/kâr al koşulları ve fee pozitifliği korunur.
+- Yeni regresyon testleri: küçük dalgalanmada erken satış olmaması, eksik/pozitif 1dk teyidinde satış olmaması, gözlenen zirve ile 1dk tersine dönüşte gerçek net kârla kapanış, kasa ve işlem geçmişinin korunması.
+- Sırf işlem sayısını artırmak amacıyla para kaybettiren emir oluşturulmaz; bu sürüm kâr garantisi vermez. Flutter v0.9.18+24. Tek 650 TL başlangıçlı sanal portföy korunur.
+
 ## 2026-11-23 — v0.9.17 Hızlandırılmış grafik tarama, gerçekleşen sonuçlara göre giriş freni
 
 - Ölçülen performans sorunu: GitHub Actions 2 dakikada bir tetiklense de bazı taramalar ~40-75 saniye sürüyordu; bot 50+ coinin kısa süreli mum isteklerini sırayla bekliyordu.

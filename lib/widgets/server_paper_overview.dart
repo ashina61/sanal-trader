@@ -44,6 +44,13 @@ class ServerPaperOverview extends StatelessWidget {
     };
     final last = s?.lastSuccessAt?.toLocal();
     final lastTrade = s != null && s.trades.isNotEmpty ? s.trades.first : null;
+    final latestTrades = s?.trades.take(4).toList()
+        ?? const <Map<String, dynamic>>[];
+    final lastTradeAt = lastTrade == null ? null :
+        DateTime.tryParse(lastTrade['at']?.toString() ?? '')?.toLocal();
+    final positionPct = s == null || s.equityTry <= 0 ? null :
+        ((s.equityTry - s.cashTry) / s.equityTry * 100).clamp(0, 100);
+    final reason = s?.decisionPlan['reason']?.toString();
     return PremiumSurface(
       padding: const EdgeInsets.all(16),
       gradient: const LinearGradient(begin: Alignment.topLeft,
@@ -142,6 +149,56 @@ class ServerPaperOverview extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        const Text('CANLI SANAL İŞLEM AKIŞI',
+          style: TextStyle(color: PremiumColors.gold, fontSize: 10,
+            fontWeight: FontWeight.w900, letterSpacing: .4)),
+        const SizedBox(height: 4),
+        Text(
+          lastTradeAt == null ? 'Henüz işlem kaydı yok'
+          : 'Son emir: ${lastTradeAt.day.toString().padLeft(2, '0')}.'
+            '${lastTradeAt.month.toString().padLeft(2, '0')} '
+            '${lastTradeAt.hour.toString().padLeft(2, '0')}:'
+            '${lastTradeAt.minute.toString().padLeft(2, '0')} · '
+            'Açık pozisyon payı: '
+            '${positionPct?.toStringAsFixed(1) ?? '—'}%',
+          style: const TextStyle(fontSize: 10, color: PremiumColors.muted)),
+        if (s != null && reason != null && reason.isNotEmpty) ...[
+          const SizedBox(height: 5),
+          Text('Son karar: ${s.decisionPlan['action'] == 'WAIT' ? 'BEKLE' : _tradeAction(s.decisionPlan['action'])} · $reason',
+            maxLines: 2, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 10, color: PremiumColors.muted)),
+        ],
+        const SizedBox(height: 7),
+        for (final t in latestTrades)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 5),
+            child: Row(children: [
+              SizedBox(width: 74, child: Text(
+                _tradeAction(t['side']),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900,
+                  color: t['side'] == 'sell' || t['side'] == 'cover'
+                    ? PremiumColors.gold : PremiumColors.emerald),
+              )),
+              Expanded(child: Text(
+                t['symbol']?.toString() ?? '—',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 10,
+                  fontWeight: FontWeight.w700),
+              )),
+              Text(
+                (t['side'] == 'sell' || t['side'] == 'cover')
+                  ? 'Net ${_signedMoney(t['realizedPnlTry'])}'
+                  : (t['grossTry'] is num
+                      ? formatTry((t['grossTry'] as num).toDouble()) : '—'),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
+                  color: (t['side'] == 'sell' || t['side'] == 'cover')
+                    && t['realizedPnlTry'] is num
+                    && (t['realizedPnlTry'] as num) < 0
+                    ? PremiumColors.danger : PremiumColors.emerald),
+              ),
+            ]),
+          ),
+        const SizedBox(height: 8),
         Row(children: [
           Expanded(child: FilledButton.icon(
             onPressed: onOpenBot,
@@ -161,11 +218,19 @@ class ServerPaperOverview extends StatelessWidget {
     );
   }
 
+  String _signedMoney(Object? value) =>
+    value is num && value.toDouble().isFinite
+    ? '${value > 0 ? '+' : ''}${formatTry(value.toDouble())}' : '—';
+
   String _tradeAction(Object? side) => switch (side) {
     'buy' => 'Spot AL',
     'sell' => 'Spot SAT',
     'short' => 'SHORT aç',
     'cover' => 'SHORT kapat',
+    'BUY' => 'Spot AL',
+    'SELL' => 'Spot SAT',
+    'SHORT' => 'SHORT aç',
+    'COVER' => 'SHORT kapat',
     _ => 'İşlem',
   };
 

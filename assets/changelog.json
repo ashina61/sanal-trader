@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.18",
+      "date": "2026-11-23",
+      "title": "Gerçek işlemler görünür, daha iyi kâr koruma ve bekleme açıklaması",
+      "details": [
+        "Botun işlemsiz göründüğü sorun incelendi. Canlı veride 18 SPOT AL, 8 SPOT SAT, 2 SHORT AÇ ve 2 SHORT KAPAT olmak üzere 30 gerçekten kaydedilmiş sanal emir vardı. Son emir yaklaşık 3 saat önceydi, ancak bot 2 dakikalık piyasa kontrollerine devam ediyordu.",
+        "Portföy 10 SPOT pozisyonuyla yaklaşık %78 doluyken yeni sinyallerin çoğu gerçek 1 dakikalık teyit, yüksek oynaklık veya trend koşulunu geçemedi. Bu yüzden yeni emir çıkmıyor; bot hatalı şekilde durmuyor.",
+        "Ana kasa ekranında son dört gerçek sanal işlem doğrudan görülür. Coin, SPOT AL/SAT veya SHORT AÇ/KAPAT yönü ve alım tutarı ya da gerçekleşen net satış kâr-zararı gösterilir.",
+        "Ana kasa ekranında son emir saati, açık pozisyonların toplam kasa değerindeki payı ve son BEKLE/AL/SAT kararının gerçek gerekçesi görünür. Bot merkezinde incelenen pozisyon sayısı ve koruyucu çıkış adayları belirtilir.",
+        "Yeni spot kâr koruma: en az 45 dakika açık, geçmişte gözlenen tepe maliyetin %1,2 üzerindeyse, fiyat tepeden en az %0,45 gerilediyse, fiyat hâlâ maliyet üzerinde %0,65 ise ve gerçek 1 dakikalık grafikte düşüş teyidi varsa daha erken net pozitif SAT adayı oluşabilir.",
+        "Tek başına kırmızı mum, henüz görülmemiş fiyat, eksik dakikalık teyit ya da zarar eden pozisyon için bu kâr koruma emri oluşturulmaz. Önceki sert zarar kes ve normal kâr alma kuralları aynen korunur.",
+        "Yeni regresyon testleri zirve ve 1 dakikalık grafik doğrulamasını, satış sonrası net pozitif sanal kârı ve gereksiz satışa karşı kuralları kontrol eder.",
+        "Mevcut 650 TL başlangıçlı tek sanal kasadaki eski bakiye, 30 kayıtlı emir ve açık pozisyonlar aynen korunur. Kâr garantisi veya gerçekten yatırım yapılması söz konusu değildir. Flutter v0.9.18+24."
+      ]
+    },
+    {
       "version": "0.9.17",
       "date": "2026-11-23",
       "title": "Hızlı grafik tarama ve zarar eden sinyallere otomatik fren",
