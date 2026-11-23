@@ -51,6 +51,18 @@ MAX_ENTRY_EXPOSURE = .78
 MIN_ENTRY_CASH_RESERVE = .20
 CORE = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT")
 STABLE = {"USDT","USDC","FDUSD","TUSD","USDD","DAI","USDP","BUSD","EUR","TRY","BRL","GBP","AUD","PAXG","XAUT","EURI","AEUR","USTC","LUNA","WBTC","WETH","BFUSD","RLUSD","PYUSD","USD1","USDG","USDJ"}
+# Binance bStocks are tokenized securities, not crypto-only strategy assets.
+# Curated from the Binance August 2026 product announcement; match exact
+# base asset codes, never exclude every symbol ending with "B".
+BSTOCKS = set("""
+AAOIB AAPLB ALABB AMATB AMDB AMZNB ARMB ASMLB ASTSB AVGOB AXTIB
+BABAB BEB BMNRB CBRSB COHRB COINB CRCLB CRDOB CRWVB DELLB DJTB
+DRAMB EWYB FLNCB GLWB GMEB GOOGLB GSB HOODB IBMB INTCB INTWB
+IRENB KORUB LITEB METAB MRVLB MSFTB MSTRB MUB MUUB MVLLB NBISB
+NFLXB NOKB NVDAB ORCLB PLTRB PYPLB QCOMB QNTB QQQB RKLBB SKHYB
+SMCIB SMHB SNDKB SNXXB SOXLB SOXSB SPCXB SPYB TQQQB TSLAB TSMB
+USARB WDCB
+""".split())
 API = "https://data-api.binance.vision"
 
 def now_utc():
@@ -153,7 +165,7 @@ def eligible(pair):
     if not pair.endswith("USDT"):
         return False
     base = pair[:-4]
-    if base in STABLE or not re.fullmatch(r"[A-Z0-9]{2,12}", base):
+    if base in STABLE or base in BSTOCKS or not re.fullmatch(r"[A-Z0-9]{2,12}", base):
         return False
     return not any(base.endswith(s) for s in ("UP", "DOWN", "BULL", "BEAR", "3L", "3S", "5L", "5S"))
 
