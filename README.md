@@ -329,3 +329,13 @@ HTTP hata kodları açıkça görünür; veri çalışmazsa sinyal üretilmez.
 Manuel kasa sıfırlama seçeneği GitHub Actions/CLI menüsünden çıkarıldı.
 Botun tek sanal kasası ve geçmişi korunur. Bu değişiklikler kâr
 garantisi veya devamlı WebSocket takibi sağlamaz.
+
+### Kripto dışı tokenize menkul kıymet filtresi
+
+Resmî Binance duyurusunda bStocks sınıfında bulunan tokenler (örn.
+CRCLB, INTCB, METAB, SPCXB, NVDAB, AAPLB) yeni kripto stratejisi
+pozisyonuna alınmaz. Mevcut kasa bunlardan pozisyon tutuyorsa satılacak
+fiyatları alınmaya ve stop/koruyucu çıkışlar çalışmaya devam eder.
+Bu sadece bilinen semboller için denetlenmiş bir sınıflandırma listesidir;
+yeni listelenen tokenize menkul kıymetleri otomatik tanımaz.
+Kaynak: https://www.binance.com/en/support/announcement/detail/4fea39f8b6e54e1b88e388fc90ce323e
