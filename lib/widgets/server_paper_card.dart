@@ -249,6 +249,11 @@ class ServerPaperCard extends StatelessWidget {
             Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
             Expanded(child: _metric('İşlem', '${state.trades.length}')),
           ]),
+          const SizedBox(height: 5),
+          Text('İzlenen açık pozisyon: ${plan['openPositionsChecked'] ?? longs.length + shorts.length}'
+            ' · Koruyucu çıkış adayı: ${plan['protectiveExitCandidates'] ?? '—'}'
+            ' · Son karar: $actionText',
+            style: const TextStyle(fontSize: 9, color: PremiumColors.muted)),
           const SizedBox(height: 11),
           const Text('SON GERÇEK SANAL EMİRLER',
             style: TextStyle(fontSize: 11,
