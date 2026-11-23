@@ -23,7 +23,7 @@ from backend.scan_engine import fetch_candle_batch
 from backend.evidence_guard import entry_gate, gate_summary
 from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
     short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
-    position_monitor)
+    spot_profit_lock_exit, position_monitor)
 from backend.shadow_validation import (migrate as migrate_forward,
     settle as settle_forward, record as record_forward,
     summary as forward_summary, evidence_bias)
@@ -537,6 +537,16 @@ def assess_decision(state, latest, t, research_only=False):
               and quote["priceTry"] / state["peakMarksTry"][pair] - 1 <= -.009):
             exits.append((91, pair, "sell", amount,
                           "SPOT takip eden kâr koruması: zirveden dönüş", technical))
+        elif (cooled(pair)
+              and state.get("peakMarksTry", {}).get(pair) is not None
+              and spot_profit_lock_exit(
+                holding_age(pair, "buy"), move,
+                state["peakMarksTry"][pair] / cost - 1,
+                quote["priceTry"] / state["peakMarksTry"][pair] - 1,
+                minute(pair))):
+            exits.append((92, pair, "sell", amount,
+                "SPOT gözlenen zirve + 1dk dönüş: kârı koruyarak çıkış",
+                technical))
         elif (minute(pair) is not None
               and minute(pair)["momentum5"] <= -.65
               and move >= .006):
@@ -592,6 +602,9 @@ def assess_decision(state, latest, t, research_only=False):
                         "Risk azaltımı: uzun süren zayıf 15dk momentum "
                         "ile dolu portföyün zararı sınırlanıyor", tech))
 
+    plan["openPositionsChecked"] = (
+        len(state["holdings"]) + len(state.get("shorts", {})))
+    plan["protectiveExitCandidates"] = len(exits)
     if exits and not research_only:
         priority, pair, side, amount, reason, technical = max(
             exits, key=lambda item: (item[0], item[3]))
@@ -1165,7 +1178,7 @@ def cycle(state, market, t):
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v8 · parallel charts + negative-edge guard + observed research"
+        state["decisionPlan"]["strategy"] = "Adaptive v9 · transparent trade tape + fee-positive peak profit lock"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
