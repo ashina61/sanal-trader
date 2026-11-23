@@ -3,6 +3,23 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.15",
+      "date": "2026-11-23",
+      "title": "İleri sinyal ölçümü ve kronolojik strateji doğrulaması",
+      "details": [
+        "Botun teknik olarak onayladığı coin adayları için, gerçek görülmüş giriş fiyatıyla ikinci kasa veya işlem oluşturmadan ayrı sinyal gözlemleri başlatılır.",
+        "Bir saat sonra yeni kamu fiyatı gerçekten görülürse SPOT AL veya 1x referans SHORT yönünde varsayımsal net sinyal getirisi hesaplanır. %0,2 gidiş dönüş komisyon ve %0,1 varsayımsal fiyat kayması düşülür; 20 dakika gecikmeden sonra eksik fiyatlı sinyaller sonuçsuz sayılır.",
+        "Tekrarlanan iki dakikalık piyasa kontrolü aynı coin/yön için ikinci bağımsız sinyal oluşturmaz. Bekleyen ve sonuçlanan gözlemler sınırlı boyutta saklanır, eski işlem geçmişi değiştirilmez.",
+        "Aynı işlem yönü ve piyasa koşulunda en az 30 doğrulanmış ileri ölçüm yoksa bu kanıt aday puanını değiştirmez. Sonrasında bile en fazla ±0,04 puanlık aday sıralama ağırlığı kullanılır; risk filtreleri devre dışı bırakılmaz.",
+        "Groq'un onayladığı ve Groq'un BEKLE dediği teknik adaylar aynı bir saatlik gerçek fiyat takibinde ayrı etiketlenir. Ortalama net sonuçları uygulamada karşılaştırılır; bu gözlemsel fark AI'nin neden-sonuç olarak üstün olduğunu kanıtlamaz.",
+        "Bot Karar Merkezi; bekleyen, tamamlanan, ortalama net getirisi ve isabet oranı görülen ileri sinyal kanıtlarını raporlar. Bu ayrı bir cüzdan veya gerçek yatırım değildir.",
+        "Gerçek kapanmış Binance 15 dakikalık mumlarıyla, daha önceki %70 ve son %30 zaman dilimlerine ayrılmış ileriye bakmayan tarihsel test modülü eklendi. 1 saat sonraki fiyat sinyalin yalnızca sonucunu ölçer.",
+        "Tarihsel test güncel üretim botunun aynısı değildir: 1dk teyit, haber, Groq, emir defteri, gerçek spread/borçlanma ve listeden kalkmış coinler kapsam dışıdır. Tek başına ileriye dönük kârlılık kanıtı olmaz.",
+        "Ücretsiz GitHub Actions zamanlanmış araştırması geçmiş mumlardan okunabilir rapor ve indirilebilir JSON çıkarır. Piyasa verisi yoksa sonuç uydurulmaz ve sanal portföye dokunulmaz.",
+        "Python birim testleri ileriye bakmama, 60dk vade, fiyat tazeliği, örnek sınırı, kısa/uzun yön ve kronolojik test ayrımını kapsar. Uygulama sürümü 0.9.15+21 ve mevcut 650 TL kasa, P&L ve işlem geçmişi korunur."
+      ]
+    },
+    {
       "version": "0.9.14",
       "date": "2026-11-23",
       "title": "Piyasa hafızası, haber radarı ve gerçekten öğrenen sanal bot",

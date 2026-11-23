@@ -44,6 +44,38 @@ ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapan�
 - Tüm bilgiler uygulamanın **Otonom Karar Merkezi** bölümünde bulunur.
   Sistem gerçek emir göndermez, gerçek para veya borsa API anahtarı kullanmaz.
 
+## Sinyaller doğru mu? (v0.9.15, araştırma katmanı)
+
+- **Canlı ileri doğrulama:** Risk motorunun onayladığı adaylar, gerçek işlem
+  oluşturulmadan o andaki kamu spot fiyatıyla işaretlenir. En fazla 3 aday
+  döngü başına kaydedilir; aynı yön/coin için bir saat boyunca tekrar örnek
+  alınmaz. Bir saat sonra **gerçekten görülen** fiyat varsa sonuç hesaplanır.
+  Fiyat 20 dakika daha gelmezse örnek sonuçsuz kapanır, kâr icat edilmez.
+- Bir saatin sonunda SPOT AL veya 1x referans SHORT yönüne göre fiyat farkı
+  hesaplanır. Sonuçtan toplam **%0,2 varsayımsal komisyon ve %0,1 varsayımsal
+  kayma (toplam %0,3)** düşülür. Bu **gerçek emir, ikinci kasa, gerçek
+  likidite ya da garanti edilen işlem fiyatı değildir**.
+- Bot Karar Merkezi **bekleyen / ölçülen sinyaller**, ortalama komisyon
+  sonrası getiri ve isabet oranını gösterir. Bir yönde ve rejimde en az
+  **30 tamamlanmış gerçek gözlem** yoksa sonuç karar puanına etki etmez.
+  Sonrasında en fazla ±0,04 puan ile yalnızca daha önce risk onayı almış
+  adayların sırasını etkiler; zararı durdurma ve diğer korumaları aşamaz.
+- **Tarihsel walk-forward:** Ayrı Python çalışması Binance'in gerçekten
+  kapanmış 15 dakikalık mumlarını alır, BTC ve seçilmiş coinleri zamanla
+  eşleştirir; en erken %70 veriyi geliştirme, son %30'u dokunulmamış
+  değerlendirme bölümü olarak kullanır. Her karar yalnız o ana kadarki
+  mumlardan verilir; ileri 1 saatlik fiyat sadece sonucu ölçer.
+- Bu tarihsel ölçüm **canlı stratejinin aynısı değildir**. Saatlik+15dk
+  giriş vekili kullanır, 1dk teyidi / haber / Groq / gerçek spread / emir
+  defteri / SHORT borçlanma maliyetlerini kapsamaz. Güncel listelenen
+  coinleri seçtiği için hayatta kalma yanlılığı da vardır.
+- Her gün ücretsiz GitHub Actions üzerinde ayrı rapor denenir ve sonuç
+  **Actions artifact** olarak saklanır; bot-data kasasına veya işlem
+  geçmişine karışmaz. Kamu verisi kullanılamazsa rapor çıkarılamadığını
+  açıkça bildirir. İşlem botu tarayıcı kapalıyken aynen çalışır.
+- Araştırma komutu:
+  `python3 -m backend.walk_forward --symbols BTCUSDT ETHUSDT SOLUSDT --out validation-report.json`
+
 ## Neden bazen işlem yapmıyor?
 
 Botun amacı işlem sayısını yükseltmek değil, **sanal sermayeyi komisyon

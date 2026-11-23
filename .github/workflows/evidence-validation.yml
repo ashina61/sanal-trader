@@ -1,0 +1,75 @@
+name: Evidence Validation (No Orders)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/evidence-validation.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/evidence-validation.yml"
+  schedule:
+    # Daily public historical research; schedules may be delayed/skipped.
+    - cron: "21 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout trusted code
+        uses: actions/checkout@v4
+
+      - name: Validate all offline evidence tests
+        run: python3 -m unittest discover -s backend/tests -v
+
+      - name: Historical chronological holdout research
+        id: research
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          python3 -m backend.walk_forward --symbols BTCUSDT ETHUSDT SOLUSDT --out validation-report.json
+
+      - name: Publish research summary with limitations
+        if: github.event_name != 'pull_request' && always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path("validation-report.json")
+          lines = ["## SanalTrader evidence validation", "",
+                   "Research only. No new wallet and no trading orders.", ""]
+          if path.exists():
+              report = json.loads(path.read_text())
+              lines += [
+                  f"**Holdout signals:** {report['holdoutTotalSignals']}",
+                  f"**Net mean per independent signal:** {report['holdoutWeightedMeanNetPct']}%",
+                  f"**Minimum 30-signal sample:** {report['holdoutSufficientSample']}",
+                  f"**Fees + simulated slippage (round trip):** "
+                  f"{report['assumedRoundTripFeeAndSlippagePct']}%",
+                  "",
+                  "**Important:** 15m+hourly proxy, NOT the full live 1m/AI/news "
+                  "strategy. Results do not imply profit or future performance.",
+              ]
+          else:
+              lines += ["**No valid research output.** Public market data may be "
+                        "unavailable. Do not invent or backfill outcomes."]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf8") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
+
+      - name: Attach historical report (independent of paper wallet)
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-backtest-report
+          path: validation-report.json
+          if-no-files-found: warn
+          retention-days: 14

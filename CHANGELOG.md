@@ -1,3 +1,16 @@
+## 2026-11-23 — v0.9.15 Gözlenen ileri sinyal sonuçları ve kronolojik piyasa testi
+
+- Yeni backend/shadow_validation.py: Ana botun onaylı teknik adaylarının gerçek giriş anı fiyatını ve yönünü ikinci kasa/emir oluşturmadan araştırma kaydına yazar. Bir saat sonraki gözlenen fiyatı ölçer; 20 dakika gecikme dışında fiyat yoksa sinyali sonuçsuz bırakır.
+- Doğrulama sonucu SPOT AL veya 1x referans SHORT yönüne göre hesaplanır; varsayımsal toplam %0,3 gidiş-dönüş komisyon/kayma düşülür. Kayıtlar son 360 sonuç ve 180 bekleyen ile sınırlandırılır.
+- Aynı coin/yöndeki sinyallerin iki dakikalık cron tekrarları sahte bağımsız veri üretmez. En az 30 gerçekleşen, aynı piyasa rejimi ve yöndeki sinyal kapanışı olmadıkça ileri sonuçların bot aday puanına etkisi sıfırdır; sonrasında da en fazla ±0,04 puanlık bağlayıcı olmayan sıralama farkı oluşturur.
+- Groq AI tarafından onaylanan sinyaller ile AI'nin BEKLE dediği teknik adaylar aynı bir saatlik gerçek fiyat metoduyla ayrı izlenir; isabet ve net ortalamaları Bot Karar Merkezi'nde yan yana raporlanır. Bu örneklemler rastgele seçilmediğinden sonuçlar nedensellik veya garantili AI üstünlüğü iddiası değildir.
+- Yeni backend/walk_forward.py: Binance'in kapanmış 15dk mumları ve tamamlanmış saatlik grafikleriyle, geleceğe bakmadan saatlik+15dk giriş vekili üzerinde kronolojik %70 geliştirme / %30 ayrı değerlendirme yürütür. Gelecek 1 saatlik fiyatı yalnızca sonucu ölçmek için okur; gappy/yetersiz/verisi eski seri güvenli biçimde reddedilir.
+- Günlük ayrı GitHub Actions araştırma iş akışı, internetten gerçek kamu mumlarını kullanarak BTC/ETH/SOL için rapor üretmeye çalışır; JSON'u Actions artifact olarak saklar. Sanal kasa/işlem geçmişi hiç değiştirilmez. Veri kaynağı bozulursa rapor uydurulmaz.
+- Canlı 1dk teyidi, haber, AI, emir defteri, gerçek SHORT maliyetleri ve likidite tarihsel vekil teste dahil değildir. Simüle sonuçlar kâr garantisi veya birebir üretim stratejisi doğrulaması değildir.
+- Otonom Karar Merkezi'ne ileri sinyal sonuçlarının ölçülen sayısı, bekleyen sayısı, komisyon sonrası ortalama sonucu ve isabet oranı eklendi.
+- Yeni Python regresyon testleri: geleceğe bakmama, 60dk vade, yetersiz/güvensiz fiyatın sonuç diye yazılmaması, 30 örnek sınırı, yön karşılaştırması, kronolojik holdout ve ikinci cüzdan oluşmaması.
+- Eski sanal 650 TL kasa, açık pozisyonlar, bakiyeler, geçmiş emirler ve haber öğrenmesi korunur. Flutter 0.9.15+21.
+
 ## 2026-11-23 — v0.9.14 Haber radarı, piyasayı tanıma ve gerçekleşen işlemlerden öğrenme
 
 - Taranan coinlerin gerçek 24 saatlik değişiminden piyasa genişliği hesaplandı: yükselen, düşen, yatay coin sayısı, medyan değişim, en güçlü/en zayıf adaylar. Bu, gözlemdir; otomatik kâr tahmini değildir.
