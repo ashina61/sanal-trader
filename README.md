@@ -318,3 +318,14 @@ ve önceki zarar/kâr kayıtları korunur.
 Kasa, Radar, Bot ve Kâr sayfaları önce temel bilgiyi gösterir;
 gelişmiş tanılar açılır. Kâr sayfasında büyük kasa özeti yinelenmez.
 [Karar aşamaları ve mobil düzen ayrıntıları](docs/decision-pipeline-compact-ui.md).
+
+## Denetim düzeltmeleri (v0.9.25)
+
+Emir defteri kaynağı hiç mevcut değilse bile yeni BUY/SHORT kararı onay
+alamaz. Sağlayıcı testi de geçerli derinlik verisi vermelidir. Satış ve
+koruyucu SHORT kapatma önceliği korunur. Ücretsiz GeckoTerminal istekleri
+artık rate-limit riskini düşürmek için 6 saniye arayla yapılır ve kaynak
+HTTP hata kodları açıkça görünür; veri çalışmazsa sinyal üretilmez.
+Manuel kasa sıfırlama seçeneği GitHub Actions/CLI menüsünden çıkarıldı.
+Botun tek sanal kasası ve geçmişi korunur. Bu değişiklikler kâr
+garantisi veya devamlı WebSocket takibi sağlamaz.
