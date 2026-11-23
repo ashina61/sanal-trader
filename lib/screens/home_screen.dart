@@ -4,6 +4,7 @@ import '../services/server_paper_repository.dart';
 import '../widgets/server_paper_card.dart';
 import '../widgets/server_paper_overview.dart';
 import '../widgets/server_runtime_status.dart';
+import '../widgets/smart_money_card.dart';
 import '../widgets/premium_theme.dart';
 import '../widgets/formatters.dart';
 import 'update_history_screen.dart';
@@ -143,6 +144,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         const Text('Bu adaylar yalnızca arka plan botunun incelediği '
           'gerçek fiyatlardan gelir. Ekranda alım veya satım butonu yok.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+        const SizedBox(height: 13),
+        SmartMoneyCard(snapshot: s),
         const SizedBox(height: 13),
         PremiumSurface(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start,
