@@ -19,6 +19,9 @@ from backend.context_learning import (context_key, adjustment as context_adjustm
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
     REFRESH_INTERVAL_SECONDS)
 from backend.market_breadth import market_breadth
+from backend.shadow_validation import (migrate as migrate_forward,
+    settle as settle_forward, record as record_forward,
+    summary as forward_summary, evidence_bias)
 from backend.signal_learning import (minute_signal, setup_for, signal_bias,
     record_open, record_close)
 
@@ -70,7 +73,7 @@ def fresh_state():
                 troughMarksTry={}, equityHistory=[], performance={},
                 micro={}, signalStats={}, openSignals={},
                 contextStats={}, openContexts={}, newsPulse={},
-                marketPulse={})
+                marketPulse={}, forwardEvidence={})
 
 def load(path):
     if not path.exists():
@@ -95,6 +98,7 @@ def load(path):
     obj.setdefault("openContexts", {})
     obj.setdefault("newsPulse", {})
     obj.setdefault("marketPulse", {})
+    migrate_forward(obj)
     if any(not isinstance(obj[field], dict) for field in
            ("intraday", "micro", "signalStats", "openSignals",
             "contextStats", "openContexts", "newsPulse", "marketPulse")):
@@ -759,7 +763,9 @@ def assess_decision(state, latest, t):
             tech, fast, micro, mode,
             direction_edge(state, direction)
             + signal_bias(state, mode, setup)
-            + context_adjustment(state, learned_context))
+            + context_adjustment(state, learned_context)
+            + evidence_bias(state, "BUY" if mode == "buy" else "SHORT",
+                            plan["marketRegime"]))
         if micro is not None:
             evidence = min(abs(micro["momentum15"]),
                            abs(tech["momentum6"]) / 2)
@@ -1019,6 +1025,9 @@ def cycle(state, market, t):
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
         )
         before = equity(state, latest)
+        # Research results use ONLY newly observed future quotes. No wallet
+        # transaction, and a candidate cannot score at its entry timestamp.
+        settle_forward(state, latest, t)
         update_price_extremes(state, latest)
         state["peakEquityTry"] = max(before, state["peakEquityTry"])
         # Headline polling is deliberately much slower than market polling:
@@ -1061,6 +1070,9 @@ def cycle(state, market, t):
             state["peakEquityTry"] = max(refreshed_equity, state["peakEquityTry"])
             planned = assess_decision(state, latest, t)
             planned["priceRechecked"] = True
+        # Save approved technical candidates, even if AI ultimately waits.
+        # Forward evidence is entirely outside the single paper wallet.
+        record_forward(state, latest, planned, t)
         planned, ai_meta = apply_ai_brain(
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
             model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
@@ -1076,12 +1088,13 @@ def cycle(state, market, t):
         state["decisionPlan"]["minutePairs"] = state.get("minutePairs", 0)
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
+        state["decisionPlan"]["forwardEvidence"] = forward_summary(state)
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v5 · news radar + context learning + verified 1m/15m"
+        state["decisionPlan"]["strategy"] = "Adaptive v6 · independent forward evidence + news and context"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
