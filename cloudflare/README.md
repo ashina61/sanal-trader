@@ -1,7 +1,7 @@
 # SanalTrader — ücretsiz harici zamanlayıcı
 
 Bu Cloudflare Worker **sanal işlem yapmaz**. Sadece mevcut
-`Free Scheduled Paper Bot` GitHub Actions workflow'unu 5 dakikada bir
+`Free Scheduled Paper Bot` GitHub Actions workflow'unu 2 dakikada bir
 `workflow_dispatch` ile tetikler. Fiyat kontrolü, Groq kararı, işlem motoru
 ve 650 TL'lik **mevcut** `bot-data/state.json` kasası aynı kalır.
 
@@ -26,7 +26,7 @@ ve 650 TL'lik **mevcut** `bot-data/state.json` kasası aynı kalır.
    Secret ekledikten sonra gerekirse deploy'u yeniden başlat.
    GitHub Actions tarafındaki `GROQ_API_KEY` orada kalır; Cloudflare'a
    kopyalanmaz.
-5. Worker → Settings → Triggers/Cron Triggers altında `*/5 * * * *`
+5. Worker → Settings → Triggers/Cron Triggers altında `*/2 * * * *`
    zamanlamasının göründüğünü ve etkin olduğunu doğrula. İlk tetiklerin
    devreye girmesi birkaç dakika alabilir.
 6. Worker'ın `https://sanaltrader-scheduler.<hesabın>.workers.dev/health`
@@ -44,7 +44,7 @@ işlem uydurmaz.
 kesinti sınırlarına tabidir; yüzde yüz garantili kesintisiz çalışma sözü
 verilemez. GitHub'ın kendi `schedule` tetiklemesi yedek kalır. İki
 tetik aynı dakikaya denk gelirse workflow concurrency ve sunucu botunun
-150 saniyelik tekrarlı kontrol koruması kullanılır.
+75 saniyelik tekrarlı kontrol koruması kullanılır.
 
 ## Yerel ücretsiz test
 

@@ -1,5 +1,5 @@
 /**
- * SanalTrader: external 5-minute heartbeat for the existing paper-trading engine.
+ * SanalTrader: external 2-minute heartbeat for the existing paper-trading engine.
  * Does not send orders or maintain a second wallet.
  * GitHub access token lives ONLY in Cloudflare Workers secret storage.
  */
@@ -44,7 +44,7 @@ const json = (value, status = 200) => new Response(JSON.stringify(value), {
 export default {
   async scheduled(_event, env, ctx) {
     // GitHub's own cron may run too. The existing bot-data wallet, concurrency
-    // group and 150-second cycle deduplication avoid nearby double decisions.
+    // group and 75-second cycle deduplication avoid nearby double decisions.
     ctx.waitUntil(dispatchPaperBot(env));
   },
 

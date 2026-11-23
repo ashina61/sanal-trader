@@ -1,3 +1,11 @@
+## 2026-11-23 — İki dakikalık dış zamanlayıcı ve gerçek kısa aralık döngüsü
+
+- Cloudflare Worker yapılandırması `*/2 * * * *` olarak değiştirildi; GitHub botunun 150 saniyelik kısa-aralık deduplikasyonu 75 saniye oldu.
+- GitHub'ın beş dakikalık yedek cron'u durur; mevcut tek cüzdan, concurrency ve kısa-aralık deduplikasyonu çakışmayı engeller.
+- 60 saniyelik tekrarlı olay atlanır; 125 saniye sonraki gerçek piyasa kontrolü işlenir.
+- Yeni Worker deploy'u Cloudflare tarafından uygulanmadan iki dakikalık gerçek servis teyit edilmiş sayılmaz. Bu hâlâ anlık tick işlem altyapısı değildir.
+- Mevcut sanal portföy ve kayıp geçmişi değiştirilmedi.
+
 ## 2026-11-23 — v0.9.12 Gerçek 1dk karar, kota yerine sinyal, doğrulanmış öğrenme
 
 - Mevcut 650 TL sanal kasanın 4/4 zarar kapanışı ve komisyon kaybı sonrası botun günlük işlem kotası/yapay 60 dakika genel bekleme sınırları kaldırıldı.

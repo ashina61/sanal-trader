@@ -336,6 +336,18 @@ class AutonomousDecisionTests(unittest.TestCase):
         else:
             self.assertEqual(len(result["trades"]), 1)
 
+    def test_two_minute_trigger_is_a_new_real_market_cycle(self):
+        state, _ = market_prices([100.0] * 168)
+        state["lastSuccessAt"] = NOW.isoformat()
+        then = NOW + dt.timedelta(seconds=125)
+        ticks = [quote("USDTTRY", 40, t=then),
+                 quote("BTCUSDT", 100, t=then)]
+        next_state = cycle(state, FakeMarket(ticks), then)
+        self.assertIsNone(next_state["lastError"])
+        self.assertEqual(next_state["lastSuccessAt"],
+                         then.isoformat().replace("+00:00", "Z"))
+        self.assertNotEqual(next_state["lastSuccessAt"], state["lastSuccessAt"])
+
     def test_feed_failure_does_not_reuse_old_action_or_open_order(self):
         state, _ = market_prices([100 + i * .4 for i in range(168)])
         state["decisionPlan"] = {
@@ -377,7 +389,7 @@ class AutonomousDecisionTests(unittest.TestCase):
         state["lastSuccessAt"] = NOW.isoformat()
         state["lastDecision"] = "Önceki doğrulanmış karar"
         state["decisionPlan"] = {"action": "WAIT", "reason": "Önceki sebep"}
-        after = cycle(state, FakeMarket([]), NOW + dt.timedelta(seconds=90))
+        after = cycle(state, FakeMarket([]), NOW + dt.timedelta(seconds=60))
         self.assertEqual(after["lastDecision"], state["lastDecision"])
         self.assertEqual(after["decisionPlan"], state["decisionPlan"])
         self.assertEqual(after["trades"], [])

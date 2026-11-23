@@ -848,7 +848,7 @@ def cycle(state, market, t):
         log(state, t, "Sunucu botu duraklatılmış.")
         return state
     last = as_date(state.get("lastSuccessAt"))
-    if last and (t - last).total_seconds() < 150:
+    if last and (t - last).total_seconds() < 75:
         # A near-duplicate push/cron event is not a new trading decision.
         # Preserve the prior decision and only record a heartbeat.
         state["journal"] = ([{"at": stamp(t), "message":
