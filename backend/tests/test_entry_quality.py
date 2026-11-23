@@ -74,5 +74,35 @@ class EntryQualityTests(unittest.TestCase):
         self.assertEqual(result["trades"], [])
 
 
+    def test_last_moment_price_recheck_cancels_outdated_spot_buy(self):
+        class RepricingMarket(FakeMarket):
+            def __init__(self, first, second):
+                super().__init__(first)
+                self.second = second
+                self.calls = 0
+
+            def tickers(self):
+                self.calls += 1
+                return self.ticks if self.calls == 1 else self.second
+
+        history = [100 + .4 * i for i in range(168)]
+        initial = history[-1] / 40
+        market = RepricingMarket(
+            [quote("USDTTRY", 40), quote("BTCUSDT", initial)],
+            [quote("USDTTRY", 40), quote("BTCUSDT", initial * 1.32)])
+        state = fresh_state()
+        state["histories"]["BTCUSDT"] = {
+            "prices": history, "fetchedAt": NOW.isoformat(),
+        }
+        result = cycle(state, market, NOW)
+        self.assertEqual(market.calls, 2)
+        self.assertIsNone(result["lastError"])
+        self.assertEqual(result["decisionPlan"]["action"], "WAIT")
+        self.assertTrue(result["decisionPlan"]["priceRechecked"])
+        self.assertEqual(result["cashTry"], 650)
+        self.assertEqual(result["trades"], [])
+
+
+
 if __name__ == "__main__":
     unittest.main()
