@@ -125,6 +125,7 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
         trade_reason = rationale + " · " + (reason or "Teknik aday doğrulandı")
         revised = dict(plan, action=selected["action"], symbol=name,
                        setupTag=selected.get("setupTag", "hourly"),
+                       contextKey=selected.get("contextKey"),
                        amountTry=amount, score=selected["score"],
                        reason=trade_reason,
                        order=(name, side, amount, trade_reason))
