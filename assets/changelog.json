@@ -3,6 +3,18 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.25",
+      "date": "2026-11-23",
+      "title": "Kapsamlı denetim: DEX hız sınırı, kesin giriş freni, kasa geçmişi koruması",
+      "details": [
+        "Ücretsiz GeckoTerminal istekleri artık en az 6 saniye arayla yapılır; HTTP_429 gibi veri kaynağı hata kodları ayrıntıda görünür. API her zaman çalışır iddiası yoktur.",
+        "Emir defteri sağlayıcısı bulunmazsa, test piyasaları dahil, riskli yeni BUY/SHORT kesin durur. Testlerde boş sağlayıcıdan geçişe izin veren yol kaldırıldı; geçerli defterli sahte piyasa verisi gereklidir.",
+        "GitHub Actions ve Python komut satırı seçeneklerindeki manuel sanal kasayı sıfırlama kaldırıldı. Tek 650 TL başlangıçlı kasanın geçmişi ve mevcut pozisyonlar korunur.",
+        "SPOT SAT, sanal SHORT KAPAT, fiyat stopları, ana risk motoru ve tek sanal muhasebe sistemi değiştirilmedi. Yeni ücretli API veya gerçek borsa emri yok.",
+        "Python veri/defter regresyon testleri, Flutter kontrolü ve yayın derlemesi CI'de doğrulanır; Flutter 0.9.25+31."
+      ]
+    },
+    {
       "version": "0.9.24",
       "date": "2026-11-23",
       "title": "6 aşamalı karar denetimi ve kompakt mobil sayfalar",
