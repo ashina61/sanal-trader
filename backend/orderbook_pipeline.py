@@ -172,12 +172,15 @@ def guard_plan(plan, market, latest, fx):
         return plan, idle_trace(plan)
     source = getattr(market, "depth", None)
     if not callable(source):
-        # Fake historical markets have no public order book. Keep old tests
-        # and simulation contract; do not claim a book-based approval.
-        trace = idle_trace(plan)
-        trace["status"] = "UNSUPPORTED"
-        trace["stages"][0]["detail"] = "Bu veri sağlayıcı emir defteri sunmuyor"
-        return plan, trace
+        # Fail closed for ANY market object. Test providers must supply a
+        # realistic explicit book; missing source cannot silently bypass gate.
+        trace = inspect_book(
+            plan, None, latest.get(plan["symbol"], {}).get("priceTry"), fx)
+        trace["reason"] = "Emir defteri sağlayıcısı desteklenmiyor"
+        revised = dict(plan, action="WAIT", order=None, symbol=None,
+                       amountTry=None,
+                       reason="Yeni sanal giriş engellendi: " + trace["reason"])
+        return revised, trace
     try:
         book = source(plan["symbol"])
     except Exception as exc:
