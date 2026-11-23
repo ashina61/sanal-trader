@@ -132,7 +132,8 @@ def _event(event, chain, wallet, now):
             or not _address(chain, token) or not _address(chain, txid, tx=True)
             or not isinstance(event.get("symbol"), str)
             or not 1 <= len(event["symbol"]) <= 24
-            or event.get("wallet", "").lower() != wallet.lower()):
+            or not isinstance(event.get("wallet"), str)
+            or event["wallet"].lower() != wallet.lower()):
         return None
     if event.get("verifiedSwap") is not True or event.get("transferOnly") is not False:
         return None
