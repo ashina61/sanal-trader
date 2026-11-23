@@ -1,6 +1,11 @@
 name: Evidence Validation (No Orders)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/evidence-validation.yml"
   pull_request:
     paths:
       - "backend/**"
