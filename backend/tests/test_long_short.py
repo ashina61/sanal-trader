@@ -112,8 +112,14 @@ class VirtualLongShortTests(unittest.TestCase):
         self.assertEqual(result["trades"][0]["side"], "short")
         self.assertIn("BTCUSDT", result["shorts"])
         self.assertEqual(result["holdings"], {})
-        self.assertAlmostEqual(result["equityTry"],
-                               650-result["trades"][0]["feeTry"])
+        # A book-aware short initially receives the observed bid, below the
+        # subsequent ticker mark. This small spread loss is intentional.
+        self.assertAlmostEqual(result["equityTry"], result["cashTry"] +
+                               short_value(result["shorts"]["BTCUSDT"], 4000))
+        self.assertLess(result["equityTry"],
+                        650 - result["trades"][0]["feeTry"])
+        self.assertEqual(
+            result["decisionPlan"]["executionPipeline"]["status"], "PASSED")
 
 
 if __name__ == "__main__":
