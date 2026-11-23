@@ -19,6 +19,9 @@ from backend.context_learning import (context_key, adjustment as context_adjustm
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
     REFRESH_INTERVAL_SECONDS)
 from backend.market_breadth import market_breadth
+from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
+    short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
+    position_monitor)
 from backend.shadow_validation import (migrate as migrate_forward,
     settle as settle_forward, record as record_forward,
     summary as forward_summary, evidence_bias)
@@ -357,7 +360,7 @@ def execute(state, t, symbol, side, amount, price, reason):
         f" {symbol}: {amount:.2f} TL; {reason}")
     return rec
 
-def assess_decision(state, latest, t):
+def assess_decision(state, latest, t, research_only=False):
     """Choose SPOT BUY, SPOT SELL, virtual SHORT, SHORT COVER or WAIT.
 
     Decisions use observed public market marks and existing closed hourly
@@ -411,6 +414,17 @@ def assess_decision(state, latest, t):
             return None
         return minute_signal(
             record.get("prices", []), latest.get(pair, {}).get("priceTry"))
+
+    def holding_age(pair, side):
+        if side == "short":
+            moment = state.get("shorts", {}).get(pair, {}).get("openedAt")
+        else:
+            moment = state.get("openContexts", {}).get(pair, {}).get("at")
+            if not moment:
+                moment = next((entry.get("at") for entry in state.get("trades", [])
+                    if entry.get("symbol") == pair and entry.get("side") == "buy"), None)
+        opened = as_date(moment)
+        return (t - opened).total_seconds() if opened and opened <= t else None
 
     def current_tech(pair):
         record = state.get("histories", {}).get(pair, {})
@@ -477,6 +491,13 @@ def assess_decision(state, latest, t):
               and adverse <= -.006):
             exits.append((94, pair, "cover", amount,
                           "SHORT gözlenen 1dk kâr koruyan dönüş", technical))
+        elif (cooled(pair) and short_reversal_exit(
+                holding_age(pair, "short"), adverse, quick(pair),
+                minute(pair), state.get("marketPulse", {}),
+                plan["marketRegime"])):
+            exits.append((109, pair, "cover", amount,
+                "SHORT rejim tersine döndü: 1dk+15dk+geniş piyasa yükseliş onayı",
+                technical))
         elif (cooled(pair) and quick(pair) is not None
               and quick(pair)["momentum1h"] >= .75 and adverse <= -.006):
             exits.append((85, pair, "cover", amount,
@@ -519,6 +540,12 @@ def assess_decision(state, latest, t):
               and move >= .006):
             exits.append((94, pair, "sell", amount,
                           "SPOT gözlenen 1dk kâr koruyan dönüş", technical))
+        elif (cooled(pair) and spot_trend_failure_exit(
+                holding_age(pair, "buy"), move, quick(pair),
+                minute(pair), technical)):
+            exits.append((87, pair, "sell", amount,
+                "SPOT uzun süreli 1dk+15dk+1s trend bozulması: risk azaltımı",
+                technical))
         elif (cooled(pair) and quick(pair) is not None
               and quick(pair)["momentum1h"] <= -.75 and move >= .006):
             exits.append((85, pair, "sell", amount,
@@ -563,7 +590,7 @@ def assess_decision(state, latest, t):
                         "Risk azaltımı: uzun süren zayıf 15dk momentum "
                         "ile dolu portföyün zararı sınırlanıyor", tech))
 
-    if exits:
+    if exits and not research_only:
         priority, pair, side, amount, reason, technical = max(
             exits, key=lambda item: (item[0], item[3]))
         plan["reviewed"] = len(latest)
@@ -571,7 +598,7 @@ def assess_decision(state, latest, t):
                       technical["score"] if technical else None)
 
     # Controls below block NEW positions only, never protective exits.
-    if total < state.get("peakEquityTry", total) * .88:
+    if not research_only and total < state.get("peakEquityTry", total) * .88:
         return wait("Portföy gerilemesi %12'yi geçti; yeni risk durduruldu")
     used = exposure(state, latest)
     if used is None:
@@ -580,7 +607,7 @@ def assess_decision(state, latest, t):
     # Rotate ONLY a net-profitable held spot position. Chasing another
     # token by selling a losing position incurred four losing closes and
     # repeated fees in the first paper session. Protect cash first.
-    if (used >= total * .70
+    if (not research_only and used >= total * .70
             and btc and btc["direction"] != "down"):
         rotation_times = [
             as_date(order.get("at")) for order in state.get("trades", [])
@@ -644,10 +671,10 @@ def assess_decision(state, latest, t):
                         "Yeni pozisyon ancak sonraki doğrulanmış döngüde açılabilir.",
                         tech["score"])
 
-    if used >= total * MAX_ENTRY_EXPOSURE:
+    if not research_only and used >= total * MAX_ENTRY_EXPOSURE:
         return wait("SPOT+SHORT pozisyon payı %78 seviyesinde; "
                     "zararına rotasyon yapılmıyor")
-    if state["cashTry"] <= total * MIN_ENTRY_CASH_RESERVE:
+    if not research_only and state["cashTry"] <= total * MIN_ENTRY_CASH_RESERVE:
         return wait("Yeni giriş için kullanılabilir sanal nakit yetersiz")
 
     candidates = []
@@ -655,11 +682,15 @@ def assess_decision(state, latest, t):
     def rejected(label):
         reasons[label] = reasons.get(label, 0) + 1
     for pair, quote in latest.items():
-        if pair in state["holdings"] or pair in state.get("shorts", {}):
+        if (not research_only and
+                (pair in state["holdings"] or pair in state.get("shorts", {}))):
             rejected("Zaten açık pozisyon")
             continue
-        if not cooled(pair):
+        if not research_only and not cooled(pair):
             rejected("Aynı coin için 10 dk dönüş bekleme")
+            continue
+        if not research_only and loss_reentry_cooldown(state, pair, t):
+            rejected("Zarar sonrası 90dk yeniden giriş beklemesi")
             continue
         tech = current_tech(pair)
         if tech is None:
@@ -744,6 +775,11 @@ def assess_decision(state, latest, t):
             rejected("Zayıf trend/sinyal")
         if mode is None:
             continue
+        if (not research_only and mode == "short" and
+                broad_risk_on(state.get("marketPulse", {}),
+                              btc["direction"] if btc else None)):
+            rejected("Piyasa geneli yükselirken yeni SHORT engeli")
+            continue
         upper = min(
             total * .12, state["cashTry"] / 1.001,
             (state["cashTry"] - total * MIN_ENTRY_CASH_RESERVE) / 1.001,
@@ -751,7 +787,10 @@ def assess_decision(state, latest, t):
         )
         scale = (.4 if tech["volatility"] > 9 else
                  .65 if tech["volatility"] > 6 else 1.0)
-        amount = math.floor(max(0.0, upper) * scale * 100) / 100
+        if mode == "short":
+            scale *= short_size_multiplier(state)
+        amount = (MIN_ORDER if research_only else
+                  math.floor(max(0.0, upper) * scale * 100) / 100)
         if amount < MIN_ORDER:
             rejected("Kullanılabilir sanal tutar")
             continue
@@ -791,9 +830,15 @@ def assess_decision(state, latest, t):
             "setupTag": setup_for(minute(pair), side),
             "contextKey": context_key(side, plan["marketRegime"],
                                       tech["volatility"]),
+            "policyExcluded": bool(
+                side == "short" and broad_risk_on(
+                    state.get("marketPulse", {}),
+                    btc["direction"] if btc else None)),
         }
         for score, pair, side, _, tech in candidates[:8]
     ]
+    if research_only:
+        return wait("Tek sanal kasa dışında emir üretmeyen sinyal gözlemi")
     if not candidates:
         primary = next(iter(plan["rejectReasons"].items()), None)
         detail = f" En sık neden: {primary[0]} ({primary[1]} coin)." if primary else ""
@@ -1074,9 +1119,11 @@ def cycle(state, market, t):
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
             model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
         state["aiBrain"] = ai_meta
-        # Preserve counterfactual evidence about both AI approvals and waits.
-        # Only the future observed quote can determine whether AI helped.
-        record_forward(state, latest, planned, t, ai_meta=ai_meta)
+        # Independent observations from the SAME price/risk signal code:
+        # research_only bypasses cash/exposure and exits but never places
+        # another order, uses another wallet or invents prices.
+        research_plan = assess_decision(state, latest, t, research_only=True)
+        record_forward(state, latest, research_plan, t, ai_meta=ai_meta)
         state["decisionPlan"] = {
             key: value for key, value in planned.items()
             if key not in ("order", "aiChoices")
@@ -1089,12 +1136,14 @@ def cycle(state, market, t):
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
         state["decisionPlan"]["forwardEvidence"] = forward_summary(state)
+        state["decisionPlan"]["researchSignals"] = len(
+            research_plan.get("candidates", []))
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v6 · independent forward evidence + news and context"
+        state["decisionPlan"]["strategy"] = "Adaptive v7 · loss feedback, reversal exits and always-on research"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
@@ -1118,6 +1167,8 @@ def cycle(state, market, t):
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 + planned["reason"])
         state["equityTry"] = equity(state, latest)
+        state["decisionPlan"]["positionHealth"] = position_monitor(
+            state, latest, t)
         # Store last observed marks of open paper positions for Flutter.
         active = set(state["holdings"]) | set(state.get("shorts", {}))
         state["marksTry"] = {
