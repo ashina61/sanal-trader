@@ -25,7 +25,7 @@
       "wins": 0
     }
   },
-  "cycles": 473,
+  "cycles": 474,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -35,7 +35,7 @@
       "status": "NO_CANDIDATE"
     },
     "amountTry": null,
-    "at": "2026-11-23T13:22:27Z",
+    "at": "2026-11-23T13:24:27Z",
     "candidates": [],
     "contextStats": {
       "buy:bull:low": {
@@ -112,26 +112,26 @@
     "historyPairs": 53,
     "intradayPairs": 53,
     "marketPulse": {
-      "advancersPct": 75.5,
-      "down": 11,
+      "advancersPct": 73.6,
+      "down": 12,
       "flat": 2,
       "laggards": [
         {
-          "change24hPct": -13.87,
+          "change24hPct": -14.8,
           "symbol": "ACEUSDT"
         },
         {
-          "change24hPct": -10.74,
+          "change24hPct": -13.7,
           "symbol": "MMTUSDT"
         },
         {
-          "change24hPct": -9.27,
+          "change24hPct": -9.59,
           "symbol": "SKYUSDT"
         }
       ],
       "leaders": [
         {
-          "change24hPct": 28.74,
+          "change24hPct": 26.73,
           "symbol": "PROMUSDT"
         },
         {
@@ -139,13 +139,13 @@
           "symbol": "MUBARAKUSDT"
         },
         {
-          "change24hPct": 13.27,
+          "change24hPct": 12.38,
           "symbol": "CYBERUSDT"
         }
       ],
-      "medianChange24hPct": 1.675,
+      "medianChange24hPct": 1.669,
       "tracked": 53,
-      "up": 40
+      "up": 39
     },
     "marketRegime": "YÜKSELİŞ",
     "minutePairs": 53,
@@ -153,10 +153,19 @@
       {
         "broad": false,
         "categories": [],
+        "publishedAt": "2026-11-23T13:15:03Z",
+        "source": "Cointelegraph",
+        "symbols": [],
+        "title": "Critics of Netflix’s FTX drama point to Obama’s producer credit",
+        "url": "https://cointelegraph.com/news/netflix-ftx-scrutiny-obama-production-ties?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound"
+      },
+      {
+        "broad": false,
+        "categories": [],
         "publishedAt": "2026-11-23T13:01:20Z",
         "source": "CoinDesk",
         "symbols": [],
-        "title": "Live news: Tech futures rebound more than 3% as dollar index tops 104, a 20-month high",
+        "title": "Live updates: Tech futures rebound more than 3% as dollar index tops 104, a 20-month high",
         "url": "https://www.coindesk.com/tech/2026/11/23/live-news-wall-street-rebounds-as-dollar-index-hits-highest-since-march-2025"
       },
       {
@@ -200,46 +209,37 @@
         "symbols": [],
         "title": "ECB to let banks pledge more tokenized securities as collateral",
         "url": "https://cointelegraph.com/news/ecb-expands-eurosystem-collateral-tokenized-securities?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound"
-      },
-      {
-        "broad": false,
-        "categories": [],
-        "publishedAt": "2026-11-23T11:33:00Z",
-        "source": "CoinDesk",
-        "symbols": [],
-        "title": "Japan to ramp up crypto tax audits after uncovering $24.5 million in hidden income",
-        "url": "https://www.coindesk.com/business/2026/11/23/japan-to-ramp-up-crypto-tax-audits-after-uncovering-usd24-5-million-in-hidden-income"
       }
     ],
     "newsStatus": "OK",
     "openPositionsChecked": 8,
     "positionHealth": [
       {
-        "ageHours": 7.3,
-        "estimatedCloseNetTry": -1.6505,
-        "estimatedClosePct": -3.29,
-        "notionalTry": 48.5682,
+        "ageHours": 7.33,
+        "estimatedCloseNetTry": -1.6406,
+        "estimatedClosePct": -3.27,
+        "notionalTry": 48.5781,
         "side": "SPOT",
         "symbol": "NIGHTUSDT"
       },
       {
-        "ageHours": 19.16,
-        "estimatedCloseNetTry": -0.6915,
-        "estimatedClosePct": -0.886,
-        "notionalTry": 77.4639,
-        "side": "SPOT",
-        "symbol": "NEARUSDT"
-      },
-      {
-        "ageHours": 6.63,
-        "estimatedCloseNetTry": -0.6713,
-        "estimatedClosePct": -2.218,
-        "notionalTry": 29.6286,
+        "ageHours": 6.67,
+        "estimatedCloseNetTry": -0.6943,
+        "estimatedClosePct": -2.294,
+        "notionalTry": 29.6055,
         "side": "SPOT",
         "symbol": "PUMPUSDT"
       },
       {
-        "ageHours": 14.04,
+        "ageHours": 19.19,
+        "estimatedCloseNetTry": -0.6657,
+        "estimatedClosePct": -0.853,
+        "notionalTry": 77.4897,
+        "side": "SPOT",
+        "symbol": "NEARUSDT"
+      },
+      {
+        "ageHours": 14.07,
         "estimatedCloseNetTry": -0.3474,
         "estimatedClosePct": -0.763,
         "notionalTry": 45.2033,
@@ -247,34 +247,34 @@
         "symbol": "PYTHUSDT"
       },
       {
-        "ageHours": 10.0,
-        "estimatedCloseNetTry": -0.2649,
-        "estimatedClosePct": -0.976,
-        "notionalTry": 26.9191,
+        "ageHours": 10.03,
+        "estimatedCloseNetTry": -0.2773,
+        "estimatedClosePct": -1.021,
+        "notionalTry": 26.9068,
         "side": "SPOT",
         "symbol": "BTCUSDT"
       },
       {
-        "ageHours": 9.03,
-        "estimatedCloseNetTry": -0.1015,
-        "estimatedClosePct": -0.133,
-        "notionalTry": 76.1007,
+        "ageHours": 9.07,
+        "estimatedCloseNetTry": -0.1355,
+        "estimatedClosePct": -0.178,
+        "notionalTry": 76.0666,
         "side": "SPOT",
         "symbol": "LINKUSDT"
       },
       {
-        "ageHours": 6.7,
-        "estimatedCloseNetTry": -0.036,
-        "estimatedClosePct": -0.047,
-        "notionalTry": 77.0981,
+        "ageHours": 6.73,
+        "estimatedCloseNetTry": -0.1102,
+        "estimatedClosePct": -0.143,
+        "notionalTry": 77.0238,
         "side": "SPOT",
         "symbol": "ENAUSDT"
       },
       {
-        "ageHours": 14.62,
-        "estimatedCloseNetTry": 0.1836,
-        "estimatedClosePct": 0.65,
-        "notionalTry": 28.4502,
+        "ageHours": 14.65,
+        "estimatedCloseNetTry": 0.1597,
+        "estimatedClosePct": 0.566,
+        "notionalTry": 28.4264,
         "side": "SPOT",
         "symbol": "WLDUSDT"
       }
@@ -282,11 +282,11 @@
     "protectiveExitCandidates": 0,
     "reason": "Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (15 coin).",
     "rejectReasons": {
-      "15dk ters trend": 3,
+      "15dk ters trend": 1,
       "1dk short onayı yok": 1,
-      "1dk spot alım onayı yok": 11,
+      "1dk spot alım onayı yok": 13,
+      "Aşırı hızlı yükseliş/düşüş kovalama": 1,
       "Fazla oynaklık / komisyon riski": 12,
-      "Son gözlenen sinyal sonuçları negatif; yeni risk bekletildi": 1,
       "Zaten açık pozisyon": 8,
       "Zayıf 6s momentum": 15,
       "Zayıf trend/sinyal": 2
@@ -294,26 +294,26 @@
     "researchSignals": 0,
     "reviewed": 33,
     "scanStats": {
-      "candleElapsedSec": 6.599,
+      "candleElapsedSec": 4.005,
       "fast15m": {
-        "elapsedSec": 0.706,
+        "elapsedSec": 0.0,
         "failed": 0,
-        "requested": 2,
-        "valid": 2
+        "requested": 0,
+        "valid": 0
       },
       "hourly": {
-        "elapsedSec": 0.714,
+        "elapsedSec": 0.0,
         "failed": 0,
-        "requested": 1,
-        "valid": 1
+        "requested": 0,
+        "valid": 0
       },
       "minute1m": {
-        "elapsedSec": 5.179,
+        "elapsedSec": 4.005,
         "failed": 0,
         "requested": 53,
         "valid": 53
       },
-      "publicRequests": 56,
+      "publicRequests": 53,
       "workers": 6
     },
     "score": null,
@@ -335,7 +335,7 @@
     "strategy": "Adaptive v9 · transparent trade tape + fee-positive peak profit lock",
     "symbol": null,
     "todayOrders": 15,
-    "universe": 122
+    "universe": 121
   },
   "directionStats": {
     "long": {
@@ -1892,9 +1892,14 @@
       "at": "2026-11-23T13:22:27Z",
       "cashTry": 229.1444,
       "equityTry": 638.5765
+    },
+    {
+      "at": "2026-11-23T13:24:27Z",
+      "cashTry": 229.1444,
+      "equityTry": 638.4446
     }
   ],
-  "equityTry": 638.5765042099714,
+  "equityTry": 638.4446294816039,
   "forwardEvidence": {
     "completed": [
       {
@@ -17215,6 +17220,10 @@
   "intradayPairs": 53,
   "journal": [
     {
+      "at": "2026-11-23T13:24:27Z",
+      "message": "121 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (15 coin)."
+    },
+    {
       "at": "2026-11-23T13:22:27Z",
       "message": "122 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (15 coin)."
     },
@@ -17369,13 +17378,9 @@
     {
       "at": "2026-11-23T12:06:27Z",
       "message": "119 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (14 coin)."
-    },
-    {
-      "at": "2026-11-23T12:04:29Z",
-      "message": "119 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: 1dk spot alım onayı yok (15 coin)."
     }
   ],
-  "lastDecision": "122 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (15 coin).",
+  "lastDecision": "121 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (15 coin).",
   "lastError": null,
   "lastOrder": {
     "AEROUSDT": "2026-11-22T21:40:05Z",
@@ -17397,32 +17402,32 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-23T03:20:27Z"
   },
-  "lastRunAt": "2026-11-23T13:22:27Z",
+  "lastRunAt": "2026-11-23T13:24:27Z",
   "lastScheduledTriggerAt": "2026-11-23T09:03:31Z",
-  "lastSuccessAt": "2026-11-23T13:22:27Z",
-  "lastTriggerAt": "2026-11-23T13:22:27Z",
+  "lastSuccessAt": "2026-11-23T13:24:27Z",
+  "lastTriggerAt": "2026-11-23T13:24:27Z",
   "lastTriggerEvent": "workflow_dispatch",
   "marketPulse": {
-    "advancersPct": 75.5,
-    "down": 11,
+    "advancersPct": 73.6,
+    "down": 12,
     "flat": 2,
     "laggards": [
       {
-        "change24hPct": -13.87,
+        "change24hPct": -14.8,
         "symbol": "ACEUSDT"
       },
       {
-        "change24hPct": -10.74,
+        "change24hPct": -13.7,
         "symbol": "MMTUSDT"
       },
       {
-        "change24hPct": -9.27,
+        "change24hPct": -9.59,
         "symbol": "SKYUSDT"
       }
     ],
     "leaders": [
       {
-        "change24hPct": 28.74,
+        "change24hPct": 26.73,
         "symbol": "PROMUSDT"
       },
       {
@@ -17430,30 +17435,28 @@
         "symbol": "MUBARAKUSDT"
       },
       {
-        "change24hPct": 13.27,
+        "change24hPct": 12.38,
         "symbol": "CYBERUSDT"
       }
     ],
-    "medianChange24hPct": 1.675,
+    "medianChange24hPct": 1.669,
     "tracked": 53,
-    "up": 40
+    "up": 39
   },
   "marksTry": {
-    "BTCUSDT": 3098195.8293,
-    "ENAUSDT": 5.249166,
-    "LINKUSDT": 451.69124000000005,
-    "NEARUSDT": 151.81114,
-    "NIGHTUSDT": 2.4688274000000003,
-    "PUMPUSDT": 0.1299649,
+    "BTCUSDT": 3096774.8123,
+    "ENAUSDT": 5.244109,
+    "LINKUSDT": 451.48896,
+    "NEARUSDT": 151.86171000000002,
+    "NIGHTUSDT": 2.4693331,
+    "PUMPUSDT": 0.12986376,
     "PYTHUSDT": 2.5881726,
-    "WLDUSDT": 12.055888
+    "WLDUSDT": 12.045774
   },
   "micro": {
     "AAVEUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4976.088000000001,
-        4989.2362,
         4987.719099999999,
         4983.1678,
         4986.7077,
@@ -17515,14 +17518,14 @@
         4951.8144,
         4955.3543,
         4955.3543,
-        4952.8258
+        4952.8258,
+        4946.2517,
+        4946.2517
       ]
     },
     "ACEUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3.772522,
-        3.7624079999999998,
         3.7624079999999998,
         3.7573510000000003,
         3.767465,
@@ -17584,14 +17587,14 @@
         3.7573510000000003,
         3.7573510000000003,
         3.767465,
-        3.767465
+        3.767465,
+        3.752294,
+        3.7371229999999995
       ]
     },
     "ADAUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        7.362992,
-        7.362992,
         7.362992,
         7.3579349999999994,
         7.362992,
@@ -17653,14 +17656,14 @@
         7.378163,
         7.378163,
         7.378163,
-        7.38322
+        7.38322,
+        7.373106000000001,
+        7.373106000000001
       ]
     },
     "ALGOUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4.212481,
-        4.207424,
         4.217538,
         4.212481,
         4.202367,
@@ -17722,14 +17725,14 @@
         4.237766,
         4.2428230000000005,
         4.232709,
-        4.237766
+        4.237766,
+        4.257994,
+        4.283279
       ]
     },
     "BARDUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4.359134,
-        4.374305,
         4.374305,
         4.364191,
         4.364191,
@@ -17791,14 +17794,14 @@
         4.354077,
         4.359134,
         4.359134,
-        4.359134
+        4.359134,
+        4.354077,
+        4.354077
       ]
     },
     "BLURUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.40405430000000003,
-        0.40456000000000003,
         0.4035486,
         0.4035486,
         0.4030429,
@@ -17860,14 +17863,14 @@
         0.40152579999999993,
         0.4005144,
         0.4010201,
+        0.4000087,
+        0.4005144,
         0.4000087
       ]
     },
     "BNBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        28066.8557,
-        28096.692000000003,
         28100.2319,
         28089.1065,
         28083.0381,
@@ -17929,14 +17932,14 @@
         28116.920000000002,
         28129.056800000002,
         28138.159399999997,
-        28135.125200000002
+        28135.125200000002,
+        28122.988400000002,
+        28131.5853
       ]
     },
     "BTCUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3097016.5368999997,
-        3101438.8834,
         3101084.3877,
         3100371.3507000003,
         3100621.1665,
@@ -17998,14 +18001,14 @@
         3095735.5988,
         3098819.8631,
         3099363.9962999998,
-        3098215.5516
+        3098215.5516,
+        3096919.4425,
+        3098088.6209
       ]
     },
     "CRCLBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2573.0016,
-        2578.5643,
         2577.5529,
         2574.5186999999996,
         2575.0244000000002,
@@ -18067,14 +18070,14 @@
         2574.5186999999996,
         2575.0244000000002,
         2578.0586,
-        2579.5757
+        2579.5757,
+        2578.0586,
+        2577.0472
       ]
     },
     "CYBERUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        10.82198,
-        10.87255,
         10.923119999999999,
         10.923119999999999,
         10.87255,
@@ -18136,14 +18139,14 @@
         12.33908,
         12.28851,
         12.1368,
-        12.03566
+        12.03566,
+        12.03566,
+        12.086229999999999
       ]
     },
     "DOGEUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2.8137148,
-        2.816749,
         2.8162433,
         2.8137148,
         2.8147262,
@@ -18205,14 +18208,14 @@
         2.8202889,
         2.8213003,
         2.8213003,
-        2.8202889
+        2.8202889,
+        2.8177604,
+        2.8182661
       ]
     },
     "ENAUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        5.249166,
-        5.2592799999999995,
         5.249166,
         5.244109,
         5.244109,
@@ -18274,14 +18277,14 @@
         5.2542230000000005,
         5.249166,
         5.249166,
-        5.2542230000000005
+        5.2542230000000005,
+        5.239052,
+        5.244109
       ]
     },
     "ENSOUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        22.2508,
-        22.20023,
         22.14966,
         22.09909,
         22.14966,
@@ -18343,14 +18346,14 @@
         21.79567,
         21.79567,
         21.7451,
-        21.7451
+        21.7451,
+        21.59339,
+        21.64396
       ]
     },
     "ERAUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3.8079210000000003,
-        3.802864,
         3.797807,
         3.797807,
         3.797807,
@@ -18412,14 +18415,14 @@
         3.732066,
         3.7270090000000002,
         3.7270090000000002,
-        3.7270090000000002
+        3.7270090000000002,
+        3.721952,
+        3.711838
       ]
     },
     "ETHUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        86887.3512,
-        87041.084,
         87046.6467,
         87019.3389,
         87031.9814,
@@ -18481,14 +18484,14 @@
         87082.5514,
         87169.0261,
         87175.09449999999,
-        87127.053
+        87127.053,
+        87132.6157,
+        87176.1059
       ]
     },
     "FETUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        5.587985,
-        5.587985,
         5.5930420000000005,
         5.572814,
         5.572814,
@@ -18550,14 +18553,14 @@
         5.522244000000001,
         5.527301,
         5.532358,
-        5.527301
+        5.527301,
+        5.517187,
+        5.517187
       ]
     },
     "HYPEUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3228.8945,
-        3232.9401,
         3232.9401,
         3230.4116000000004,
         3230.4116000000004,
@@ -18619,14 +18622,14 @@
         3242.0427,
         3245.5826,
         3243.5598,
-        3240.5256
+        3240.5256,
+        3239.0085,
+        3243.5598
       ]
     },
     "INJUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        326.53049,
-        326.88448,
         326.12593,
         325.82250999999997,
         325.92365,
@@ -18688,14 +18691,14 @@
         325.72137,
         325.97422,
         325.62023,
-        325.67080000000004
+        325.67080000000004,
+        324.96282,
+        324.96282
       ]
     },
     "KAVAUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        1.218737,
-        1.2197484,
         1.2212655000000001,
         1.2202541,
         1.2177256,
@@ -18757,14 +18760,14 @@
         1.2273339,
         1.2263225,
         1.2273339,
-        1.228851
+        1.228851,
+        1.2273339,
+        1.2263225
       ]
     },
     "KORUBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        265.4925,
-        265.9982,
         264.9868,
         265.4925,
         265.4925,
@@ -18826,14 +18829,14 @@
         266.5039,
         267.5153,
         268.021,
-        268.5267
+        268.5267,
+        268.021,
+        268.021
       ]
     },
     "LINKUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        451.99466,
-        452.6015,
         452.55093,
         452.0958,
         451.79238,
@@ -18895,14 +18898,14 @@
         451.79238,
         451.79238,
         451.79238,
-        451.79238
+        451.79238,
+        451.48896,
+        451.43838999999997
       ]
     },
     "LISTAUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4.0102009999999995,
-        4.000087000000001,
         4.0051440000000005,
         4.015258,
         4.020315,
@@ -18964,14 +18967,14 @@
         3.888833,
         3.898947,
         3.898947,
-        3.89389
+        3.89389,
+        3.898947,
+        3.909061
       ]
     },
     "LSKUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        7.78778,
-        7.797894,
         7.802950999999999,
         7.818122,
         7.8585780000000005,
@@ -19033,14 +19036,14 @@
         7.88892,
         7.899034,
         7.899034,
-        7.873749
+        7.873749,
+        7.83835,
+        7.848464
       ]
     },
     "LTCUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2069.8301,
-        2072.3586,
         2071.8529,
         2071.3472,
         2071.3472,
@@ -19102,14 +19105,14 @@
         2072.8643,
         2073.37,
         2074.8871,
-        2076.4042
+        2076.4042,
+        2074.8871,
+        2074.3814
       ]
     },
     "LUNCUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.0021310198,
-        0.0021386053,
         0.0021401224,
         0.0021380996000000003,
         0.0021340540000000002,
@@ -19171,14 +19174,14 @@
         0.0021284913,
         0.0021168602,
         0.0021082633,
-        0.0021153431
+        0.0021153431,
+        0.0021097804,
+        0.0021133203
       ]
     },
     "MMTUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        10.473047000000001,
-        10.46799,
         10.427534,
         10.392135,
         10.36685,
@@ -19240,14 +19243,14 @@
         10.088715,
         10.119057,
         10.083658,
-        10.06343
+        10.06343,
+        10.002746,
+        10.033088
       ]
     },
     "MSTRBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4268.6137,
-        4278.7277,
         4275.6935,
         4271.6479,
         4270.1308,
@@ -19309,14 +19312,14 @@
         4259.511100000001,
         4263.0509999999995,
         4265.0738,
-        4265.0738
+        4265.0738,
+        4265.0738,
+        4265.5795
       ]
     },
     "MUBARAKUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        1.2121629,
-        1.2106458,
         1.2141857,
         1.208623,
         1.2207598000000002,
@@ -19378,14 +19381,14 @@
         1.2242997,
         1.21368,
         1.2141857,
-        1.2045774
+        1.2045774,
+        1.208623,
+        1.2106458
       ]
     },
     "MUBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        31409.027000000002,
-        31519.2696,
         31445.943100000004,
         31468.6996,
         31489.433300000004,
@@ -19447,14 +19450,14 @@
         31785.7735,
         31769.0854,
         31781.222200000004,
-        31830.2751
+        31830.2751,
+        31826.7352,
+        31855.5601
       ]
     },
     "NBISBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4449.1486,
-        4447.6315,
         4445.103,
         4441.0574,
         4438.0232000000005,
@@ -19516,14 +19519,14 @@
         4480.5019999999995,
         4477.9735,
         4478.4792,
-        4482.5248
+        4482.5248,
+        4481.0077,
+        4482.0190999999995
       ]
     },
     "NEARUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        151.20430000000002,
-        151.50772,
         151.45715,
         151.45715,
         151.65943000000001,
@@ -19585,14 +19588,14 @@
         151.86171000000002,
         151.91228,
         151.91228,
+        151.86171000000002,
+        151.76057,
         151.86171000000002
       ]
     },
     "NIGHTUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2.4506222,
-        2.4511279,
         2.4501165,
         2.4470823,
         2.4511279,
@@ -19654,14 +19657,14 @@
         2.4683217,
         2.4713559,
         2.4748958,
-        2.4703445
+        2.4703445,
+        2.4662989,
+        2.467816
       ]
     },
     "NVDABUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        6821.387299999999,
-        6843.1323999999995,
         6826.4443,
         6824.4214999999995,
         6824.4214999999995,
@@ -19723,14 +19726,14 @@
         6908.367700000001,
         6909.3791,
         6921.5159,
-        6918.9874
+        6918.9874,
+        6921.010200000001,
+        6927.5843
       ]
     },
     "PEPEUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.0001749722,
-        0.0001744665,
         0.0001739608,
         0.0001744665,
         0.0001739608,
@@ -19792,14 +19795,14 @@
         0.0001739608,
         0.0001744665,
         0.0001739608,
-        0.0001739608
+        0.0001739608,
+        0.0001739608,
+        0.0001744665
       ]
     },
     "PROMUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        272.52173,
-        270.24608,
         272.82515,
         272.92629,
         267.97043,
@@ -19861,14 +19864,14 @@
         297.95844,
         297.65502000000004,
         297.75616,
-        297.30102999999997
+        297.30102999999997,
+        296.49191,
+        295.63222
       ]
     },
     "PUMPUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.12991433,
-        0.13016718,
         0.12991433,
         0.1299649,
         0.13006604,
@@ -19930,14 +19933,14 @@
         0.13021775,
         0.13021775,
         0.13001547,
+        0.12986376,
+        0.12986376,
         0.12986376
       ]
     },
     "PYTHUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2.6068835,
-        2.6053664000000003,
         2.6063778,
         2.6058721,
         2.6058721,
@@ -19999,14 +20002,14 @@
         2.5972752000000003,
         2.5922182,
         2.5901954000000003,
-        2.5901954000000003
+        2.5901954000000003,
+        2.5881726,
+        2.5881726
       ]
     },
     "QNTUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        7900.0454,
-        7931.9045,
         7895.9998,
         7860.0951000000005,
         7873.2433,
@@ -20068,14 +20071,14 @@
         7988.5429,
         7975.9003999999995,
         7947.5812,
-        7956.6838
+        7956.6838,
+        7949.0983,
+        7929.376
       ]
     },
     "RAREUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.6832007,
-        0.6847178,
         0.6847178,
         0.6847178,
         0.6837064,
@@ -20137,14 +20140,14 @@
         0.6791551,
         0.6791551,
         0.6781437,
-        0.6751095
+        0.6751095,
+        0.6761209,
+        0.6771323
       ]
     },
     "RWUSDUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        50.564943,
-        50.57,
         50.57,
         50.57,
         50.57,
@@ -20203,6 +20206,8 @@
         50.564943,
         50.564943,
         50.564943,
+        50.57,
+        50.57,
         50.57,
         50.57,
         50.57,
@@ -20210,10 +20215,8 @@
       ]
     },
     "SENTUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        0.9790352,
-        0.9800466000000001,
         0.9795408999999999,
         0.9775181000000001,
         0.9770124,
@@ -20275,14 +20278,14 @@
         0.9684155,
         0.9709439999999999,
         0.9709439999999999,
-        0.9704383
+        0.9704383,
+        0.9699325999999999,
+        0.9694269
       ]
     },
     "SKHYBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        5632.9923,
-        5641.0835,
         5639.5664,
         5631.9809000000005,
         5630.9695,
@@ -20344,14 +20347,14 @@
         5674.459699999999,
         5673.4483,
         5681.0338,
-        5685.5851
+        5685.5851,
+        5677.9996,
+        5679.0109999999995
       ]
     },
     "SKYUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        2.1052291,
-        2.0789327,
         2.0951151,
         2.0758985,
         2.0673016,
@@ -20413,14 +20416,14 @@
         2.0086404,
         2.0020663,
         2.0086404,
+        2.0101575,
+        2.0116746,
         2.0101575
       ]
     },
     "SNDKBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        4226.6406,
-        4229.1691,
         4216.5266,
         4222.0893,
         4226.6406,
@@ -20482,14 +20485,14 @@
         4249.902800000001,
         4249.3971,
         4252.937,
-        4255.9712
+        4255.9712,
+        4249.3971,
+        4258.499699999999
       ]
     },
     "SOLUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3654.6938999999998,
-        3661.7736999999997,
         3662.7851000000005,
         3660.2565999999997,
         3661.7736999999997,
@@ -20551,14 +20554,14 @@
         3662.2794,
         3666.8307000000004,
         3669.8648999999996,
-        3668.8534999999997
+        3668.8534999999997,
+        3667.8421000000003,
+        3669.8648999999996
       ]
     },
     "SOXLBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        1793.7178999999999,
-        1803.3261999999997,
         1801.3033999999998,
         1796.7521000000002,
         1800.2920000000001,
@@ -20620,14 +20623,14 @@
         1833.1625,
         1834.1739000000002,
         1839.7366000000002,
-        1838.7252
+        1838.7252,
+        1837.7138000000002,
+        1840.2423000000001
       ]
     },
     "SOXSBUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        3581.3673999999996,
-        3550.5197,
         3560.128,
         3565.6907,
         3555.5767,
@@ -20689,14 +20692,14 @@
         3466.5735,
         3473.6533,
         3454.4367,
-        3450.3911000000003
+        3450.3911000000003,
+        3454.4367,
+        3452.9196
       ]
     },
     "SUIUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        33.957755,
-        34.008325,
         33.988097,
         33.957755,
         33.952698,
@@ -20758,14 +20761,14 @@
         33.876843,
         33.897071000000004,
         33.897071000000004,
-        33.912242
+        33.912242,
+        33.871786,
+        33.8819
       ]
     },
     "TRXUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        15.540161000000001,
-        15.540161000000001,
         15.545218,
         15.545218,
         15.550275,
@@ -20827,14 +20830,14 @@
         15.545218,
         15.550275,
         15.550275,
+        15.550275,
+        15.550275,
         15.550275
       ]
     },
     "UNIUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        241.06719,
-        241.57289,
         241.42118,
         241.42118,
         241.62346,
@@ -20896,14 +20899,14 @@
         240.76377,
         240.96605,
         240.81434,
-        240.61206
+        240.61206,
+        240.40977999999998,
+        240.51092
       ]
     },
     "WLDUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        12.03566,
-        12.045774,
         12.040717,
         12.030603,
         12.03566,
@@ -20965,14 +20968,14 @@
         12.050831,
         12.060945,
         12.060945,
-        12.055888
+        12.055888,
+        12.040717,
+        12.045774
       ]
     },
     "XRPUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        47.515572,
-        47.576256,
         47.566142,
         47.510515,
         47.525686,
@@ -21034,14 +21037,14 @@
         47.758308,
         47.778535999999995,
         47.798764000000006,
-        47.813935
+        47.813935,
+        47.768422,
+        47.727966
       ]
     },
     "ZECUSDT": {
-      "fetchedAt": "2026-11-23T13:22:27Z",
+      "fetchedAt": "2026-11-23T13:24:27Z",
       "prices": [
-        39847.6429,
-        39915.4067,
         39943.2202,
         39927.5435,
         39941.7031,
@@ -21103,7 +21106,9 @@
         40207.7013,
         40295.1874,
         40304.29,
-        40220.3438
+        40220.3438,
+        40183.9334,
+        40215.2868
       ]
     }
   },
@@ -21111,16 +21116,25 @@
   "minutePairs": 53,
   "mode": "server-paper",
   "newsPulse": {
-    "checkedAt": "2026-11-23T13:04:26.985222Z",
+    "checkedAt": "2026-11-23T13:24:27.998602Z",
     "failures": [],
     "headlines": [
+      {
+        "broad": false,
+        "categories": [],
+        "publishedAt": "2026-11-23T13:15:03Z",
+        "source": "Cointelegraph",
+        "symbols": [],
+        "title": "Critics of Netflix’s FTX drama point to Obama’s producer credit",
+        "url": "https://cointelegraph.com/news/netflix-ftx-scrutiny-obama-production-ties?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound"
+      },
       {
         "broad": false,
         "categories": [],
         "publishedAt": "2026-11-23T13:01:20Z",
         "source": "CoinDesk",
         "symbols": [],
-        "title": "Live news: Tech futures rebound more than 3% as dollar index tops 104, a 20-month high",
+        "title": "Live updates: Tech futures rebound more than 3% as dollar index tops 104, a 20-month high",
         "url": "https://www.coindesk.com/tech/2026/11/23/live-news-wall-street-rebounds-as-dollar-index-hits-highest-since-march-2025"
       },
       {
@@ -21253,17 +21267,6 @@
         "symbols": [],
         "title": "Crypto thieves are using online ads to infect iPhones with a single tap, research finds",
         "url": "https://www.coindesk.com/tech/2026/11/23/moldyroost-malvertizing-campaign-uses-one-tap-iphone-hacks-to-hunt-crypto-wallet-keys-research-shows"
-      },
-      {
-        "broad": false,
-        "categories": [],
-        "publishedAt": "2026-11-23T07:18:45Z",
-        "source": "CoinDesk",
-        "symbols": [
-          "BTCUSDT"
-        ],
-        "title": "This Swedish bitcoin treasury firm lost 30 BTC trading part of its own stack",
-        "url": "https://www.coindesk.com/markets/2026/11/23/this-swedish-bitcoin-treasury-firm-lost-30-btc-trading-part-of-its-own-stack"
       }
     ],
     "sourceCount": 2,
@@ -21342,37 +21345,37 @@
   },
   "performance": {
     "closedTrades": 12,
-    "drawdownPct": 1.757,
+    "drawdownPct": 1.778,
     "feesTry": 1.9056,
-    "netTry": -11.4235,
+    "netTry": -11.5554,
     "openPositions": 8,
     "realizedTry": -8.2534,
-    "returnPct": -1.757,
+    "returnPct": -1.778,
     "winRatePct": 33.3,
     "wins": 4
   },
   "realizedTry": -8.253368174401295,
   "scanStats": {
-    "candleElapsedSec": 6.599,
+    "candleElapsedSec": 4.005,
     "fast15m": {
-      "elapsedSec": 0.706,
+      "elapsedSec": 0.0,
       "failed": 0,
-      "requested": 2,
-      "valid": 2
+      "requested": 0,
+      "valid": 0
     },
     "hourly": {
-      "elapsedSec": 0.714,
+      "elapsedSec": 0.0,
       "failed": 0,
-      "requested": 1,
-      "valid": 1
+      "requested": 0,
+      "valid": 0
     },
     "minute1m": {
-      "elapsedSec": 5.179,
+      "elapsedSec": 4.005,
       "failed": 0,
       "requested": 53,
       "valid": 53
     },
-    "publicRequests": 56,
+    "publicRequests": 53,
     "workers": 6
   },
   "schema": 1,
@@ -21394,7 +21397,7 @@
   },
   "source": "Binance public spot REST",
   "todayOrders": 15,
-  "tracked": 122,
+  "tracked": 121,
   "trades": [
     {
       "at": "2026-11-23T10:14:27Z",
