@@ -13,7 +13,7 @@ from backend.tests.test_paper_bot import NOW
 
 
 def descending_fast(mark):
-    return [mark * (1.095 - i*.001) for i in range(96)]
+    return [mark * (1.1235 - i*.0013) for i in range(96)]
 
 
 def rising_fast(mark):
