@@ -997,6 +997,27 @@ def cycle(state, market, t):
             state["day"] = day
             state["todayOrders"] = 0
         planned = assess_decision(state, latest, t)
+        if planned["order"]:
+            # Scanning charts can take tens of seconds. NEVER simulate a fill
+            # against the older pre-scan ticker. Reprice from a fresh public
+            # snapshot and require the entire entry/exit decision to remain
+            # valid at the observed execution mark, before asking the AI.
+            fresh_lookup, fresh_fx = quotes(market.tickers(), t)
+            latest = {
+                pair: {
+                    "symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
+                    "volumeUsdt": fresh_lookup[pair]["volume"],
+                    "change24h": fresh_lookup[pair]["change"],
+                }
+                for pair in latest if pair in fresh_lookup
+            }
+            refreshed_equity = equity(state, latest)
+            if refreshed_equity is None:
+                raise ValueError("Position quote missing during fill revalidation")
+            update_price_extremes(state, latest)
+            state["peakEquityTry"] = max(refreshed_equity, state["peakEquityTry"])
+            planned = assess_decision(state, latest, t)
+            planned["priceRechecked"] = True
         planned, ai_meta = apply_ai_brain(
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
             model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
