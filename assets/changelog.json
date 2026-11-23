@@ -3,6 +3,19 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.23",
+      "date": "2026-11-23",
+      "title": "API anahtarsız ücretsiz Solana / Base DEX Keşfi",
+      "details": [
+        "GeckoTerminal herkese açık API ile Solana ve Base trend havuzlarından sınırlı, periyodik gerçek işlem gözlemi. Ücretli abonelik ya da anahtar gerekmez.",
+        "İki havuz/ağ, en az 200 bin dolar likidite, 1 saatte en çok %30 yükseliş, 20 dakikada en az 100 USD işlem ve üç farklı gönderen adresiyle araştırma kümesi. Duplicate işlem ve aynı gönderen iki kez sayılmaz.",
+        "Adresler kârlı Akıllı Cüzdan olarak doğrulanmış değildir. İlişkili sahipler, 30 gün ROI, LP kilidi, mint/blacklist ve taze fon girişi halen kanıtlanmaz. Giriş sinyali yalnız gözlem, otomatik emir yok.",
+        "Botun bot-data tek cüzdan durumuna freeDexRadar alanı eklendi. Flutter Radar kartında havuz/işlem/adres sayısı, izlenen adresler, son kümeler ve veri hataları görünür.",
+        "GeckoTerminal erişimi başarısızsa durum UNAVAILABLE veya DEGRADED olur. 12 dk önbellek, ücretsiz servis kullanımını azaltır ve sahte kapsam iddiasını engeller.",
+        "650 TL sanal kasaya ve eski SPOT/SHORT işlem geçmişine dokunulmadı. Ücretsiz keşif otomatik çalışabilir fakat GitHub Actions kesintisiz saniyelik izleme sağlamaz. Flutter v0.9.23+29."
+      ]
+    },
+    {
       "version": "0.9.22",
       "date": "2026-11-23",
       "title": "Solana/Base Akıllı Para Radar araştırma katmanı",
