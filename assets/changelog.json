@@ -3,6 +3,19 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.22",
+      "date": "2026-11-23",
+      "title": "Solana/Base Akıllı Para Radar araştırma katmanı",
+      "details": [
+        "Binance teknik radarından ayrı Solana/Base akıllı cüzdan araştırma modülü eklendi; tek 650 TL sanal kasa, mevcut emir geçmişi ve SPOT/SHORT motoru değiştirilmedi.",
+        "Yalnız taze ve dış sağlayıcının doğruladığını beyan ettiği swap, likidite, LP kilit, mint/freeze/kontrat güvenlik, 30 günlük cüzdan performansı, bağımsız sahip/fon kaynağı verileri değerlendirilir. En fazla 15 cüzdan ve 20 dakikada 3 bağımsız alım; aynı token tekrar sinyali engellenir.",
+        "Satış uyarıları ve 24 saatlik sinyal geçmişi tek sunucu state.json dosyasında saklanır; mobil Radar panelinde kompakt karttan izlenir. Veri kaynağı yoksa NOT_CONFIGURED, eskiyse STALE, okunamazsa UNAVAILABLE veya INVALID açıkça gösterilir.",
+        "Bu sürümde Arkham veya ücretsiz on-chain indeksleyici otomatik bağlanmadı. SMART_WALLET_FEED_URL üzerinden kullanıcıca sağlanan güvenilir HTTPS JSON veri beslemesi gerekir. Bu alanların gerçek zincir doğrulaması beslemeyi hazırlayan kaynağın sorumluluğundadır.",
+        "DEX tokenlerine sanal veya gerçek emir oluşturulmaz; %7 giriş, %-7 stop ve manuel onay yalnız araştırma politikası olarak tanımlıdır. Kesintisiz WebSocket, ani stop veya kâr garantisi iddia edilmez.",
+        "Yeni Python bağımsız cüzdan/likidite/zaman/dedup/satış testleri ve Python+Flutter pull request CI akışı eklendi. Kaynak sözleşmesi docs/smart-money-feed.md içinde."
+      ]
+    },
+    {
       "version": "0.9.21",
       "date": "2026-11-23",
       "title": "Geniş likit evren, dönüşümlü grafik taraması ve görünür kapsam",
