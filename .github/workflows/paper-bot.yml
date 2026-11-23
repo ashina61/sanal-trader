@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "run, pause, resume or reset server paper wallet"
+        description: "run, pause or resume existing server paper wallet"
         type: choice
-        options: [run, pause, resume, reset]
+        options: [run, pause, resume]
         default: run
         required: true
 
