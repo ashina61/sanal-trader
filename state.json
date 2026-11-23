@@ -5,7 +5,7 @@
     "status": "NO_CANDIDATE"
   },
   "cashTry": 277.3042724819038,
-  "cycles": 95,
+  "cycles": 96,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -15057,6 +15057,10 @@
   "intradayPairs": 54,
   "journal": [
     {
+      "at": "2026-11-23T01:09:19Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T01:08:25Z",
       "message": "117 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (20 coin)."
     },
@@ -15211,10 +15215,6 @@
     {
       "at": "2026-11-22T23:46:07Z",
       "message": "113 coin tarandı; Günlük 16 sanal emir sınırı; yeni pozisyon açılmadı. Koruyucu kapanışlar limit dışıdır."
-    },
-    {
-      "at": "2026-11-22T23:40:18Z",
-      "message": "113 coin tarandı; Günlük 16 sanal emir sınırı; yeni pozisyon açılmadı. Koruyucu kapanışlar limit dışıdır."
     }
   ],
   "lastDecision": "117 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (20 coin).",
@@ -15233,11 +15233,11 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-22T23:15:14Z"
   },
-  "lastRunAt": "2026-11-23T01:08:25Z",
-  "lastScheduledTriggerAt": null,
+  "lastRunAt": "2026-11-23T01:09:19Z",
+  "lastScheduledTriggerAt": "2026-11-23T01:09:19Z",
   "lastSuccessAt": "2026-11-23T01:08:25Z",
-  "lastTriggerAt": "2026-11-23T01:08:25Z",
-  "lastTriggerEvent": "workflow_dispatch",
+  "lastTriggerAt": "2026-11-23T01:09:19Z",
+  "lastTriggerEvent": "schedule",
   "marksTry": {
     "ETHUSDT": 86702.5215,
     "KITEUSDT": 7.227108,
