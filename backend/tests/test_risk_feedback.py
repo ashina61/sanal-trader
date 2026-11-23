@@ -6,6 +6,7 @@ from backend.paper_bot import assess_decision, execute, fresh_state
 from backend.risk_feedback import (
     broad_risk_on, loss_reentry_cooldown, position_monitor,
     short_reversal_exit, short_size_multiplier, spot_trend_failure_exit,
+    spot_profit_lock_exit,
 )
 from backend.short_positions import open_short
 from backend.tests.test_autonomous_decision import market_prices
@@ -85,6 +86,45 @@ class RiskFeedbackTests(unittest.TestCase):
         self.assertFalse(loss_reentry_cooldown(state, "BTCUSDT", NOW))
         state["trades"][0]["realizedPnlTry"] = .1
         self.assertFalse(loss_reentry_cooldown(state, "ETHUSDT", NOW))
+
+    def test_fee_positive_peak_trailing_requires_observed_reversal(self):
+        micro = {"momentum15": -.40, "momentum5": -.12}
+        self.assertTrue(spot_profit_lock_exit(
+            7200, .009, .014, -.0054, micro))
+        self.assertFalse(spot_profit_lock_exit(
+            7200, .009, .014, -.0054, None))
+        self.assertFalse(spot_profit_lock_exit(
+            7200, .009, .014, -.003, micro))
+        self.assertFalse(spot_profit_lock_exit(
+            7200, .003, .014, -.0054, micro))
+        self.assertFalse(spot_profit_lock_exit(
+            600, .009, .014, -.0054, micro))
+        self.assertFalse(spot_profit_lock_exit(
+            7200, .009, .014, -.0054,
+            {"momentum15": .5, "momentum5": .1}))
+
+    def test_observed_peak_reversal_can_close_spot_in_profit(self):
+        state, latest = market_prices([100 + i*.4 for i in range(168)])
+        # Entry cost includes entry commission: a real profitable
+        # paper close must also cover the exit commission.
+        execute(state, NOW - dt.timedelta(hours=2),
+                "BTCUSDT", "buy", 60, 100, "old observed entry")
+        latest["BTCUSDT"]["priceTry"] = 101
+        state["peakMarksTry"]["BTCUSDT"] = 101.55
+        state["micro"]["BTCUSDT"] = {
+            "fetchedAt": NOW.isoformat(),
+            "prices": [
+                101 * (1.02 - i * .00035)
+                for i in range(60)],
+        }
+        decision = assess_decision(state, latest, NOW)
+        self.assertEqual(decision["action"], "SELL")
+        self.assertIn("zirve + 1dk", decision["reason"])
+        self.assertEqual(len(state["holdings"]), 1)
+        order = execute(state, NOW, "BTCUSDT", "sell",
+                        decision["amountTry"], 101, decision["reason"])
+        self.assertGreater(order["realizedPnlTry"], 0)
+        self.assertNotIn("BTCUSDT", state["holdings"])
 
     def test_live_bullish_breadth_short_reversal_closes_previously_held_short(self):
         state, latest = market_prices([100 + i*.4 for i in range(168)])
