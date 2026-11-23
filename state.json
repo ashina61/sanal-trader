@@ -5,7 +5,7 @@
     "status": "NO_CANDIDATE"
   },
   "cashTry": 277.3042724819038,
-  "cycles": 90,
+  "cycles": 91,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -13047,6 +13047,10 @@
   "intradayPairs": 34,
   "journal": [
     {
+      "at": "2026-11-23T01:01:40Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T01:01:25Z",
       "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
     },
@@ -13201,10 +13205,6 @@
     {
       "at": "2026-11-22T23:20:15Z",
       "message": "Sanal SPOT AL PYTHUSDT: 45.46 TL; AI onayladı · High score, strong 6‑hour momentum, moderate volatility, and an uptrend regime suggest a credible risk‑adjusted edge despite recent small‑sample losses."
-    },
-    {
-      "at": "2026-11-22T23:15:14Z",
-      "message": "Sanal SPOT AL XVGUSDT: 30.57 TL; AI onayladı · High candidate score (0.894) with positive 6‑hour momentum and moderate volatility suggests a credible risk‑adjusted edge; recent small losses are insufficient to negate the signal"
     }
   ],
   "lastDecision": "117 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (22 coin).",
@@ -13223,10 +13223,10 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-22T23:15:14Z"
   },
-  "lastRunAt": "2026-11-23T01:01:25Z",
+  "lastRunAt": "2026-11-23T01:01:40Z",
   "lastScheduledTriggerAt": null,
   "lastSuccessAt": "2026-11-23T01:00:26Z",
-  "lastTriggerAt": "2026-11-23T01:01:25Z",
+  "lastTriggerAt": "2026-11-23T01:01:40Z",
   "lastTriggerEvent": "push",
   "marksTry": {
     "ETHUSDT": 87057.7946,
