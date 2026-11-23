@@ -8,6 +8,8 @@
 - Teknik çıkış kararı da haber sorgusunu beklemez. Yeniden fiyat kontrolünde çıkış koşulu kaybolursa o karar yeni girişe çevrilmez. Alım, satım, SHORT açma ve kapatma aynı muhasebe yolunu kullanır.
 - Veri tazeliği, çoklu koruyucu çıkış, eksik pozisyon fiyatında sağlam kalan stop, tekrar tetik ve küçük telefon ekranı için regresyon kapsamı eklendi. Bot periyodik GitHub Actions altyapısındadır; bu sürüm sürekli WebSocket bağlantısı kurmaz.
 - Mevcut 650 TL başlangıçlı tek sanal kasa, geçmiş zarar/kâr, açık pozisyonlar ve işlem geçmişi sıfırlanmaz. Gerçek borsa emri veya yeni ücretli hizmet yoktur. Flutter 0.9.19+25.
+- Canlı yayın kontrolünde eski uygulama JavaScript dosyasının önbellekten gelmesi görüldü. Web paketlemesi artık ana kod ve yükleyici için içeriğe göre değişen dosya adları üretir; yeni sayfa eski arayüz dosyasını kullanmaz. Orijinal dosyalar uyumluluk için korunur, paketleme girdileri doğrulanır.
+
 
 ## 2026-11-23 — v0.9.18 Gerçek işlem şeridi, BEKLE açıklaması, zirveden kâr koruma
 

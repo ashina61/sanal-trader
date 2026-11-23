@@ -52,6 +52,7 @@ jobs:
       - name: Build for GitHub Pages
         run: |
           flutter build web --release --base-href /sanal-trader/
+          python3 scripts/version_web_bootstrap.py build/web
           touch build/web/.nojekyll
 
       - name: Configure GitHub Pages
