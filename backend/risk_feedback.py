@@ -76,6 +76,27 @@ def short_reversal_exit(age_seconds, adverse, fast, micro, breadth, regime):
             and micro.get("momentum15", -math.inf) >= .30)
 
 
+def spot_profit_lock_exit(age_seconds, move, observed_peak_move,
+                          observed_pullback, micro):
+    """Protect a modest net-positive SPOT gain after a real observed peak.
+
+    No exit on just a gain or a single red tick. The observed peak must have
+    risen at least 1.2% above the fee-inclusive position cost; the current
+    mark must still sit 0.65% above cost, which is ~0.55% net of the estimated
+    closing fee. A >=0.45% actual pullback needs 1m trend confirmation.
+    """
+    if (not _finite(age_seconds) or age_seconds < 45 * 60
+            or not _finite(move) or move < .0065
+            or not _finite(observed_peak_move) or observed_peak_move < .012
+            or not _finite(observed_pullback) or observed_pullback > -.0045
+            or not isinstance(micro, dict)):
+        return False
+    minute15 = micro.get("momentum15")
+    minute5 = micro.get("momentum5")
+    return (_finite(minute15) and _finite(minute5)
+            and minute15 <= -.15 and minute5 <= .05)
+
+
 def spot_trend_failure_exit(age_seconds, move, fast, micro, tech):
     """Reduce stale losing longs only after confirmed multi-timeframe reversal."""
     if (not _finite(age_seconds) or age_seconds < 2 * 60 * 60
