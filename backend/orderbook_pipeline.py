@@ -118,19 +118,21 @@ def inspect_book(plan, book, quote_try, fx, *, fee=0.001):
     # Take the visible side of the book only. Limit the test size to depth;
     # prices are an optimistic instantaneous proxy and NOT guaranteed fills.
     levels = asks if side == "BUY" else bids
-    remaining_usdt = gross / rate
-    target_base = remaining_usdt / (levels[0][0] or 1)
-    base_left = target_base
+    # Use an exact quote-currency NOTIONAL budget. A fixed-base estimate at
+    # the best level silently exceeds the requested money on deeper BUY fills.
+    # A paper order's grossTry is always the budget, not requested base qty.
+    quote_budget = gross / rate
+    quote_left = quote_budget
     spent_usdt = 0.0
     filled = 0.0
     for price, quantity in levels:
-        take = min(quantity, base_left)
-        filled += take
-        spent_usdt += take * price
-        base_left -= take
-        if base_left <= 1e-9:
+        paid = min(price * quantity, quote_left)
+        filled += paid / price
+        spent_usdt += paid
+        quote_left -= paid
+        if quote_left <= max(1e-9, quote_budget * 1e-9):
             break
-    if filled <= 0 or base_left > max(1e-9, target_base * .001):
+    if filled <= 0 or quote_left > max(1e-8, quote_budget * .001):
         return block("20 seviyede hedef miktarın tamamına yetecek hacim yok")
     avg_price = spent_usdt / filled
     mid_slip_pct = abs(avg_price - midpoint) / midpoint * 100

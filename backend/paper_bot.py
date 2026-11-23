@@ -16,6 +16,7 @@ from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
 from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
+from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
 from backend.context_learning import (context_key, adjustment as context_adjustment,
@@ -1218,6 +1219,8 @@ def cycle(state, market, t, clock=None):
                 "executionPipeline": idle_trace(first_exit),
             })
             state["aiBrain"] = state["decisionPlan"]["aiBrain"]
+            state["tradeLearning"] = summarize_trades(state)
+            state["decisionPlan"]["tradeLearning"] = state["tradeLearning"]
             update_wallet_marks(state, latest, t)
             if runtime["missingPositionQuotes"]:
                 raise ValueError("Protective closes saved; another position quote is missing")
@@ -1468,6 +1471,8 @@ def cycle(state, market, t, clock=None):
                 + planned["reason"])
         state["decisionPlan"]["positionHealth"] = position_monitor(
             state, latest, t)
+        state["tradeLearning"] = summarize_trades(state)
+        state["decisionPlan"]["tradeLearning"] = state["tradeLearning"]
         update_wallet_marks(state, latest, t)
         state["lastSuccessAt"] = stamp(t)
         state["lastError"] = None

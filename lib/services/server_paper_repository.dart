@@ -116,6 +116,8 @@ class ServerPaperSnapshot {
   Map<String, dynamic> get marksTry => _map('marksTry');
   Map<String, dynamic> get directionStats => _map('directionStats');
   Map<String, dynamic> get performance => _map('performance');
+  Map<String, dynamic> get objective => _map('objective');
+  Map<String, dynamic> get tradeLearning => _map('tradeLearning');
   Map<String, dynamic> get coverageStats => _map('coverageStats');
   Map<String, dynamic> get smartMoney => _map('smartMoney');
   Map<String, dynamic> get freeDexRadar => _map('freeDexRadar');

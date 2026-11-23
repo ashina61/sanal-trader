@@ -339,3 +339,18 @@ fiyatları alınmaya ve stop/koruyucu çıkışlar çalışmaya devam eder.
 Bu sadece bilinen semboller için denetlenmiş bir sınıflandırma listesidir;
 yeni listelenen tokenize menkul kıymetleri otomatik tanımaz.
 Kaynak: https://www.binance.com/en/support/announcement/detail/4fea39f8b6e54e1b88e388fc90ce323e
+
+## DEX rug araştırması ve kapalı işlem öğrenimi (v0.9.26)
+
+Mevcut Solana/Base ücretsiz DEX keşfine en fazla dört token için GoPlus
+Token Security kamu veri kaynağı eklendi. Alanlar bulunamıyorsa güvenlik
+bilinmiyor gösterilir; bu **akıllı cüzdan onayı veya ticaret izni değildir**.
+LP kilidi veya gerçekleşebilen satış garantisi yoktur, DEX otomatik
+işlemleri kapalıdır.
+
+Binance public depth20 tutarı tam USDT bütçesine göre hesaplanır.
+Mevcut sanal kasa rakamının yanına yalnızca ayrı bir 5 baz puan ekstra
+çıkış kayması **stres senaryosu** eklenir, geçmiş kasaya dokunulmaz.
+Bot/Kâr arayüzünde kapanan sanal işlemlerden net rapor ve kayıp serisi
+görülür. Otomatik yeni strateji veya kâr garanti edilmez.
+[Detaylar](docs/rug-cost-learning-v0926.md).

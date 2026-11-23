@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.26 DEX riskleri, maliyet senaryosu ve net öğrenme
+
+- Ücretsiz GeckoTerminal keşfinde yalnızca gözlenen maksimum dört token için GoPlus kamu Token Security API'sinden sözleşme riskleri araştırılıyor. Honeypot/mint/transfer, EVM vergi ve Solana yetki uyarıları görülebilir; eksik veri UNKNOWN/UNAVAILABLE, hiçbir token güvenli olarak sertifikalandırılmaz.
+- Gerçek DEX emri, ayrı sanal kasa, kurgusal cüzdan kârlılığı veya otomatik akıllı cüzdan takibi eklenmedi. Her sonuç araştırma amaçlıdır. Kapanışların koruyucu önceliği korunur.
+- Binance public depth20 için tahmini VWAP artık tam işlem USDT bütçesini baz alır; seviyeler boyunca fazla harcama yanılsaması düzeltilir.
+- Ana net kasa/değerleme ve mevcut geçmiş değişmeden, tüm açık pozisyonlar için ek 5 baz puan fiyat kayması stres senaryosu ayrı gösterilir. Bu sonuç gerçekleşen fiyat veya kesin maliyet değildir.
+- Sadece gerçekleşmiş sanal kapanışlardan net öğrenme raporu: son 10 çıkış, kayıp serisi, stop/kâr al/takip/rotasyon, spot/short ayrımı ve net kâr/zarar faktörü. Zaten ücret dahil net PnL tekrar ücret kesilerek bozulmaz.
+- Radar token risk listesi kompakt açılır panel, Bot ve Kâr ayrı kompakt öğrenme kartı. Python ve Flutter testleri eklendi. Sürüm 0.9.26+32.
+
 ## 2026-11-23 — v0.9.25 Denetim: güvenli veri kaynağı ve kasa sıfırlama koruması
 
 - Ücretsiz GeckoTerminal veri kaynağı istekleri arasında en az 6 saniye bırakılır; herkese açık altyapıda hız sınırı riskini azaltır. HTTP hata kodu (ör. 429) artık net olarak kaydedilir ve DEX Radar ekranında görünür. Servisin her zaman erişilebilir olacağı iddia edilmez.
