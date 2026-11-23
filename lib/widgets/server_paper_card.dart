@@ -155,6 +155,17 @@ class ServerPaperCard extends StatelessWidget {
     final aiWaitedMean = aiWaited['avgNetPct'] is num
         ? '${(aiWaited['avgNetPct'] as num).toStringAsFixed(2)}%'
         : '—';
+    final scanStats = plan['scanStats'] is Map
+        ? (plan['scanStats'] as Map) : const <String, dynamic>{};
+    final entryGuard = plan['evidenceGuard'] is Map
+        ? (plan['evidenceGuard'] as Map) : const <String, dynamic>{};
+    final entryBuy = entryGuard['BUY'] is Map
+        ? (entryGuard['BUY'] as Map) : const <String, dynamic>{};
+    final entryShort = entryGuard['SHORT'] is Map
+        ? (entryGuard['SHORT'] as Map) : const <String, dynamic>{};
+    final scanDuration = scanStats['candleElapsedSec'] is num
+        ? '${(scanStats['candleElapsedSec'] as num).toStringAsFixed(1)} sn'
+        : '—';
     final marketPulse = plan['marketPulse'] is Map
         ? (plan['marketPulse'] as Map) : const <String, dynamic>{};
     final newsStatus = plan['newsStatus']?.toString() ?? 'UNAVAILABLE';
@@ -376,6 +387,18 @@ class ServerPaperCard extends StatelessWidget {
                     '$contextClosures kapanış')),
                 ]),
                 const SizedBox(height: 5),
+                Text('Grafik tarama süresi: $scanDuration · '
+                  '${scanStats['publicRequests'] ?? '—'} mum isteği · '
+                  '${scanStats['workers'] ?? '—'} eşzamanlı okuma',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 9)),
+                const SizedBox(height: 4),
+                Text(
+                  'Giriş freni: SPOT ${entryBuy['blocked'] == true ? 'KORUMADA' : 'AÇIK'} · '
+                  'SHORT ${entryShort['blocked'] == true ? 'KORUMADA' : 'AÇIK'}',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 10)),
+                const SizedBox(height: 5),
                 const Text('Öğrenme sadece tamamlanan sanal işlemin net sonucundan '
                   'yapılır. Az örneklemde etki çok düşüktür; geçmişte olmayan sonuç '
                   'üretilmez.',
@@ -393,8 +416,8 @@ class ServerPaperCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text('Komisyon + varsayılan kayma sonrası isabet: $forwardWins. '
                   'Gerçek emir değil: seçilen sinyalin bir saat sonraki '
-                  'gözlenen fiyatı ölçülür. İlk 30 sonuçtan önce öğrenme '
-                  'puanına etkisi yoktur.',
+                  'gözlenen fiyatı ölçülür. İlk 30 sonuçtan önce puan '
+                  'ayarı yapılmaz; tutarlı zararlar yeni girişe fren olabilir.',
                   style: const TextStyle(
                     color: PremiumColors.muted, fontSize: 9)),
                 const SizedBox(height: 5),
