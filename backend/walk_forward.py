@@ -23,6 +23,7 @@ HOLDOUT_FRACTION = 0.30
 MINIMUM_BARS = 400
 DEFAULT_SYMBOLS = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
 MAX_MARKET_CANDLES = 1000
+TARGET_TOTAL_CANDLES = 3000  # roughly one month of genuine 15m history
 
 
 def clean_klines(rows, now_ms):
@@ -56,26 +57,43 @@ def fetch_klines(symbol, now=None, request=None):
     if not isinstance(symbol, str) or not symbol.endswith("USDT") or not symbol.isalnum():
         raise ValueError("Invalid public spot symbol")
     now = now or dt.datetime.now(dt.timezone.utc)
-    uri = API + "/api/v3/klines?" + urllib.parse.urlencode({
-        "symbol": symbol, "interval": "15m", "limit": MAX_MARKET_CANDLES,
-    })
-    if request is not None:
-        raw = request(uri)
-    else:
-        req = urllib.request.Request(uri, headers={
-            "Accept": "application/json",
-            "User-Agent": "SanalTraderHistoricalResearch/1.0",
-        })
-        with urllib.request.urlopen(req, timeout=15) as response:
-            raw = response.read(1_500_001)
-        if len(raw) > 1_500_000:
-            raise ValueError("Historical market payload too large")
-        raw = json.loads(raw)
-    bars = clean_klines(raw, int(now.timestamp() * 1000))
+    all_rows = []
+    end_time = None
+    for _page in range(math.ceil(TARGET_TOTAL_CANDLES / MAX_MARKET_CANDLES)):
+        params = {"symbol": symbol, "interval": "15m",
+                  "limit": MAX_MARKET_CANDLES}
+        if end_time is not None:
+            params["endTime"] = end_time
+        uri = API + "/api/v3/klines?" + urllib.parse.urlencode(params)
+        if request is not None:
+            page = request(uri)
+        else:
+            req = urllib.request.Request(uri, headers={
+                "Accept": "application/json",
+                "User-Agent": "SanalTraderHistoricalResearch/1.0",
+            })
+            with urllib.request.urlopen(req, timeout=15) as response:
+                raw = response.read(1_500_001)
+            if len(raw) > 1_500_000:
+                raise ValueError("Historical market payload too large")
+            page = json.loads(raw)
+        if not isinstance(page, list):
+            raise ValueError("Invalid page of historical candles")
+        all_rows.extend(page)
+        if len(page) < MAX_MARKET_CANDLES:
+            break
+        try:
+            oldest_open = min(int(bar[0]) for bar in page
+                              if isinstance(bar, list) and len(bar) >= 7)
+        except (ValueError, TypeError):
+            raise ValueError("Invalid historical pagination boundary")
+        if end_time is not None and oldest_open >= end_time:
+            raise ValueError("Non-advancing historical pagination")
+        end_time = oldest_open - 1
+    bars = clean_klines(all_rows, int(now.timestamp() * 1000))
     if len(bars) < MINIMUM_BARS:
         raise ValueError("Not enough closed historical candles for " + symbol)
     return bars
-
 
 def _hourly_at(prices, i, times):
     # Include only genuinely ended hourly bars, not 15m prices observed in
