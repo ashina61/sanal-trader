@@ -250,6 +250,28 @@ def fast_momentum(series, mark):
             "momentum4h": 100 * (mark / series[-16] - 1)}
 
 
+def entry_quality_score(tech, fast, micro, mode, learned=0.0):
+    """Rank validated candidates by trend quality, follow-through and risk.
+
+    This only sorts risk-approved spot/SHORT opportunities. It never turns
+    an unapproved setup into an order or predicts an unobserved return.
+    """
+    sign = 1 if mode == "buy" else -1
+    score = sign * tech["score"] + learned
+    if fast is not None:
+        score += min(.16, max(0, sign * fast["momentum1h"]) * .13)
+        score += min(.12, max(0, sign * fast["momentum4h"]) * .035)
+    if micro is not None:
+        score += min(.12, max(0, sign * micro["momentum5"]) * .18)
+        score += min(.10, max(0, sign * micro["momentum15"]) * .06)
+        if micro["breakout"] if mode == "buy" else micro["breakdown"]:
+            score += .03
+    # High-noise coins and already extended hourly runs pay a ranking cost.
+    score -= min(.25, max(0, tech["volatility"]) * .025)
+    score -= min(.12, max(0, abs(tech["momentum6"]) - 2.5) * .035)
+    return round(score, 4)
+
+
 def equity(state, latest):
     total = state["cashTry"]
     for symbol, pos in state["holdings"].items():
@@ -603,7 +625,7 @@ def assess_decision(state, latest, t):
                         tech["score"])
 
     if used >= total * MAX_ENTRY_EXPOSURE:
-        return wait("SPOT+SHORT pozisyon payı %60 seviyesinde; "
+        return wait("SPOT+SHORT pozisyon payı %78 seviyesinde; "
                     "zararına rotasyon yapılmıyor")
     if state["cashTry"] <= total * MIN_ENTRY_CASH_RESERVE:
         return wait("Yeni giriş için kullanılabilir sanal nakit yetersiz")
@@ -712,9 +734,10 @@ def assess_decision(state, latest, t):
             continue
         direction = "long" if mode == "buy" else "short"
         setup = setup_for(micro, mode)
-        score = ((tech["score"] if mode == "buy" else -tech["score"])
-                 + direction_edge(state, direction)
-                 + signal_bias(state, mode, setup))
+        score = entry_quality_score(
+            tech, fast, micro, mode,
+            direction_edge(state, direction)
+            + signal_bias(state, mode, setup))
         if micro is not None:
             evidence = min(abs(micro["momentum15"]),
                            abs(tech["momentum6"]) / 2)
@@ -755,7 +778,7 @@ def assess_decision(state, latest, t):
          "momentum5mPct": round(minute(pair)["momentum5"], 3)
              if minute(pair) is not None else None,
          "setupTag": setup_for(minute(pair), side)}
-        for score, pair, side, amount, tech in candidates[:5]
+        for score, pair, side, amount, tech in candidates[:8]
     ]
     score, pair, side, amount, tech = candidates[0]
     plan["setupTag"] = setup_for(minute(pair), side)
@@ -903,9 +926,10 @@ def cycle(state, market, t):
         # Add real closed 15m candles for liquid + high-momentum symbols and
         # held positions. Bounded workload; hourly trend still anchors trades.
         fast_cache = state.setdefault("intraday", {})
-        fast_symbols = {v["symbol"] for v in eligible_pairs[:18]}
-        fast_symbols.update(v["symbol"] for v in movers_up[:7])
-        fast_symbols.update(v["symbol"] for v in movers_down[:7])
+        # Analyze every shortlisted trading candidate on the same timeframes.
+        # Previously only a subset had 15m candles, making others impossible
+        # to enter despite passing the main liquidity/mover selection.
+        fast_symbols = set(latest)
         fast_symbols.update(state["holdings"].keys())
         fast_symbols.update(state.get("shorts", {}).keys())
         fast_symbols.intersection_update(latest)
@@ -934,9 +958,9 @@ def cycle(state, market, t):
         # Closed one-minute candles: observed only at the GitHub run cadence.
         # No claim of fills between the observed ticks.
         minute_cache = state.setdefault("micro", {})
-        minute_symbols = {v["symbol"] for v in eligible_pairs[:20]}
-        minute_symbols.update(v["symbol"] for v in movers_up[:8])
-        minute_symbols.update(v["symbol"] for v in movers_down[:8])
+        # A global "1m required" gate must not silently exclude coins that
+        # the fetch loop never attempted to cover.
+        minute_symbols = set(latest)
         minute_symbols.update(state["holdings"])
         minute_symbols.update(state.get("shorts", {}))
         minute_symbols.intersection_update(latest)
@@ -989,7 +1013,7 @@ def cycle(state, market, t):
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v3 · 1m / 15m / hourly + online learning"
+        state["decisionPlan"]["strategy"] = "Adaptive v4 · full 1m/15m coverage + quality ranking"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
