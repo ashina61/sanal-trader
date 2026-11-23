@@ -19,7 +19,7 @@
       "wins": 0
     }
   },
-  "cycles": 344,
+  "cycles": 345,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -16391,6 +16391,10 @@
   "intradayPairs": 53,
   "journal": [
     {
+      "at": "2026-11-23T09:08:41Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T09:08:25Z",
       "message": "126 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (11 coin)."
     },
@@ -16545,10 +16549,6 @@
     {
       "at": "2026-11-23T07:54:29Z",
       "message": "124 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: 1dk spot alım onayı yok (12 coin)."
-    },
-    {
-      "at": "2026-11-23T07:52:32Z",
-      "message": "124 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: 1dk spot alım onayı yok (12 coin)."
     }
   ],
   "lastDecision": "126 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (11 coin).",
@@ -16573,11 +16573,11 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-23T03:20:27Z"
   },
-  "lastRunAt": "2026-11-23T09:08:25Z",
+  "lastRunAt": "2026-11-23T09:08:41Z",
   "lastScheduledTriggerAt": "2026-11-23T09:03:31Z",
   "lastSuccessAt": "2026-11-23T09:08:25Z",
-  "lastTriggerAt": "2026-11-23T09:08:25Z",
-  "lastTriggerEvent": "push",
+  "lastTriggerAt": "2026-11-23T09:08:41Z",
+  "lastTriggerEvent": "workflow_dispatch",
   "marketPulse": {
     "advancersPct": 77.4,
     "down": 10,
