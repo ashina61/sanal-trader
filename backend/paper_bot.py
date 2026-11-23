@@ -14,6 +14,10 @@ import urllib.request
 from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
+from backend.context_learning import (context_key, adjustment as context_adjustment,
+    record_entry as context_record_entry, record_exit as context_record_exit)
+from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
+    REFRESH_INTERVAL_SECONDS)
 from backend.signal_learning import (minute_signal, setup_for, signal_bias,
     record_open, record_close)
 
@@ -63,7 +67,8 @@ def fresh_state():
                 lastTriggerEvent=None, lastTriggerAt=None,
                 lastScheduledTriggerAt=None, intraday={}, peakMarksTry={},
                 troughMarksTry={}, equityHistory=[], performance={},
-                micro={}, signalStats={}, openSignals={})
+                micro={}, signalStats={}, openSignals={},
+                contextStats={}, openContexts={}, newsPulse={})
 
 def load(path):
     if not path.exists():
@@ -84,8 +89,12 @@ def load(path):
     obj.setdefault("micro", {})
     obj.setdefault("signalStats", {})
     obj.setdefault("openSignals", {})
+    obj.setdefault("contextStats", {})
+    obj.setdefault("openContexts", {})
+    obj.setdefault("newsPulse", {})
     if any(not isinstance(obj[field], dict) for field in
-           ("intraday", "micro", "signalStats", "openSignals")):
+           ("intraday", "micro", "signalStats", "openSignals",
+            "contextStats", "openContexts", "newsPulse")):
         raise ValueError("Invalid minute/learning paper cache")
     obj.setdefault("peakMarksTry", {})
     obj.setdefault("troughMarksTry", {})
@@ -165,6 +174,10 @@ class Market:
     def candles_minute(self, symbol):
         return self.request("/api/v3/klines",
                             {"symbol": symbol, "interval": "1m", "limit": 65})
+
+    def news(self, t):
+        articles, failures = fetch_rss(t)
+        return news_snapshot(articles, t, failures)
 
 def quotes(raw, t):
     if not isinstance(raw, list):
@@ -645,6 +658,9 @@ def assess_decision(state, latest, t):
         if tech is None:
             rejected("Yetersiz / eski mum")
             continue
+        if entry_alert(state.get("newsPulse", {}), pair, t):
+            rejected("Yakın tarihli olumsuz haber uyarısı")
+            continue
         if tech["volatility"] > 7.5:
             rejected("Fazla oynaklık / komisyon riski")
             continue
@@ -734,10 +750,13 @@ def assess_decision(state, latest, t):
             continue
         direction = "long" if mode == "buy" else "short"
         setup = setup_for(micro, mode)
+        learned_context = context_key(mode, plan["marketRegime"],
+                                      tech["volatility"])
         score = entry_quality_score(
             tech, fast, micro, mode,
             direction_edge(state, direction)
-            + signal_bias(state, mode, setup))
+            + signal_bias(state, mode, setup)
+            + context_adjustment(state, learned_context))
         if micro is not None:
             evidence = min(abs(micro["momentum15"]),
                            abs(tech["momentum6"]) / 2)
@@ -761,6 +780,8 @@ def assess_decision(state, latest, t):
             "momentum5mPct": round(minute(pair)["momentum5"], 3)
                 if minute(pair) is not None else None,
             "setupTag": setup_for(minute(pair), side),
+            "contextKey": context_key(side, plan["marketRegime"],
+                                      tech["volatility"]),
         }
         for score, pair, side, _, tech in candidates[:5]
     ]
@@ -777,11 +798,15 @@ def assess_decision(state, latest, t):
              if quick(pair) is not None else None,
          "momentum5mPct": round(minute(pair)["momentum5"], 3)
              if minute(pair) is not None else None,
-         "setupTag": setup_for(minute(pair), side)}
+         "setupTag": setup_for(minute(pair), side),
+         "contextKey": context_key(side, plan["marketRegime"],
+                                   tech["volatility"])}
         for score, pair, side, amount, tech in candidates[:8]
     ]
     score, pair, side, amount, tech = candidates[0]
     plan["setupTag"] = setup_for(minute(pair), side)
+    plan["contextKey"] = context_key(side, plan["marketRegime"],
+                                     tech["volatility"])
     mode = "SPOT AL" if side == "buy" else "SANAL 1x SHORT"
     return choose(
         pair, side, amount,
@@ -992,6 +1017,20 @@ def cycle(state, market, t):
         before = equity(state, latest)
         update_price_extremes(state, latest)
         state["peakEquityTry"] = max(before, state["peakEquityTry"])
+        # Headline polling is deliberately much slower than market polling:
+        # RSS is best-effort context, never a reason to stop stop-loss exits.
+        provider = getattr(market, "news", None)
+        last_news_at = as_date(state.get("newsPulse", {}).get("checkedAt"))
+        if callable(provider) and (last_news_at is None or
+                (t - last_news_at).total_seconds() >= REFRESH_INTERVAL_SECONDS):
+            try:
+                state["newsPulse"] = provider(t)
+            except Exception as exc:
+                state["newsPulse"] = {
+                    "checkedAt": stamp(t), "status": "UNAVAILABLE",
+                    "headlines": [], "sourceCount": 0,
+                    "failures": [type(exc).__name__],
+                }
         day = t.strftime("%Y-%m-%d")
         if state["day"] != day:
             state["day"] = day
@@ -1032,9 +1071,12 @@ def cycle(state, market, t):
         state["decisionPlan"]["intradayPairs"] = state.get("intradayPairs", 0)
         state["decisionPlan"]["minutePairs"] = state.get("minutePairs", 0)
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
+        state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
+        state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
+        state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v4 · full 1m/15m coverage + quality ranking"
+        state["decisionPlan"]["strategy"] = "Adaptive v5 · news radar + context learning + verified 1m/15m"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
@@ -1049,8 +1091,11 @@ def cycle(state, market, t):
                 record_open(state, pair, side,
                             planned.get("setupTag") or "hourly",
                             gross, stamp(t))
+                context_record_entry(state, pair, planned.get("contextKey"),
+                                     gross, stamp(t))
             else:
                 record_close(state, pair, executed["realizedPnlTry"])
+                context_record_exit(state, pair, executed["realizedPnlTry"])
         else:
             log(state, t, f"{len(eligible_pairs)} coin tarandı; "
                 + planned["reason"])
