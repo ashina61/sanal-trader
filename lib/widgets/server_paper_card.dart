@@ -249,7 +249,42 @@ class ServerPaperCard extends StatelessWidget {
             Expanded(child: _metric('Açık SHORT · 1x', '${shorts.length}')),
             Expanded(child: _metric('İşlem', '${state.trades.length}')),
           ]),
-          const SizedBox(height: 14),
+          const SizedBox(height: 11),
+          const Text('SON GERÇEK SANAL EMİRLER',
+            style: TextStyle(fontSize: 11,
+              color: PremiumColors.gold, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 5),
+          if (state.trades.isEmpty)
+            const Text('Henüz hiçbir sanal emir gerçekleşmedi',
+              style: TextStyle(fontSize: 10, color: PremiumColors.muted))
+          else
+            for (final trade in state.trades.take(4))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Row(children: [
+                  SizedBox(width: 90, child: Text(
+                    _sideLabel(trade['side']),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
+                      color: trade['side'] == 'sell' || trade['side'] == 'cover'
+                        ? PremiumColors.gold : PremiumColors.emerald))),
+                  Expanded(child: Text(
+                    trade['symbol']?.toString() ?? '—',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 10))),
+                  Text(
+                    trade['side'] == 'sell' || trade['side'] == 'cover'
+                      ? 'Net ${_money(trade['realizedPnlTry'])}'
+                      : _money(trade['grossTry']),
+                    style: TextStyle(fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: (trade['side'] == 'sell' || trade['side'] == 'cover')
+                          && trade['realizedPnlTry'] is num
+                          && (trade['realizedPnlTry'] as num) < 0
+                        ? PremiumColors.danger : PremiumColors.emerald),
+                  ),
+                ]),
+              ),
+          const SizedBox(height: 10),
           const Text('Gerçek sanal kapanışlardan SPOT/SHORT analizi',
             style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
               color: PremiumColors.gold)),
