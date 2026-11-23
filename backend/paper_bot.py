@@ -1070,13 +1070,13 @@ def cycle(state, market, t):
             state["peakEquityTry"] = max(refreshed_equity, state["peakEquityTry"])
             planned = assess_decision(state, latest, t)
             planned["priceRechecked"] = True
-        # Save approved technical candidates, even if AI ultimately waits.
-        # Forward evidence is entirely outside the single paper wallet.
-        record_forward(state, latest, planned, t)
         planned, ai_meta = apply_ai_brain(
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
             model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
         state["aiBrain"] = ai_meta
+        # Preserve counterfactual evidence about both AI approvals and waits.
+        # Only the future observed quote can determine whether AI helped.
+        record_forward(state, latest, planned, t, ai_meta=ai_meta)
         state["decisionPlan"] = {
             key: value for key, value in planned.items()
             if key not in ("order", "aiChoices")
