@@ -107,6 +107,35 @@ ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapan�
   kaynağını ölçüp disiplini arttırmaya yöneliktir; eski 650 TL
   başlangıçlı kasa, 9 açık pozisyon ve tüm geçmiş işlemler korunur.
 
+## Hızlı tarama ve ölçülen olumsuz sinyali frenleme (v0.9.17)
+
+- **Grafik gecikmesi:** Yeni, ücretsiz ve sınırlandırılmış eşzamanlı okuma, en fazla
+  6 adet bağımsız Binance kamu verisi isteğini birlikte çalıştırır. Saatlik,
+  15dk ve 1dk mumları yine gerçek kapanmış verilerden oluşturur; kasa ve
+  emir yönetimi eşzamanlı değildir ve **tek cüzdanda** kalır. API eksikse
+  veri uydurulmaz; eski 1dk teyidi otomatik kullanılmaz.
+- **Hız ölçümü:** Bot karar ekranında mum API istekleri, veri tarama saniyesi
+  ve iş parçacığı sayısı gösterilir. Bu yalnız grafik isteği süresidir;
+  GitHub Actions başlatma/deploy gecikmesi ve Groq süresi dahil değildir.
+  İşlem döngüsü hâlâ ücretsiz Cloudflare tetiklemesiyle yaklaşık **2 dk**
+  aralıklıdır. Tick düzeyinde veya 7/24 kesintisiz hız garantisi yoktur.
+- **Gözlemlenmiş zarar freni:** Son 12 ileriye dönük SPOT sinyali ortalama
+  net getirisi en fazla -%0,30 ve başarılı oranı en fazla %35 ise yeni
+  SPOT girişlerine ara verilir. SHORT için son en az 6 sinyal ortalama
+  -%0,45 veya kötü ve başarı oranı en fazla %34 ise yeni SHORT açılmaz.
+  Bunlar istatistiksel kârlılık kanıtı değil, küçük örneklemde temkinli
+  **yeni giriş sınırlamalarıdır**.
+- Koruyucu SPOT SAT / SHORT KAPAT daima çalışır. Mevcut açık pozisyonlar
+  korunur, geçmiş P&L resetlenmez. Girişler ancak sonraki gerçek piyasa
+  gözlemleri yuvarlanan son 12 örneğin risk durumunu iyileştirirse
+  otomatik tekrar değerlendirilebilir.
+- **Öğrenme devam eder:** Yeni emir verilmese bile aynı gerçek fiyatlarla
+  araştırma sinyalleri toplanır; bir saat sonra fiyat görülürse ölçülür.
+  İkinci hayali kasa yaratılmaz. Groq onaylarının araştırma etiketleri
+  canlı seçilen simge ve yöne göre kaydedilir.
+- Bu değişiklik doğrudan kâr üretmez. Önce gecikmenin düştüğü,
+  sonra güvenilir yeni verilerde net sonuçların iyileştiği doğrulanmalıdır.
+
 ## Neden bazen işlem yapmıyor?
 
 Botun amacı işlem sayısını yükseltmek değil, **sanal sermayeyi komisyon

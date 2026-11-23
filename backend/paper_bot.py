@@ -19,6 +19,8 @@ from backend.context_learning import (context_key, adjustment as context_adjustm
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
     REFRESH_INTERVAL_SECONDS)
 from backend.market_breadth import market_breadth
+from backend.scan_engine import fetch_candle_batch
+from backend.evidence_guard import entry_gate, gate_summary
 from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
     short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
     position_monitor)
@@ -775,6 +777,10 @@ def assess_decision(state, latest, t, research_only=False):
             rejected("Zayıf trend/sinyal")
         if mode is None:
             continue
+        if (not research_only and entry_gate(
+                state, "BUY" if mode == "buy" else "SHORT")["blocked"]):
+            rejected("Son gözlenen sinyal sonuçları negatif; yeni risk bekletildi")
+            continue
         if (not research_only and mode == "short" and
                 broad_risk_on(state.get("marketPulse", {}),
                               btc["direction"] if btc else None)):
@@ -986,19 +992,17 @@ def cycle(state, market, t):
         if equity(state, latest) is None:
             raise ValueError("Held position price is missing; no trade")
         cache = state["histories"]
-        for pair in selected_pairs:
-            if pair not in latest:
-                continue
-            old = cache.get(pair)
-            when = as_date(old.get("fetchedAt")) if old else None
-            if when and (t - when).total_seconds() < 3600:
-                continue
-            try:
-                points = closes(market.candles(pair), t, rate)
-                if len(points) >= 60:
-                    cache[pair] = {"fetchedAt": stamp(t), "prices": points}
-            except Exception:
-                pass  # no chart = no new signal; never generate fake candles
+        due_hourly = [
+            pair for pair in selected_pairs if pair in latest and
+            (not cache.get(pair) or
+             not as_date(cache[pair].get("fetchedAt")) or
+             (t - as_date(cache[pair].get("fetchedAt"))).total_seconds() >= 3600)
+        ]
+        hour_bars, hour_stats = fetch_candle_batch(
+            market.candles, due_hourly,
+            lambda rows: closes(rows, t, rate), minimum=60)
+        for pair, prices in hour_bars.items():
+            cache[pair] = {"fetchedAt": stamp(t), "prices": prices}
         for symbol in list(cache):
             if symbol not in selected_pairs:
                 cache.pop(symbol, None)
@@ -1013,20 +1017,20 @@ def cycle(state, market, t):
         fast_symbols.update(state.get("shorts", {}).keys())
         fast_symbols.intersection_update(latest)
         fast_provider = getattr(market, "candles_fast", None)
-        if fast_provider is not None:
-            for pair in sorted(fast_symbols):
-                prior = fast_cache.get(pair, {})
-                when = as_date(prior.get("fetchedAt"))
-                if when and (t - when).total_seconds() < 720:
-                    continue
-                try:
-                    real_closes = closes(fast_provider(pair), t, rate)
-                    if len(real_closes) >= 20:
-                        fast_cache[pair] = {
-                            "fetchedAt": stamp(t), "prices": real_closes,
-                        }
-                except Exception:
-                    pass
+        fast_stats = {"requested": 0, "valid": 0, "failed": 0, "elapsedSec": 0.0}
+        if callable(fast_provider):
+            due_fast = [
+                pair for pair in fast_symbols if
+                not as_date(fast_cache.get(pair, {}).get("fetchedAt")) or
+                (t - as_date(fast_cache[pair]["fetchedAt"])).total_seconds() >= 720
+            ]
+            fast_bars, fast_stats = fetch_candle_batch(
+                fast_provider, due_fast,
+                lambda rows: closes(rows, t, rate), minimum=20)
+            for pair, prices in fast_bars.items():
+                fast_cache[pair] = {
+                    "fetchedAt": stamp(t), "prices": prices,
+                }
         for pair in list(fast_cache):
             if pair not in fast_symbols:
                 fast_cache.pop(pair, None)
@@ -1045,17 +1049,20 @@ def cycle(state, market, t):
         minute_symbols.intersection_update(latest)
         minute_provider = getattr(market, "candles_minute", None)
         state["microSourceConfigured"] = minute_provider is not None
-        if minute_provider:
-            for pair in sorted(minute_symbols):
-                try:
-                    prices = closes(minute_provider(pair), t, rate)
-                    if len(prices) >= 35:
-                        minute_cache[pair] = {
-                            "fetchedAt": stamp(t), "prices": prices[-65:]}
-                    else:
-                        minute_cache.pop(pair, None)
-                except Exception:
-                    # Never generate fake minute signals or reuse stale data.
+        minute_stats = {"requested": 0, "valid": 0, "failed": 0,
+                        "elapsedSec": 0.0}
+        if callable(minute_provider):
+            minute_bars, minute_stats = fetch_candle_batch(
+                minute_provider, minute_symbols,
+                lambda rows: closes(rows, t, rate), minimum=35)
+            # Fail closed: never silently reuse 1m confirmation after an
+            # individual endpoint fails. Held positions still have hard stops.
+            for pair in minute_symbols:
+                if pair in minute_bars:
+                    minute_cache[pair] = {
+                        "fetchedAt": stamp(t),
+                        "prices": minute_bars[pair][-65:]}
+                else:
                     minute_cache.pop(pair, None)
         for pair in list(minute_cache):
             if pair not in minute_symbols:
@@ -1065,6 +1072,15 @@ def cycle(state, market, t):
             for pair in minute_symbols)
         state["tracked"] = len(eligible_pairs)
         state["screened"] = len(latest)
+        state["scanStats"] = {
+            "hourly": hour_stats, "fast15m": fast_stats,
+            "minute1m": minute_stats,
+            "publicRequests": sum(x["requested"] for x in
+                 (hour_stats, fast_stats, minute_stats)),
+            "candleElapsedSec": round(sum(x["elapsedSec"] for x in
+                 (hour_stats, fast_stats, minute_stats)), 3),
+            "workers": 6,
+        }
         state["marketPulse"] = market_breadth(latest)
         state["historyPairs"] = sum(
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
@@ -1123,6 +1139,10 @@ def cycle(state, market, t):
         # research_only bypasses cash/exposure and exits but never places
         # another order, uses another wallet or invents prices.
         research_plan = assess_decision(state, latest, t, research_only=True)
+        # Research probes are never filled. This annotation is ONLY to
+        # distinguish how the AI treated the actual candidate, not an order.
+        research_plan["action"] = planned.get("action")
+        research_plan["symbol"] = planned.get("symbol")
         record_forward(state, latest, research_plan, t, ai_meta=ai_meta)
         state["decisionPlan"] = {
             key: value for key, value in planned.items()
@@ -1139,11 +1159,13 @@ def cycle(state, market, t):
         state["decisionPlan"]["researchSignals"] = len(
             research_plan.get("candidates", []))
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
+        state["decisionPlan"]["scanStats"] = state.get("scanStats", {})
+        state["decisionPlan"]["evidenceGuard"] = gate_summary(state)
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v7 · loss feedback, reversal exits and always-on research"
+        state["decisionPlan"]["strategy"] = "Adaptive v8 · parallel charts + negative-edge guard + observed research"
         choice = planned["order"]
         if choice:
             pair, side, gross, reason = choice
