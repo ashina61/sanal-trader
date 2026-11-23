@@ -37,6 +37,17 @@ class FakeMarket:
         return self.ticks
     def candles(self, symbol):
         return self.history.get(symbol, [])
+    def depth(self, symbol):
+        # Explicit, realistic public-book fixture. Tests must not bypass
+        # the new-entry gate merely because an API is absent.
+        tick = next((r for r in self.ticks if r.get("symbol") == symbol), None)
+        if tick is None:
+            raise ValueError("No simulated book for missing ticker")
+        mid = float(tick["lastPrice"])
+        return {
+            "bids": [[str(mid * 0.9995), "100000"]],
+            "asks": [[str(mid * 1.0005), "100000"]],
+        }
 
 class PaperBotTests(unittest.TestCase):
     def test_eligible_only_plain_spot_usdt(self):
