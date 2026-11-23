@@ -5,6 +5,7 @@ import unittest
 from backend.context_learning import (
     context_key, adjustment, record_entry, record_exit,
 )
+from backend.market_breadth import market_breadth
 from backend.news_radar import (
     parse_rss, news_snapshot, entry_alert, classify,
 )
@@ -94,6 +95,19 @@ class NewsContextTests(unittest.TestCase):
         self.assertLess(adjustment(state, k), 0)
         self.assertEqual(record_exit(state, "NOT_OPEN", 25), None)
         self.assertEqual(state["contextStats"][k]["closed"], 3)
+
+    def test_market_breadth_counts_real_quotes_without_fake_forecast(self):
+        summary = market_breadth({
+            "BTCUSDT": {"change24h": 2.5},
+            "ETHUSDT": {"change24h": -1.5},
+            "ADAUSDT": {"change24h": 0.0},
+            "FAKE": {"change24h": float("nan")},
+        })
+        self.assertEqual(summary["tracked"], 3)
+        self.assertEqual((summary["up"], summary["down"], summary["flat"]),
+                         (1, 1, 1))
+        self.assertAlmostEqual(summary["medianChange24hPct"], 0)
+        self.assertEqual(summary["leaders"][0]["symbol"], "BTCUSDT")
 
     def test_learning_key_separates_short_and_volatility(self):
         self.assertNotEqual(context_key("short", "DÜŞÜŞ", 6),
