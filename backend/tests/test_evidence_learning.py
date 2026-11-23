@@ -1,13 +1,14 @@
 import copy
 import datetime as dt
 import unittest
+from urllib.parse import urlparse, parse_qs
 
 from backend.paper_bot import fresh_state
 from backend.shadow_validation import (
     COST_PCT, HORIZON_SECONDS, record, settle, summary, evidence_bias,
 )
 from backend.walk_forward import (
-    INTERVAL_MS, clean_klines, proxy_signal, replay, run_report,
+    INTERVAL_MS, clean_klines, fetch_klines, proxy_signal, replay, run_report,
 )
 from backend.tests.test_paper_bot import NOW
 
@@ -122,6 +123,29 @@ class ChronologicalResearchTests(unittest.TestCase):
         self.assertEqual(report["status"], "RESEARCH_ONLY")
         self.assertEqual(report["coins"][0]["symbol"], "BTCUSDT")
         self.assertEqual(before, state)
+
+    def test_historical_fetch_pages_backward_without_duplicate_candles(self):
+        now_ms = int(NOW.timestamp() * 1000)
+        first_open = now_ms - 3000 * INTERVAL_MS
+        rows = []
+        for i in range(3000):
+            opening = first_open + i * INTERVAL_MS
+            rows.append([opening, "100", "100", "100", "101",
+                         "1", opening + INTERVAL_MS - 1])
+        calls = []
+        def fake(uri):
+            params = parse_qs(urlparse(uri).query)
+            self.assertEqual(params["symbol"], ["BTCUSDT"])
+            self.assertEqual(params["interval"], ["15m"])
+            cutoff = int(params["endTime"][0]) if "endTime" in params else now_ms
+            calls.append(cutoff)
+            return [row for row in rows if row[0] <= cutoff][-1000:]
+        bars = fetch_klines("BTCUSDT", now=NOW, request=fake)
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(bars), 3000)
+        self.assertEqual(bars[0][0], first_open + INTERVAL_MS - 1)
+        self.assertEqual(bars[-1][0], now_ms - 1)
+        self.assertEqual(len(set(t for t, _ in bars)), 3000)
 
     def test_flat_market_has_no_fabricated_backtest_winners(self):
         ts, _ = market_series()
