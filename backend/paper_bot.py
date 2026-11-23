@@ -15,6 +15,7 @@ import urllib.request
 from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
+from backend.smart_money import refresh as refresh_smart_money
 from backend.context_learning import (context_key, adjustment as context_adjustment,
     record_entry as context_record_entry, record_exit as context_record_exit)
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
@@ -83,7 +84,7 @@ def fresh_state():
                 troughMarksTry={}, equityHistory=[], performance={},
                 micro={}, signalStats={}, openSignals={},
                 contextStats={}, openContexts={}, newsPulse={},
-                marketPulse={}, forwardEvidence={})
+                marketPulse={}, forwardEvidence={}, smartMoney={})
 
 def load(path):
     if not path.exists():
@@ -109,6 +110,7 @@ def load(path):
     obj.setdefault("newsPulse", {})
     obj.setdefault("marketPulse", {})
     migrate_forward(obj)
+    obj.setdefault("smartMoney", {})
     if any(not isinstance(obj[field], dict) for field in
            ("intraday", "micro", "signalStats", "openSignals",
             "contextStats", "openContexts", "newsPulse", "marketPulse")):
@@ -1490,6 +1492,9 @@ def main():
     else:
         state = record_trigger(state, t, os.getenv("TRIGGER_EVENT", ""))
         state = cycle(state, Market(), t, clock=now_utc)
+        # Isolated research-only indexer: never changes the single paper wallet,
+        # blocks protective exits, or converts a DEX token to a Binance pair.
+        state["smartMoney"] = refresh_smart_money(state.get("smartMoney"), now_utc())
     save(args.state, state)
     print(json.dumps({
         "enabled": state["enabled"], "cashTry": round(state["cashTry"], 4),

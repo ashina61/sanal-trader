@@ -272,3 +272,18 @@ Sanal botun `bot-data` dalındaki geçmişi, açık pozisyonları ve bakiyesi
 
 **Yatırım tavsiyesi değildir.** Veri kaynakları, sanal komisyonlar ve
 otomatik çalıştırma gerçek ticaretin tüm risk ve maliyetlerini yansıtmaz.
+
+## Akıllı Para Radarı (v0.9.22)
+
+Radar ekranında Solana/Base akıllı cüzdan araştırma alanı vardır. En fazla 15
+uygun kârlı cüzdanda, 20 dakika içinde üç **bağımsız** alım, fon girişinin
+teyidi, token likiditesi/kontrat güvenliği ve fiyat şişmesi kuralları uygulanır.
+Hatalı, eksik, gecikmiş veri geçerli sinyal sayılmaz. İşlem kimlikleri,
+satış uyarıları ve son 24 saatlik sinyal kaydı tek sunucu durumuna eklenir.
+
+**Veri kaynağı olmadan aktif izleme yoktur.** Güvenilir on-chain indeksleyicinin
+HTTPS JSON adresi için GitHub Actions `SMART_WALLET_FEED_URL` secret gerekir.
+Bu modül sunulan kanıtları bağımsız zincir üzerinden yeniden doğrulamaz. DEX
+fiyat ve gerçekçi dolum olmadan yeni sanal emir açmaz, hiçbir gerçek alım/satım
+yapmaz ve ana 650 TL sanal kasayı değiştirmez. Ayrıntılı veri şeması ve
+kısıtlar: [Smart Money bağlantı rehberi](docs/smart-money-feed.md).
