@@ -108,6 +108,28 @@ class FreeDiscoveryTests(unittest.TestCase):
                                       429, 'Too Many Requests', {}, None)
         self.assertEqual(_error_label(exc), 'HTTP_429')
 
+    def test_contract_review_is_research_only_and_offline_mocked(self):
+        def fake_fetch(path):
+            return top_response() if path.endswith("/trending_pools") else trades()
+        def mocked_security(chain, token):
+            return {token.lower(): {"is_honeypot": "1", "is_mintable": "0"}}
+        result = refresh({}, NOW, fetcher=fake_fetch,
+                         security_fetcher=mocked_security,
+                         sleep=lambda _: None)
+        risk = result["tokenRisk"]
+        self.assertEqual(risk["checked"], 1)
+        self.assertEqual(risk["riskFlagged"], 1)
+        self.assertEqual(risk["results"][0]["status"], "RISK_FLAGGED")
+        self.assertFalse(risk["automaticOrder"])
+
+    def test_fake_dex_never_makes_a_second_real_network_call(self):
+        def fake_fetch(path):
+            return top_response() if path.endswith("/trending_pools") else trades()
+        result = refresh({}, NOW, fetcher=fake_fetch,
+                         sleep=lambda _: None)
+        self.assertEqual(result["tokenRisk"]["status"], "NOT_TESTED")
+        self.assertFalse(result["tokenRisk"]["tokenSafetyVerified"])
+
     def test_free_refresh_makes_real_reads_without_paid_credentials(self):
         seen = []
         delays = []
