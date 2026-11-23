@@ -98,14 +98,12 @@ class ServerPaperCard extends StatelessWidget {
     final healthy = state?.isHealthyAt(DateTime.now()) ?? false;
     final longs = state?.holdings ?? {};
     final shorts = state?.shorts ?? {};
-    final positionHealth = (state?.decisionPlan?['positionHealth'] is List)
-        ? (state!.decisionPlan!['positionHealth'] as List)
-            .whereType<Map>().take(12).toList()
-        : <Map>[];
-    final researchSignals = (state?.decisionPlan?['researchSignals'] as num?)
-        ?.toInt() ?? 0;
-    final sideStats = state?.directionStats ?? const <String, dynamic>{};
     final plan = state?.decisionPlan ?? const <String, dynamic>{};
+    final positionHealth = plan['positionHealth'] is List
+        ? (plan['positionHealth'] as List).whereType<Map>().take(12).toList()
+        : <Map>[];
+    final researchSignals = (plan['researchSignals'] as num?)?.toInt() ?? 0;
+    final sideStats = state?.directionStats ?? const <String, dynamic>{};
     final ai = plan['aiBrain'] is Map
         ? (plan['aiBrain'] as Map) : const <String, dynamic>{};
     final aiStatus = ai['status']?.toString() ?? 'NOT_CONFIGURED';
