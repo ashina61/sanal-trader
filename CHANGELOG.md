@@ -1,3 +1,13 @@
+## 2026-11-23 — v0.9.13 Tam grafik kapsamı, kaliteli aday seçimi ve emir öncesi fiyat doğrulaması
+
+- Sunucuda 2 dakikalık Cloudflare tetikleme döngüleri workflow_dispatch ile art arda başarılı çalışırken tek sanal cüzdanın korunması doğrulandı. GitHub Actions / Worker altyapısı milisaniyelik veya kesintisiz 7/24 emir hizmeti değildir.
+- Önceden taranan 53 coinin yalnızca 39'unda 1dk, 36'sında 15dk veri bulunabiliyordu. Artık **kısa listeye seçilen her coin** için iki zaman dilimi de alınmaya çalışılıyor; veri gelmezse işlem hâlâ engellenir.
+- Onaylı SPOT AL / sanal SHORT adaylarını, eşit saatlik trend puanlarında rastgele sembol adına göre seçmek yerine gerçek 1dk/15dk takip momentumu ve yüksek oynaklığa ceza ile sıralayan kalite puanı eklendi. Seçim kuralı sinyal üretmez veya kâr garantilemez.
+- Grafik taramasında geçen süre boyunca eskimiş fiyat üzerinden hayalî emir yazılmasını engellemek amacıyla, bir plan emir verecekse Binance kamu ticker'ı yeniden okunur ve karar güncel fiyatla bir kez daha hesaplanır. Yeni karar uygun değilse **BEKLE** yazılır.
+- Karar raporunda toplam pozisyon sınırı etiketi mevcut gerçek %78 sınırıyla eşitlendi; Groq için doğrulanmış üst aday listesi beşten sekize çıkarıldı.
+- Tam 1dk/15dk kapsamı, SHORT/spot kalite sıralaması ve eskiyen fiyatla alımdan vazgeçme için yeni Python regresyon testleri eklendi. README iki dakikalık dış tetiklemeyi, mevcut sermaye sınırlarını ve gerçek zamanlı işlem kısıtlarını açıklayacak şekilde düzeltildi.
+- Flutter sürümü 0.9.13+19. Mevcut sunucu kasası, açık pozisyonlar, 650 TL başlangıç değeri ve bütün gerçek sanal işlem geçmişi **sıfırlanmadı**.
+
 ## 2026-11-23 — Bot kararında gerçek 1dk veri ve öğrenme ilerlemesi
 
 - Bot karar ekranı gerçek 1 dakika mum verisi okunan coin sayısını ve sinyal bazında gerçekleşmiş sanal kapanışları gösterir.
