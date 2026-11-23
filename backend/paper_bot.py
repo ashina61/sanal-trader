@@ -159,6 +159,8 @@ class Market:
         self._limited_until = 0.0
         self._scan_deadline = None
         self._used_weight = None
+        self._http_requests = 0
+        self._chart_requests = 0
 
     def begin_scan(self, seconds=45):
         self._scan_deadline = time.monotonic() + seconds
@@ -168,6 +170,8 @@ class Market:
             remaining = max(0, math.ceil(self._limited_until - time.monotonic()))
             return {'rateLimited': remaining > 0, 'retryAfterSeconds': remaining,
                     'usedWeight1m': self._used_weight,
+                    'httpRequests': self._http_requests,
+                    'chartHttpRequests': self._chart_requests,
                     'chartBudgetExhausted': self._scan_deadline is not None
                         and time.monotonic() >= self._scan_deadline}
 
@@ -187,6 +191,9 @@ class Market:
             if remaining <= 0:
                 raise RuntimeError('Chart scan time budget exhausted')
             try:
+                with self._lock:
+                    self._http_requests += 1
+                    self._chart_requests += int(route == '/api/v3/klines')
                 with urllib.request.urlopen(req, timeout=min(12, remaining)) as response:
                     if response.status != 200:
                         raise ValueError("Market HTTP " + str(response.status))
@@ -1202,12 +1209,49 @@ def cycle(state, market, t, clock=None):
         if callable(scan_begin):
             scan_begin()
         held_pairs = set(state['holdings']) | set(state.get('shorts', {}))
+        chart_priority = sorted(held_pairs) + [s for s in CORE if s not in held_pairs]
+        # Closed one-minute candles: observed only at the GitHub run cadence.
+        # No claim of fills between the observed ticks.
+        minute_cache = state.setdefault("micro", {})
+        # A global "1m required" gate must not silently exclude coins that
+        # the fetch loop never attempted to cover.
+        minute_symbols, focus_policy = minute_focus(eligible_pairs, latest,
+            held_pairs, CORE, state.get('minuteScanCursor', 0))
+        minute_provider = getattr(market, "candles_minute", None)
+        state["microSourceConfigured"] = minute_provider is not None
+        minute_stats = {"requested": 0, "valid": 0, "failed": 0,
+                        "elapsedSec": 0.0}
+        minute_bars = {}
+        if callable(minute_provider):
+            minute_bars, minute_stats = fetch_candle_batch(
+                minute_provider, minute_symbols,
+                lambda rows: closes(rows, t, rate, max_age=180), minimum=35,
+                priority=chart_priority)
+            # Fail closed: never silently reuse 1m confirmation after an
+            # individual endpoint fails. Held positions still have hard stops.
+            for pair in minute_symbols:
+                if pair in minute_bars:
+                    minute_cache[pair] = {
+                        "fetchedAt": stamp(t),
+                        "prices": minute_bars[pair][-65:]}
+                else:
+                    minute_cache.pop(pair, None)
+            if minute_bars:
+                state['minuteScanCursor'] = focus_policy['nextCursor']
+        for pair in list(minute_cache):
+            if pair not in minute_symbols:
+                minute_cache.pop(pair, None)
+        state["minutePairs"] = sum(
+            len(minute_cache.get(pair, {}).get("prices", [])) >= 35
+            for pair in minute_symbols)
+
         cache = state["histories"]
         due_hourly = due_batch(set(latest), cache, t, 3600, HOURLY_BATCH,
                                held_pairs | set(CORE))
         hour_bars, hour_stats = fetch_candle_batch(
             market.candles, due_hourly,
-            lambda rows: closes(rows, t, rate, max_age=7200), minimum=60)
+            lambda rows: closes(rows, t, rate, max_age=7200), minimum=60,
+            priority=chart_priority)
         for pair, prices in hour_bars.items():
             cache[pair] = {"fetchedAt": stamp(t), "prices": prices}
         for symbol in list(cache):
@@ -1230,7 +1274,8 @@ def cycle(state, market, t, clock=None):
                                  held_pairs | set(CORE))
             fast_bars, fast_stats = fetch_candle_batch(
                 fast_provider, due_fast,
-                lambda rows: closes(rows, t, rate, max_age=1800), minimum=20)
+                lambda rows: closes(rows, t, rate, max_age=1800), minimum=20,
+                priority=chart_priority)
             for pair, prices in fast_bars.items():
                 fast_cache[pair] = {
                     "fetchedAt": stamp(t), "prices": prices,
@@ -1242,39 +1287,6 @@ def cycle(state, market, t, clock=None):
             len(fast_cache.get(pair, {}).get("prices", [])) >= 20
             for pair in fast_symbols)
 
-        # Closed one-minute candles: observed only at the GitHub run cadence.
-        # No claim of fills between the observed ticks.
-        minute_cache = state.setdefault("micro", {})
-        # A global "1m required" gate must not silently exclude coins that
-        # the fetch loop never attempted to cover.
-        minute_symbols, focus_policy = minute_focus(eligible_pairs, latest,
-            held_pairs, CORE, state.get('minuteScanCursor', 0))
-        minute_provider = getattr(market, "candles_minute", None)
-        state["microSourceConfigured"] = minute_provider is not None
-        minute_stats = {"requested": 0, "valid": 0, "failed": 0,
-                        "elapsedSec": 0.0}
-        minute_bars = {}
-        if callable(minute_provider):
-            minute_bars, minute_stats = fetch_candle_batch(
-                minute_provider, minute_symbols,
-                lambda rows: closes(rows, t, rate, max_age=180), minimum=35)
-            # Fail closed: never silently reuse 1m confirmation after an
-            # individual endpoint fails. Held positions still have hard stops.
-            for pair in minute_symbols:
-                if pair in minute_bars:
-                    minute_cache[pair] = {
-                        "fetchedAt": stamp(t),
-                        "prices": minute_bars[pair][-65:]}
-                else:
-                    minute_cache.pop(pair, None)
-            if minute_bars:
-                state['minuteScanCursor'] = focus_policy['nextCursor']
-        for pair in list(minute_cache):
-            if pair not in minute_symbols:
-                minute_cache.pop(pair, None)
-        state["minutePairs"] = sum(
-            len(minute_cache.get(pair, {}).get("prices", [])) >= 35
-            for pair in minute_symbols)
         state["tracked"] = len(eligible_pairs)
         state["screened"] = len(latest)
         state["scanStats"] = {
@@ -1286,6 +1298,11 @@ def cycle(state, market, t, clock=None):
                  (hour_stats, fast_stats, minute_stats)), 3),
             "workers": 6,
         }
+        health_getter = getattr(market, 'health', None)
+        if callable(health_getter):
+            state['scanStats']['providerAttempts'] = state['scanStats']['publicRequests']
+            state['scanStats']['publicRequests'] = health_getter().get(
+                'chartHttpRequests', state['scanStats']['providerAttempts'])
         runtime["scanCompleted"] = True
         state['coverageStats'] = coverage_snapshot(state, lookup, eligible_pairs,
             latest, minute_bars, minute_symbols, focus_policy, t,

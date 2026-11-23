@@ -8,8 +8,10 @@
 - 429/418 yanıtı geldiğinde Retry-After süresi dikkate alınır; hemen tekrar sorgu gönderilmez. Bekleme bilgisi bot-data kaydına yazılarak sonraki zamanlanmış süreçte de korunur. Görüldüğünde dakika başına API ağırlığı ve grafik bütçe durumu tanılara eklenir.
 - İsteğe bağlı grafik sorguları yaklaşık 45 saniyelik tarama bütçesiyle sınırlıdır; sonraki güncel fiyat sorgusu bu grafik bütçesine bağlanmaz. Bekleyen ağ istekleri ve diğer işlemler nedeniyle bu bir tüm döngü süre garantisi değildir. Okuma eşzamanlılığı en fazla altı olarak kalır.
 - Daha geniş grafik önbelleği nedeniyle state.json makine için kompakt JSON olarak kaydedilir; kasa, işlemler ve geçmiş silinmez. Bot sayfasında izlenen paritelerin adları açılır listeden incelenebilir.
-- Geniş evrene sırayla erişim, açık pozisyon önceliği, gerçek başarılı kapsam sayımı, API beklemesi ve grafik süre bütçesi için yeni testler eklendi. 145 Python testi geçti; Flutter kontrolleri yayın akışında çalışır. Daha çok parite izlemek kâr garantisi değildir. Flutter 0.9.21+27.
+- Geniş evrene sırayla erişim, açık pozisyon önceliği, gerçek başarılı kapsam sayımı, API beklemesi ve grafik süre bütçesi için yeni testler eklendi. 146 Python testi geçti; Flutter kontrolleri yayın akışında çalışır. Daha çok parite izlemek kâr garantisi değildir. Flutter 0.9.21+27.
 - Flutter telefon testinde parite açılır listesinin kart arka planı üzerinde Material yüzeyi gerektirdiği görüldü; liste kendi şeffaf Material yüzeyiyle düzeltildi. Test beklentisi kaldırılmadı.
+
+- Azalan süre bütçesinde açık pozisyonların 1dk grafikleri geride kalmasın diye 1dk okuması geniş önbellek hazırlığının önüne alındı. Seçim önceliği isteklerin başlatılma sırasında da korunur. Ağ isteği sayısı, bütçe nedeniyle ağa çıkmayan sağlayıcı denemelerinden ayrıca sayılır.
 
 
 ## 2026-11-23 — v0.9.20 Net kasa ve strateji bazında giriş değerlendirmesi

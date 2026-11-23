@@ -11,7 +11,8 @@ DEFAULT_WORKERS = 6
 MAX_WORKERS = 8
 
 
-def fetch_candle_batch(provider, symbols, parser, minimum, workers=DEFAULT_WORKERS):
+def fetch_candle_batch(provider, symbols, parser, minimum, workers=DEFAULT_WORKERS,
+                       priority=()):
     """Fetch independent symbols concurrently, preserving deterministic order.
 
     provider(symbol) -> public candle payload.
@@ -19,7 +20,8 @@ def fetch_candle_batch(provider, symbols, parser, minimum, workers=DEFAULT_WORKE
     Every symbol is attempted once; invalid/failing data is omitted. An empty
     batch requires zero threads. Do not pass a mutable wallet or order callback.
     """
-    names = sorted(set(symbols))
+    ranks = {name: i for i, name in enumerate(dict.fromkeys(priority))}
+    names = sorted(set(symbols), key=lambda name: (ranks.get(name, len(ranks)), name))
     if not names:
         return {}, {"requested": 0, "valid": 0, "failed": 0, "elapsedSec": 0.0}
     if not isinstance(workers, int) or not 1 <= workers <= MAX_WORKERS:

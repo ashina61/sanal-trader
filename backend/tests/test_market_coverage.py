@@ -5,12 +5,22 @@ import urllib.error
 from unittest.mock import patch
 
 from backend.market_coverage import minute_focus, due_batch, snapshot
+from backend.scan_engine import fetch_candle_batch
 from backend.paper_bot import (Market, cycle, execute, fresh_state,
                                stamp, store_market_health)
 from backend.tests.test_paper_bot import NOW, quote, candles_for
 
 
 class CoverageTests(unittest.TestCase):
+    def test_priority_is_preserved_when_requests_start_not_only_when_selected(self):
+        called = []
+        def request(symbol):
+            called.append(symbol)
+            return [1, 2, 3]
+        fetch_candle_batch(request, ['A', 'B', 'Z'], lambda x: x, 3,
+                           workers=1, priority=['Z'])
+        self.assertEqual(called, ['Z', 'A', 'B'])
+
     def test_rotation_covers_beyond_top_leaders_and_always_keeps_holdings(self):
         rows = [{'symbol': f'ALT{i:03}USDT', 'volume': 40_000_000 - i,
                  'change': i / 10} for i in range(220)]
