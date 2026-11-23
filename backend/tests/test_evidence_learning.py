@@ -74,6 +74,21 @@ class ForwardEvidenceTests(unittest.TestCase):
         record(state, quote(101), approved(), NOW + dt.timedelta(minutes=2))
         self.assertEqual(summary(state)["pending"], 1)
 
+    def test_ai_wait_and_ai_approval_are_measured_without_orders(self):
+        state = fresh_state()
+        plan = approved()
+        record(state, quote(100), plan, NOW, ai_meta={"status": "WAIT"})
+        settle(state, quote(102), NOW + dt.timedelta(minutes=61))
+        self.assertEqual(summary(state)["aiWaited"]["samples"], 1)
+        self.assertEqual(summary(state)["aiApproved"]["samples"], 0)
+        second = NOW + dt.timedelta(minutes=65)
+        plan = dict(plan, action="BUY", symbol="BTCUSDT")
+        record(state, quote(100), plan, second, ai_meta={"status": "TRADE"})
+        settle(state, quote(103), second + dt.timedelta(minutes=61))
+        self.assertEqual(summary(state)["aiApproved"]["samples"], 1)
+        self.assertEqual(summary(state)["aiWaited"]["samples"], 1)
+        self.assertEqual(state["trades"], [])
+
     def test_thirty_real_observations_required_before_tie_break(self):
         state = fresh_state()
         state["forwardEvidence"]["completed"] = [
