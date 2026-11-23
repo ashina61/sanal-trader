@@ -161,6 +161,10 @@ void main() {
     expect(find.text('OTONOM BOT · ANA SANAL KASA'), findsOneWidget);
     expect(find.textContaining('Son sanal işlem: NEARUSDT · Spot AL'),
       findsOneWidget);
+    expect(find.text('CANLI SANAL İŞLEM AKIŞI'), findsOneWidget);
+    expect(find.textContaining('Son emir:'), findsOneWidget);
+    expect(find.textContaining('Açık pozisyon payı:'), findsOneWidget);
+    expect(find.text('NEARUSDT'), findsOneWidget);
     expect(find.text('GERÇEK SANAL KASA EĞRİSİ'), findsOneWidget);
     await tester.tap(find.text('Bot merkezi'));
     await tester.tap(find.text('İşlemler'));
