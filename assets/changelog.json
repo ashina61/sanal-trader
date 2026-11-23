@@ -3,6 +3,22 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.16",
+      "date": "2026-11-23",
+      "title": "Zarar sonrası öğrenme, daha iyi satış kararları ve risk kontrolü",
+      "details": [
+        "Bot zarar eden pozisyonları körü körüne tutmak yerine doğrulanmış 1dk + 15dk grafik değişimini ve genel piyasa rejimini birlikte inceler. Daha önceki zarar kes ve kâr koruması aynen korunur.",
+        "En az 45 dakika açık kalmış SHORT pozisyon, ters yükseliş sırasında kendi kısa vadeli grafikleri ve geniş piyasa da aynı yönü doğrularsa sabit %4,5 zarar kes seviyesinden önce kapanabilir.",
+        "SPOT pozisyonları en az 2 saatlik bekleyişten sonra saatlik, 15 dakikalık ve 1 dakikalık trend birlikte negatife dönerse kontrollü çıkış adayı olabilir. Tek başına küçük dalgalanma satışı tetiklemez.",
+        "Gerçekten zararla kapanan coine 90 dakika yeni giriş yapılmaz. Böylece al, zararla sat, hemen yeniden al döngüsünde tekrar tekrar komisyon ödeme riski azaltılır.",
+        "Genel piyasa ve BTC güçlü yükselişteyken yeni SHORT açılmaz. SHORT emir miktarı başlangıçta daha küçük tutulur, son 6 ileriye dönük SHORT gözlemi tamamı zarar gösteriyorsa daha da azaltılır. Küçük örneklem kâr garantisi olarak sunulmaz.",
+        "Yenilik: Ana sanal kasa doluyken dahi teknik araştırma taraması, gerçekleşen kamu fiyatlarını kullanarak yeni sinyal örnekleri toplamaya devam eder. İkinci sanal kasa açılmaz, para veya ek emir yaratılmaz.",
+        "Uygulamada her açık pozisyon için gerçek son piyasa işaretinden türetilen yaklaşık komisyon sonrası kapanış kâr-zararı ve pozisyon süresi gösterilir; açık P&L gerçekleşmiş net kazanç değildir.",
+        "Yeni regresyon testleri piyasa yönüne aykırı SHORT korunmasını, eski SPOT trendinin bozulmasını, geri alım beklemesini, eksik veriyle işlem yapılmamasını ve dolu cüzdanla salt-okunur öğrenmeyi doğrular.",
+        "Mevcut 650 TL başlangıçlı sanal kasanın geçmişi ve açık pozisyonları sıfırlanmaz. Sürüm 0.9.16+22; hiçbir işlem gerçek borsaya gönderilmez."
+      ]
+    },
+    {
       "version": "0.9.15",
       "date": "2026-11-23",
       "title": "İleri sinyal ölçümü ve kronolojik strateji doğrulaması",

@@ -76,6 +76,37 @@ ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapan�
 - Araştırma komutu:
   `python3 -m backend.walk_forward --symbols BTCUSDT ETHUSDT SOLUSDT --out validation-report.json`
 
+## Öğrenen çıkışlar ve yanlış sinyal kontrolü (v0.9.16)
+
+- Piyasa yukarı yönlü ve taranan en az 12 coinin %70'i yükseliyorsa,
+  **yeni SHORT** açılmaz. Yalnızca gerçekten kapanmış piyasa mumları ve
+  BTC yönü kullanılır. Daha önce açılmış SHORT emirleri otomatik kapatılmaz:
+  kendi 15dk+1dk mumları da yükseliş dönüşünü onaylamalı, pozisyon
+  en az 45 dakika taşınmış ve aleyhte en az %0,6 hareket görülmelidir.
+  Stop/kâr koruması bunlardan bağımsız önceliklidir.
+- Zayıflayan **SPOT** için en az 2 saat bekledikten, düşük fakat anlamlı
+  zarar oluştuktan ve saatlik+15dk+1dk düşüş teyidinden sonra savunma
+  amaçlı satış yapılabilir. Her düşüşte hemen SAT veya sırf başka coin
+  almak için zararına rotasyon yapılmaz.
+- Gerçekte zarar ile kapanan bir coinde 90 dakika boyunca **yeni giriş**
+  ertelenir. Kârla kapanan coinlere bu ek kısıt uygulanmaz. Koruyucu
+  kapanışlar asla bekleme kuralına takılmaz.
+- Doğrulanmamış SHORT 1x sanal işlem büyüklüğü normal SPOT miktarının
+  %75'i kadardır; geriye dönük alınmış son 6 gerçek ileri SHORT sinyali
+  tamamı zarar gösterirse %50'ye kadar iner. Bu bir kâr tahmini değildir
+  ve sınır küçük örneklemde koruma amaçlıdır.
+- **Cüzdan dolsa da öğrenme:** Aynı piyasa verisinden ve aynı teknik
+  filtrelerden sanal emir vermeyen araştırma adayları hesaplanır.
+  Gerçekten gözlenen bir saat sonraki fiyata bakılır. İkinci kasa,
+  kurgusal işlem emri, geçmiş veride gelecekten yararlanma yoktur.
+  Koruyucu çıkışlar gerçek cüzdanda aynı şekilde öncelikli kalır.
+- Uygulamanın açık pozisyonlar alanında komisyon sonrası yaklaşık
+  kapanış net değeri, tutulma süresi ve coin görünür. Gözlem ekranı
+  işlem yaptırmaz; maliyet ve eski veri nedeniyle değer değişebilir.
+- **Önemli:** Botun zarardan çıkması garanti değildir. Bu sürüm zarar
+  kaynağını ölçüp disiplini arttırmaya yöneliktir; eski 650 TL
+  başlangıçlı kasa, 9 açık pozisyon ve tüm geçmiş işlemler korunur.
+
 ## Neden bazen işlem yapmıyor?
 
 Botun amacı işlem sayısını yükseltmek değil, **sanal sermayeyi komisyon

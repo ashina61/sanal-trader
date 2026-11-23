@@ -98,9 +98,12 @@ class ServerPaperCard extends StatelessWidget {
     final healthy = state?.isHealthyAt(DateTime.now()) ?? false;
     final longs = state?.holdings ?? {};
     final shorts = state?.shorts ?? {};
-    final marks = state?.marksTry ?? {};
-    final sideStats = state?.directionStats ?? const <String, dynamic>{};
     final plan = state?.decisionPlan ?? const <String, dynamic>{};
+    final positionHealth = plan['positionHealth'] is List
+        ? (plan['positionHealth'] as List).whereType<Map>().take(12).toList()
+        : <Map>[];
+    final researchSignals = (plan['researchSignals'] as num?)?.toInt() ?? 0;
+    final sideStats = state?.directionStats ?? const <String, dynamic>{};
     final ai = plan['aiBrain'] is Map
         ? (plan['aiBrain'] as Map) : const <String, dynamic>{};
     final aiStatus = ai['status']?.toString() ?? 'NOT_CONFIGURED';
@@ -258,42 +261,49 @@ class ServerPaperCard extends StatelessWidget {
           const SizedBox(height: 13),
           if (longs.isNotEmpty || shorts.isNotEmpty) ...[
             const Divider(color: PremiumColors.border),
-            const Text('Açık sanal pozisyonlar',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-            const SizedBox(height: 8),
-            for (final entry in longs.entries.take(8))
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text('SPOT ${entry.key} · maliyet '
-                  '${entry.value is Map ? _money((entry.value as Map)['costTry']) : '—'}',
-                  style: const TextStyle(fontSize: 11,
-                    color: PremiumColors.emerald)),
-              ),
-            for (final entry in shorts.entries.take(8)) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('SHORT ${entry.key} · teminat '
-                  '${entry.value is Map ? _money((entry.value as Map)['marginTry']) : '—'}',
-                  style: const TextStyle(
-                    fontSize: 11, color: PremiumColors.gold)),
-              ),
-              if (entry.value is Map &&
-                  (entry.value as Map)['entryPriceTry'] is num &&
-                  (entry.value as Map)['quantity'] is num &&
-                  marks[entry.key] is num)
-                Padding(padding: const EdgeInsets.only(bottom: 7),
-                  child: Text(
-                    'Açık fiyat farkı (ücret hariç): '
-                    '${_money(
-                      ((entry.value as Map)['entryPriceTry'] as num).toDouble() *
-                      ((entry.value as Map)['quantity'] as num).toDouble() -
-                      (marks[entry.key] as num).toDouble() *
-                      ((entry.value as Map)['quantity'] as num).toDouble()
-                    )}',
-                    style: const TextStyle(fontSize: 10,
-                      color: PremiumColors.muted)),
-                ),
+            const Text('Açık pozisyonlar · tahmini kapanış neti',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+            const SizedBox(height: 6),
+            if (positionHealth.isNotEmpty)
+              for (final item in positionHealth)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Row(children: [
+                    Expanded(child: Text(
+                      '${item['side'] ?? 'POZİSYON'} ${item['symbol'] ?? ''}'
+                      '${item['ageHours'] is num ? ' · ${item['ageHours']} sa' : ''}',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11,
+                        color: PremiumColors.muted),
+                    )),
+                    Text(
+                      _money(item['estimatedCloseNetTry']),
+                      style: TextStyle(fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        color: (item['estimatedCloseNetTry'] is num &&
+                            (item['estimatedCloseNetTry'] as num) < 0)
+                          ? PremiumColors.danger : PremiumColors.emerald),
+                    ),
+                  ]),
+                )
+            else ...[
+              for (final entry in longs.entries.take(8))
+                Padding(padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('SPOT ${entry.key} · maliyet '
+                    '${entry.value is Map ? _money((entry.value as Map)['costTry']) : '—'}',
+                    style: const TextStyle(
+                      fontSize: 10, color: PremiumColors.muted))),
+              for (final entry in shorts.entries.take(8))
+                Padding(padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('SHORT ${entry.key} · teminat '
+                    '${entry.value is Map ? _money((entry.value as Map)['marginTry']) : '—'}',
+                    style: const TextStyle(
+                      fontSize: 10, color: PremiumColors.muted))),
             ],
+            const Text('Net: son gözlenen fiyat ve varsayılan çıkış '
+              'komisyonu ile yaklaşık değer; henüz gerçekleşmiş işlem değildir.',
+              style: TextStyle(fontSize: 9, color: PremiumColors.muted)),
+            const SizedBox(height: 7),
           ],
           Text(updated == null ? 'Henüz başarılı döngü kaydı yok'
                 : 'Son başarılı piyasa kontrolü: '
@@ -396,6 +406,11 @@ class ServerPaperCard extends StatelessWidget {
                   style: const TextStyle(
                     color: PremiumColors.muted, fontSize: 9),
                 ),
+                const SizedBox(height: 4),
+                Text('Cüzdan dolu olsa da gözlemsel aday: $researchSignals · '
+                  'bu adaylar ekstra emir veya ikinci kasa oluşturmaz.',
+                  style: const TextStyle(
+                    color: PremiumColors.muted, fontSize: 9)),
                 const SizedBox(height: 9),
                 Align(alignment: Alignment.centerLeft, child: Text(
                   'Piyasa genişliği · 24s',
