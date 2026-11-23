@@ -1496,7 +1496,7 @@ def record_trigger(state, t, event):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state", type=Path, required=True)
-    parser.add_argument("--mode", choices=("run", "pause", "resume", "reset"),
+    parser.add_argument("--mode", choices=("run", "pause", "resume"),
                         default="run")
     args = parser.parse_args()
     t = now_utc()
@@ -1507,9 +1507,6 @@ def main():
     elif args.mode == "resume":
         state["enabled"] = True
         log(state, t, "Sunucu sanal botu etkinleştirildi.")
-    elif args.mode == "reset":
-        state = fresh_state()
-        log(state, t, "Ayrı sunucu sanal kasası 650 TL'ye sıfırlandı.")
     else:
         state = record_trigger(state, t, os.getenv("TRIGGER_EVENT", ""))
         state = cycle(state, Market(), t, clock=now_utc)
