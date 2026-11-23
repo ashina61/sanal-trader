@@ -11,7 +11,8 @@
         "Emir defteri sağlayıcısı bulunmazsa, test piyasaları dahil, riskli yeni BUY/SHORT kesin durur. Testlerde boş sağlayıcıdan geçişe izin veren yol kaldırıldı; geçerli defterli sahte piyasa verisi gereklidir.",
         "GitHub Actions ve Python komut satırı seçeneklerindeki manuel sanal kasayı sıfırlama kaldırıldı. Tek 650 TL başlangıçlı kasanın geçmişi ve mevcut pozisyonlar korunur.",
         "SPOT SAT, sanal SHORT KAPAT, fiyat stopları, ana risk motoru ve tek sanal muhasebe sistemi değiştirilmedi. Yeni ücretli API veya gerçek borsa emri yok.",
-        "Python veri/defter regresyon testleri, Flutter kontrolü ve yayın derlemesi CI'de doğrulanır; Flutter 0.9.25+31."
+        "Python veri/defter regresyon testleri, Flutter kontrolü ve yayın derlemesi CI'de doğrulanır; Flutter 0.9.25+31.",
+        "Binance'in resmî bStocks liste duyurusundaki tokenize menkul kıymetler artık yeni kripto girişlerine aday sayılmıyor. Mevcut CRCLB/INTCB/METAB/SPCXB gibi açık pozisyonların fiyatlanması ve koruyucu satışları özellikle korunuyor; yeni bStocks listelenirse sembol listesi güncellenmeli."
       ]
     },
     {
