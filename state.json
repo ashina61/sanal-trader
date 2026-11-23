@@ -31,7 +31,7 @@
       "wins": 0
     }
   },
-  "cycles": 622,
+  "cycles": 623,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -17514,6 +17514,10 @@
   "intradayPairs": 52,
   "journal": [
     {
+      "at": "2026-11-23T18:20:44Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T18:20:28Z",
       "message": "164 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin)."
     },
@@ -17668,10 +17672,6 @@
     {
       "at": "2026-11-23T17:04:27Z",
       "message": "161 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (21 coin)."
-    },
-    {
-      "at": "2026-11-23T17:02:29Z",
-      "message": "161 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin)."
     }
   ],
   "lastDecision": "164 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin).",
@@ -17701,11 +17701,11 @@
     "WLDUSDT": "2026-11-23T13:58:27Z",
     "XVGUSDT": "2026-11-23T03:20:27Z"
   },
-  "lastRunAt": "2026-11-23T18:20:28Z",
+  "lastRunAt": "2026-11-23T18:20:44Z",
   "lastScheduledTriggerAt": "2026-11-23T09:03:31Z",
   "lastSuccessAt": "2026-11-23T18:20:28Z",
-  "lastTriggerAt": "2026-11-23T18:20:28Z",
-  "lastTriggerEvent": "workflow_dispatch",
+  "lastTriggerAt": "2026-11-23T18:20:44Z",
+  "lastTriggerEvent": "push",
   "marketPulse": {
     "advancersPct": 76.9,
     "down": 11,
@@ -21630,6 +21630,27 @@
     "wins": 12
   },
   "realizedTry": 6.6967421310420825,
+  "runtimeStatus": {
+    "completedAt": "2026-11-23T18:20:44Z",
+    "cycleElapsedSec": 0.0,
+    "exitCheckedAt": null,
+    "exitOrders": 0,
+    "marketObservedAt": null,
+    "missingPositionQuotes": [],
+    "mode": "scheduled-rest",
+    "newestQuoteAt": null,
+    "oldestQuoteAt": null,
+    "phase": "SKIPPED",
+    "positionsChecked": 0,
+    "previousSuccessAt": "2026-11-23T18:20:28Z",
+    "quotesReceived": 0,
+    "reason": "Tekrarlanan tetik atlandı; yeni piyasa kontrolü yapılmadı",
+    "scanCompleted": false,
+    "scanCoverage": {},
+    "schema": 1,
+    "shortlisted": 0,
+    "startedAt": "2026-11-23T18:20:44Z"
+  },
   "scanStats": {
     "candleElapsedSec": 5.104,
     "fast15m": {
