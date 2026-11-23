@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.23 Ücretsiz Solana / Base DEX Keşfi
+
+- Abonelik, Arkham, Grok veya ücretli API anahtarı istemeyen GeckoTerminal herkese açık REST havuz/işlem gözlemi eklendi. Solana ve Base üzerindeki trend havuzlarındaki işlemler örneklenir; her zincirden en fazla iki likit havuz incelenir.
+- En az 200.000 USD havuz rezervi, son bir saatte %30 üzeri yükselişi eleme, en az 100 USD işlem bildirimi ve 20 dakikalık zaman penceresi uygulanır. Tekrarlanan işlem kimlikleri ve adresler çift sayılmaz.
+- Üç farklı işlem göndericisinin aynı tokeni alması salt-okunur, doğrulanmamış araştırma kümesi üretir. Bu işlem kârlılık kanıtı, üç bağımsız sahibin kanıtı, taze fon girişi, LP kilidi veya sözleşme güvenliği onayı değildir. Bot otomatik DEX pozisyonu açmaz.
+- Tarama 12 dakika önbellekle sınırlıdır; ücretsiz uç noktalar hata verirse başaramama/eksik veri açık görünür. Radar'da havuz, işlem, adres ve 24 saatlik örneklem geçmişi tek sunucu kasasında ayrı freeDexRadar alanında izlenir.
+- Mevcut 650 TL sanal kasa, SPOT ve SHORT işlem geçmişi, haber/AI risk filtresi ve koruyucu çıkışlar değişmeden korunur. Kesintisiz anlık fiyat akışı, 15 doğrulanmış milyonluk cüzdan veya kâr garantisi iddia edilmez.
+- Ücretsiz keşif için yeni otomatik testler eklendi. Verinin limitleri ve kaynağı docs/free-dex-radar.md sayfasında açıklandı.
+
 ## 2026-11-23 — v0.9.22 Akıllı Para Radarı (Solana / Base)
 
 - Binance teknik sinyallerinden ayrı, mevcut tek 650 TL sanal kasaya dokunmayan Solana/Base cüzdan araştırma motoru eklendi.
