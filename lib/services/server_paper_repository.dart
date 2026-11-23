@@ -118,6 +118,7 @@ class ServerPaperSnapshot {
   Map<String, dynamic> get performance => _map('performance');
   Map<String, dynamic> get coverageStats => _map('coverageStats');
   Map<String, dynamic> get smartMoney => _map('smartMoney');
+  Map<String, dynamic> get freeDexRadar => _map('freeDexRadar');
   Map<String, dynamic> get publicApiHealth => _map('publicApiHealth');
 
   /// Only real, persisted virtual-wallet observations.
