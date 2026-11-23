@@ -86,6 +86,13 @@ class ServerPaperOverview extends StatelessWidget {
         if (s?.hasNetLiquidation == true)
           const Text('Tahmini kapanış komisyonu dahil',
             style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
+        if (s != null) ...[
+          const SizedBox(height: 6),
+          Text('İzleme: ${s.coverageStats['liquidPairs'] ?? s.tracked} likit parite · '
+            '${s.coverageStats['minuteObservedPairs'] ?? s.number('minutePairs')?.toInt() ?? '—'} '
+            'adet 1dk grafik', style: const TextStyle(fontSize: 14,
+              color: PremiumColors.muted)),
+        ],
         const SizedBox(height: 4),
         Text(growth == null ? 'Güncel değer bekleniyor'
             : '${growth >= 0 ? '+' : ''}${formatTry(growth)} · '

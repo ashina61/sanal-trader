@@ -55,10 +55,23 @@ class ServerRuntimeStatusCard extends StatelessWidget {
     final exits = runtime['exitOrders'];
     final duration = runtime['cycleElapsedSec'];
     final coverage = runtime['scanCoverage'];
+    final scope = state?.coverageStats ?? const <String, dynamic>{};
+    final scopeAt = DateTime.tryParse(scope['at']?.toString() ?? '')?.toUtc();
+    final liquid = scope['liquidPairs'] ?? state?.tracked;
+    final chartCount = scope['minuteObservedPairs'] ?? state?.number('minutePairs')?.toInt();
+    final liquidSymbols = scope['liquidSymbols'] is List
+        ? (scope['liquidSymbols'] as List).whereType<String>().toList() : <String>[];
+    final apiHealth = state?.publicApiHealth ?? const <String, dynamic>{};
     final rawStrategies = state?.decisionPlan['strategyGuard'];
     final strategies = rawStrategies is List
         ? rawStrategies.whereType<Map>().take(6).toList() : <Map>[];
     final metrics = <Widget>[
+      _metric('İzlenen likit parite', '${liquid ?? '—'}'),
+      _metric('Bu turdaki 1dk grafik', '${chartCount ?? '—'} / '
+        '${scope['minuteRequestedPairs'] ?? '—'} başarılı'),
+      _metric('Son 10 dk kapsanan', '${scope['recentMinutePairs'] ?? '—'} / '
+        '${liquid ?? '—'} parite'),
+      _metric('Üç zaman dilimi hazır', '${scope['fullTechnicalPairs'] ?? '—'} parite'),
       _metric('Son fiyat gözlemi',
         _age(state?.runtimeDate('marketObservedAt'), clock)),
       _metric('Çıkış denetimi',
@@ -69,9 +82,12 @@ class ServerRuntimeStatusCard extends StatelessWidget {
         _metric('Son başarılı kontrol', _age(state?.lastSuccessAt, clock)),
         _metric('Döngü süresi', duration is num
           ? '${duration.toStringAsFixed(1)} sn' : 'Henüz ölçülmedi'),
-        _metric('Likit evren / kısa liste', runtime['marketObservedAt'] == null
-          ? 'Bu tetikte taranmadı'
-          : '${state?.tracked ?? 0} / ${runtime['shortlisted'] ?? 0} coin'),
+        _metric('24 sa likidite alt sınırı',
+          '${scope['minQuoteVolumeUsdt'] ?? '—'} USDT'),
+        _metric('API durumu', apiHealth.isEmpty ? 'Ölçüm bekleniyor'
+          : apiHealth['rateLimited'] == true ? 'Bekleme bildirildi'
+          : apiHealth['chartBudgetExhausted'] == true ? 'Grafik süre bütçesi doldu'
+          : 'Son kontrolde sınır yanıtı yok'),
         _metric('Son çıkış kontrolü',
           _age(state?.runtimeDate('exitCheckedAt'), clock)),
         _metric('En eski fiyat zamanı',
@@ -100,6 +116,25 @@ class ServerRuntimeStatusCard extends StatelessWidget {
             for (final metric in metrics) SizedBox(width: width, child: metric),
           ]);
         }),
+        if (scopeAt != null) ...[
+          const SizedBox(height: 8),
+          Text('Kapsam ölçümü: ${_age(scopeAt, clock)}',
+            style: const TextStyle(fontSize: 12, color: PremiumColors.muted)),
+          const Text('1 saat ve 15dk grafikler önbellekle geniş taranır; '
+            '1dk grafikler öncelik ve sıra ile yenilenir.',
+            style: TextStyle(fontSize: 12, color: PremiumColors.muted)),
+        ],
+        if (detailed && liquidSymbols.isNotEmpty)
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Text('İzlenen pariteler (${liquidSymbols.length})',
+              style: const TextStyle(fontSize: 14)),
+            children: [Padding(padding: const EdgeInsets.only(bottom: 12),
+              child: Wrap(spacing: 10, runSpacing: 6, children: [
+                for (final symbol in liquidSymbols) Text(symbol,
+                  style: const TextStyle(fontSize: 14, color: PremiumColors.muted)),
+              ]))],
+          ),
         if (absent.isNotEmpty) ...[
           const SizedBox(height: 10),
           Text('Fiyatı alınamayan açık pozisyon: $absent',

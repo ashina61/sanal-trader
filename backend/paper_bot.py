@@ -7,6 +7,7 @@ import math
 import os
 import re
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -23,6 +24,8 @@ from backend.scan_engine import fetch_candle_batch
 from backend.runtime_status import start as start_runtime, market_seen, finish as finish_runtime
 from backend.evidence_guard import gate_summary, strategy_gate, strategy_summary
 from backend.net_objective import net_liquidation
+from backend.market_coverage import (MIN_VOLUME_USDT, HOURLY_BATCH, FAST_BATCH,
+    minute_focus, due_batch, snapshot as coverage_snapshot)
 from backend.risk_feedback import (loss_reentry_cooldown, broad_risk_on,
     short_size_multiplier, short_reversal_exit, spot_trend_failure_exit,
     spot_profit_lock_exit, position_monitor)
@@ -130,7 +133,7 @@ def load(path):
 
 def save(path, obj):
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2,
+    payload = json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(',', ':'),
                          allow_nan=False) + "\n"
     tmp = path.with_suffix(".tmp")
     tmp.write_text(payload, encoding="utf-8")
@@ -152,6 +155,21 @@ def eligible(pair):
 class Market:
     def __init__(self, url=API):
         self.url = url
+        self._lock = threading.Lock()
+        self._limited_until = 0.0
+        self._scan_deadline = None
+        self._used_weight = None
+
+    def begin_scan(self, seconds=45):
+        self._scan_deadline = time.monotonic() + seconds
+
+    def health(self):
+        with self._lock:
+            remaining = max(0, math.ceil(self._limited_until - time.monotonic()))
+            return {'rateLimited': remaining > 0, 'retryAfterSeconds': remaining,
+                    'usedWeight1m': self._used_weight,
+                    'chartBudgetExhausted': self._scan_deadline is not None
+                        and time.monotonic() >= self._scan_deadline}
 
     def request(self, route, params=None):
         uri = self.url + route
@@ -160,14 +178,36 @@ class Market:
         req = urllib.request.Request(uri, headers={
             "Accept": "application/json", "User-Agent": "SanalTraderPaperTest/1.0"})
         for i in range(3):
+            with self._lock:
+                if time.monotonic() < self._limited_until:
+                    raise RuntimeError('Public API rate limit backoff active')
+            remaining = (self._scan_deadline - time.monotonic()
+                         if route == '/api/v3/klines' and self._scan_deadline is not None
+                         else 12)
+            if remaining <= 0:
+                raise RuntimeError('Chart scan time budget exhausted')
             try:
-                with urllib.request.urlopen(req, timeout=12) as response:
+                with urllib.request.urlopen(req, timeout=min(12, remaining)) as response:
                     if response.status != 200:
                         raise ValueError("Market HTTP " + str(response.status))
+                    weight = numeric(response.headers.get('X-MBX-USED-WEIGHT-1M'))
+                    if weight is not None:
+                        with self._lock:
+                            self._used_weight = int(weight)
                     body = response.read(3_000_001)
                     if len(body) > 3_000_000:
                         raise ValueError("Oversized market data")
                     return json.loads(body)
+            except urllib.error.HTTPError as exc:
+                if exc.code in (418, 429):
+                    delay = numeric(exc.headers.get('Retry-After')) if exc.headers else None
+                    delay = max(60, delay or 60)
+                    with self._lock:
+                        self._limited_until = max(self._limited_until, time.monotonic() + delay)
+                    raise RuntimeError('Public API rate limit; honoring Retry-After') from exc
+                if i == 2:
+                    raise RuntimeError('Public data HTTP ' + str(exc.code)) from exc
+                time.sleep(i + 1)
             except (urllib.error.URLError, ValueError, TimeoutError,
                     json.JSONDecodeError) as exc:
                 if i == 2:
@@ -716,6 +756,9 @@ def assess_decision(state, latest, t, research_only=False,
     def rejected(label):
         reasons[label] = reasons.get(label, 0) + 1
     for pair, quote in latest.items():
+        if quote.get('entryEligible') is False:
+            rejected('Likit USDT giriş evreni dışında')
+            continue
         if (not research_only and
                 (pair in state["holdings"] or pair in state.get("shorts", {}))):
             rejected("Zaten açık pozisyon")
@@ -1025,6 +1068,24 @@ def update_wallet_marks(state, latest, t):
     }
 
 
+def store_market_health(state, market, t, clock=None):
+    getter = getattr(market, 'health', None)
+    if not callable(getter):
+        return
+    t = clock() if callable(clock) else t
+    health = getter()
+    previous = as_date(state.get('marketBackoffUntil'))
+    if previous and previous > t and not health.get('retryAfterSeconds'):
+        health = {**health, 'rateLimited': True,
+                  'retryAfterSeconds': math.ceil((previous - t).total_seconds())}
+    state['publicApiHealth'] = {**health, 'observedAt': stamp(t)}
+    if health.get('retryAfterSeconds', 0) > 0:
+        state['marketBackoffUntil'] = stamp(t + dt.timedelta(
+            seconds=health['retryAfterSeconds']))
+    else:
+        state.pop('marketBackoffUntil', None)
+
+
 def cycle(state, market, t, clock=None):
     state = json.loads(json.dumps(state))
     began = time.perf_counter()
@@ -1055,24 +1116,26 @@ def cycle(state, market, t, clock=None):
         return state
     latest = {}
     try:
+        resume = as_date(state.get('marketBackoffUntil'))
+        if resume and t < resume:
+            raise RuntimeError('Public API backoff until ' + stamp(resume))
         raw_quotes = market.tickers()
         t = observed_time()
         lookup, rate = quotes(raw_quotes, t, max_age=90)
         runtime["quotesReceived"] = len(lookup)
         eligible_pairs = [v for v in lookup.values() if eligible(v["symbol"])
-                          and v["volume"] >= 1_000_000]
+                          and v["volume"] >= MIN_VOLUME_USDT]
         eligible_pairs.sort(key=lambda x: x["volume"], reverse=True)
-        # Scan more than the first 24 liquid symbols. Recent gainers and
-        # losers provide broader LONG / SHORT opportunities; all still pass
-        # volume, volatility, history, and risk filters before any paper order.
-        selected_pairs = {v["symbol"] for v in eligible_pairs[:36]}
-        movers_up = sorted(eligible_pairs, key=lambda x: x["change"], reverse=True)
-        movers_down = sorted(eligible_pairs, key=lambda x: x["change"])
-        selected_pairs.update(x["symbol"] for x in movers_up[:10])
-        selected_pairs.update(x["symbol"] for x in movers_down[:10])
+        # Every liquid plain USDT pair enters the price/history universe.
+        # Minute charts rotate in bounded batches; held positions stay first.
+        selected_pairs = {v['symbol'] for v in eligible_pairs}
+        entry_pairs = set(selected_pairs)
         selected_pairs.update(x for x in CORE if x in lookup)
         selected_pairs.update(state["holdings"].keys())
         selected_pairs.update(state.get("shorts", {}).keys())
+        selected_pairs.update(row.get('symbol') for row in
+            state.get('forwardEvidence', {}).get('pending', [])
+            if isinstance(row, dict) and isinstance(row.get('symbol'), str))
         latest = {}
         for pair in selected_pairs:
             v = lookup.get(pair)
@@ -1080,6 +1143,7 @@ def cycle(state, market, t, clock=None):
                 continue
             latest[pair] = {"symbol": pair, "priceTry": v["usdt"] * rate,
                             "volumeUsdt": v["volume"], "change24h": v["change"],
+                            'entryEligible': pair in entry_pairs,
                             "sourceAt": v["sourceAt"]}
         market_seen(runtime, latest, t)
         state["tracked"] = len(eligible_pairs)
@@ -1134,13 +1198,13 @@ def cycle(state, market, t, clock=None):
         # Every held coin must be freshly valued, even when off the top 24.
         if equity(state, latest) is None:
             raise ValueError("Held position price is missing; no trade")
+        scan_begin = getattr(market, 'begin_scan', None)
+        if callable(scan_begin):
+            scan_begin()
+        held_pairs = set(state['holdings']) | set(state.get('shorts', {}))
         cache = state["histories"]
-        due_hourly = [
-            pair for pair in selected_pairs if pair in latest and
-            (not cache.get(pair) or
-             not as_date(cache[pair].get("fetchedAt")) or
-             (t - as_date(cache[pair].get("fetchedAt"))).total_seconds() >= 3600)
-        ]
+        due_hourly = due_batch(set(latest), cache, t, 3600, HOURLY_BATCH,
+                               held_pairs | set(CORE))
         hour_bars, hour_stats = fetch_candle_batch(
             market.candles, due_hourly,
             lambda rows: closes(rows, t, rate, max_age=7200), minimum=60)
@@ -1162,11 +1226,8 @@ def cycle(state, market, t, clock=None):
         fast_provider = getattr(market, "candles_fast", None)
         fast_stats = {"requested": 0, "valid": 0, "failed": 0, "elapsedSec": 0.0}
         if callable(fast_provider):
-            due_fast = [
-                pair for pair in fast_symbols if
-                not as_date(fast_cache.get(pair, {}).get("fetchedAt")) or
-                (t - as_date(fast_cache[pair]["fetchedAt"])).total_seconds() >= 720
-            ]
+            due_fast = due_batch(fast_symbols, fast_cache, t, 720, FAST_BATCH,
+                                 held_pairs | set(CORE))
             fast_bars, fast_stats = fetch_candle_batch(
                 fast_provider, due_fast,
                 lambda rows: closes(rows, t, rate, max_age=1800), minimum=20)
@@ -1186,14 +1247,13 @@ def cycle(state, market, t, clock=None):
         minute_cache = state.setdefault("micro", {})
         # A global "1m required" gate must not silently exclude coins that
         # the fetch loop never attempted to cover.
-        minute_symbols = set(latest)
-        minute_symbols.update(state["holdings"])
-        minute_symbols.update(state.get("shorts", {}))
-        minute_symbols.intersection_update(latest)
+        minute_symbols, focus_policy = minute_focus(eligible_pairs, latest,
+            held_pairs, CORE, state.get('minuteScanCursor', 0))
         minute_provider = getattr(market, "candles_minute", None)
         state["microSourceConfigured"] = minute_provider is not None
         minute_stats = {"requested": 0, "valid": 0, "failed": 0,
                         "elapsedSec": 0.0}
+        minute_bars = {}
         if callable(minute_provider):
             minute_bars, minute_stats = fetch_candle_batch(
                 minute_provider, minute_symbols,
@@ -1207,6 +1267,8 @@ def cycle(state, market, t, clock=None):
                         "prices": minute_bars[pair][-65:]}
                 else:
                     minute_cache.pop(pair, None)
+            if minute_bars:
+                state['minuteScanCursor'] = focus_policy['nextCursor']
         for pair in list(minute_cache):
             if pair not in minute_symbols:
                 minute_cache.pop(pair, None)
@@ -1225,6 +1287,10 @@ def cycle(state, market, t, clock=None):
             "workers": 6,
         }
         runtime["scanCompleted"] = True
+        state['coverageStats'] = coverage_snapshot(state, lookup, eligible_pairs,
+            latest, minute_bars, minute_symbols, focus_policy, t,
+            sum(eligible(symbol) for symbol in lookup))
+        runtime['coverageStats'] = state['coverageStats']
         state["marketPulse"] = market_breadth(latest)
         state["historyPairs"] = sum(
             1 for pair in latest if len(cache.get(pair, {}).get("prices", [])) >= 60
@@ -1247,6 +1313,7 @@ def cycle(state, market, t, clock=None):
                 pair: {"symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
                        "volumeUsdt": fresh_lookup[pair]["volume"],
                        "change24h": fresh_lookup[pair]["change"],
+                       'entryEligible': eligible(pair) and fresh_lookup[pair]['volume'] >= MIN_VOLUME_USDT,
                        "sourceAt": fresh_lookup[pair]["sourceAt"]}
                 for pair in latest if pair in fresh_lookup
             }
@@ -1289,6 +1356,7 @@ def cycle(state, market, t, clock=None):
                     "symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
                     "volumeUsdt": fresh_lookup[pair]["volume"],
                     "change24h": fresh_lookup[pair]["change"],
+                    'entryEligible': eligible(pair) and fresh_lookup[pair]['volume'] >= MIN_VOLUME_USDT,
                     "sourceAt": fresh_lookup[pair]["sourceAt"],
                 }
                 for pair in latest if pair in fresh_lookup
@@ -1332,6 +1400,7 @@ def cycle(state, market, t, clock=None):
             research_plan.get("candidates", []))
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
         state["decisionPlan"]["scanStats"] = state.get("scanStats", {})
+        state["decisionPlan"]['coverageStats'] = state.get('coverageStats', {})
         state["decisionPlan"]["evidenceGuard"] = gate_summary(state)
         state["decisionPlan"]["strategyGuard"] = strategy_summary(state)
         state["decisionPlan"]["newsStatus"] = state.get("newsPulse", {}).get("status", "UNAVAILABLE")
@@ -1351,6 +1420,7 @@ def cycle(state, market, t, clock=None):
         update_wallet_marks(state, latest, t)
         state["lastSuccessAt"] = stamp(t)
         state["lastError"] = None
+        store_market_health(state, market, t, observed_time if callable(clock) else None)
         failures = sum(x.get("failed", 0) for x in (hour_stats, fast_stats, minute_stats))
         finish_runtime(runtime, state, "DEGRADED" if failures else "COMPLETE", t, began)
     except Exception as exc:
@@ -1368,6 +1438,7 @@ def cycle(state, market, t, clock=None):
         }
         update_wallet_marks(state, latest, t)
         log(state, t, state["decisionPlan"]["reason"] + ". " + state["lastError"])
+        store_market_health(state, market, t, observed_time if callable(clock) else None)
         finish_runtime(runtime, state, "ERROR", observed_time(), began)
     return state
 

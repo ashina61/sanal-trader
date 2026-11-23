@@ -21,6 +21,30 @@ Yalnızca başlangıç değeri **650 TL** olan tek bir sanal portföyü takip ed
 **Ekranlar:** Kasa (net bakiye ve açık pozisyonlar), Radar (gerçek bot adayları
 ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapanışlar).
 
+## Kaç parite izleniyor? (v0.9.21)
+
+Bot taze fiyatı olan, hariç tutulan stable/kaldıraçlı sembollere girmeyen ve
+24s hacmi en az 1.000.000 USDT olan **tüm düz USDT paritelerini** fiyat/hacim
+evrenine alır. Önceki sabit yaklaşık 51 grafiklik kısa liste kaldırıldı.
+Gerçek parite sayısı piyasaya göre değişir; tüm kotasyon sayısı coin sayısı değildir.
+
+1dk grafiklerde normal döngü sınırı 96 paritedir. Açık pozisyonlar, çekirdekler,
+hacim liderleri ve hareketli adaylar öncelikli; kalanlar kalıcı imleçle sırayla
+incelenir. Saatlik/15dk önbellek sırasıyla en fazla 72/96 yeni sorguyla hazırlanır.
+İlk genişlemede veri birkaç döngüde tamamlanabilir. Eksik/başarısız veri onay
+sayılmaz. Likidite filtresi dışındaki açık pozisyonun fiyat kontrolü sürer.
+
+Kasa ve Bot ekranlarında likit parite, başarılı 1dk grafik, son 10dk benzersiz
+kapsam ve üç zaman dilimi hazır sayıları görünür. Bot ekranındaki açılır listede
+izlenen semboller bulunur. Son kapsam zaman damgasıyla gösterilir; tekrar tetik
+atlandığında eski kapsam yeni tarama gibi gösterilmez.
+
+API 429/418 verdiğinde bekleme süresi saklanıp sonraki süreçlerde de korunur.
+Grafik okuması yaklaşık 45s bütçeye tabidir; ana fiyat yenilemesi bu grafik
+bütçesinden bağımsızdır. Bu, ağ veya tüm döngü süre garantisi değildir.
+Daha geniş tarama net kârlılığı tek başına kanıtlamaz; strateji ve kasa sonucu
+ayrı ölçülür. Tek kasa, mevcut risk ve masraf koşulları korunur.
+
 ## Net kasa büyümesi ve strateji değerlendirmesi (v0.9.20)
 
 Ana değer, gözlenen fiyatlardan hesaplanan **tahmini kapanış komisyonu sonrası

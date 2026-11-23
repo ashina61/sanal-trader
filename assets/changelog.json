@@ -3,6 +3,22 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.21",
+      "date": "2026-11-23",
+      "title": "Geniş likit evren, dönüşümlü grafik taraması ve görünür kapsam",
+      "details": [
+        "Önceki son canlı kontrolde 161 likit USDT paritesi vardı; yalnızca 51 parite ayrıntılı grafiğe giriyordu. İzleme artık sabit kısa liste yerine en az 1 milyon USDT 24s hacim eşiğini ve taze fiyat şartını geçen tüm düz USDT paritelerini kapsar. Gerçek sayı piyasaya göre değişir.",
+        "Ana kasada izlenen likit parite sayısı ve son döngüde başarıyla alınan 1dk grafik sayısı görünür. Durum kartı son 10 dakikadaki benzersiz grafik kapsamını ve 1s/15dk/1dk verisi birlikte hazır parite sayısını da gösterir. Ham çoklu işlem çifti kotasyonları coin sayısı gibi sunulmaz.",
+        "1dk grafikler her döngüde normalde en fazla 96 parite için sorgulanır. Açık pozisyonlar ve çekirdek pariteler önceliklidir; hacim liderleri ve yükselen/düşen adaylardan sonra kalan evren sırayla dolaşılır. Sürekli veya tüm paritelerin her döngüde incelendiği iddia edilmez; başarı yalnız gerçekten alınan veriyle sayılır.",
+        "Saatlik grafik önbelleği döngü başına 72, 15dk grafik önbelleği 96 yeni sorguyla hazırlanır. Açık pozisyonlar ve çekirdek pariteler öncelikli kalır. Yeni paritelerin verisi birkaç kontrolde tamamlanabilir; eksik, eski veya başarısız 1dk verisi yeni giriş onayı sayılmaz.",
+        "Hacmi eşik altına inen açık pozisyon ve bekleyen araştırma sinyallerinin fiyatı yine izlenir; bunlar yeni likit giriş adayı sayılmaz. Koruyucu fiyat çıkışları geniş tarama ve haber/AI beklemeden önce kontrol edilmeye devam eder.",
+        "429/418 yanıtı geldiğinde Retry-After süresi dikkate alınır; hemen tekrar sorgu gönderilmez. Bekleme bilgisi bot-data kaydına yazılarak sonraki zamanlanmış süreçte de korunur. Görüldüğünde dakika başına API ağırlığı ve grafik bütçe durumu tanılara eklenir.",
+        "İsteğe bağlı grafik sorguları yaklaşık 45 saniyelik tarama bütçesiyle sınırlıdır; sonraki güncel fiyat sorgusu bu grafik bütçesine bağlanmaz. Bekleyen ağ istekleri ve diğer işlemler nedeniyle bu bir tüm döngü süre garantisi değildir. Okuma eşzamanlılığı en fazla altı olarak kalır.",
+        "Daha geniş grafik önbelleği nedeniyle state.json makine için kompakt JSON olarak kaydedilir; kasa, işlemler ve geçmiş silinmez. Bot sayfasında izlenen paritelerin adları açılır listeden incelenebilir.",
+        "Geniş evrene sırayla erişim, açık pozisyon önceliği, gerçek başarılı kapsam sayımı, API beklemesi ve grafik süre bütçesi için yeni testler eklendi. 145 Python testi geçti; Flutter kontrolleri yayın akışında çalışır. Daha çok parite izlemek kâr garantisi değildir. Flutter 0.9.21+27."
+      ]
+    },
+    {
       "version": "0.9.20",
       "date": "2026-11-23",
       "title": "Net kasa hedefi, strateji bazında öğrenen giriş freni ve eşit koşullarda karşılaştırma",
