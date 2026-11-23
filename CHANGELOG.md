@@ -1,3 +1,12 @@
+## 2026-11-23 — v0.9.22 Akıllı Para Radarı (Solana / Base)
+
+- Binance teknik sinyallerinden ayrı, mevcut tek 650 TL sanal kasaya dokunmayan Solana/Base cüzdan araştırma motoru eklendi.
+- En fazla 15 cüzdan, raporlanmış 30 günlük 750.000 USD üzeri kâr ve %65+ başarı, 20 dakika içinde 3 bağımsız alım, farklı fon kaynağı, 200.000 USD likidite, LP kilidi, zincire göre mint/freeze/kontrat kontrolleri ve 1 saatte %30 üzeri yükselişi eleme kuralları uygulandı.
+- Aynı tokenin tekrar sinyali engellendi; satış uyarıları ve son 24 saatlik kayıtlar Radar kartında gösterildi. Değişiklik geçmişi, sürüm ve testler güncellendi.
+- Kaynak verisi için güvenilir harici indeksleyicinin HTTPS beslemesi SMART_WALLET_FEED_URL secret olarak bağlanmalıdır. Şu an veri bağlı değilse sistem açıkça NOT_CONFIGURED gösterir; Arkham/Grok entegrasyonu kurulmuş gibi iddia edilmez.
+- Sağlayıcı beyanları modülde yeniden zincir üzerinden kanıtlanmaz. Gerçek/sanal DEX emri yoktur; %7 giriş ve %-7 stop bu sürümde emir olarak uygulanmaz. Mevcut SPOT/SHORT ve tek kasa kayıtları korunur.
+- Python ve Flutter regresyon kontrolleri için PR iş akışı eklendi; canlıya geçiş test sonuçlarına bağlıdır.
+
 ## 2026-11-23 — v0.9.21 Geniş evren ve gerçek tarama kapsamı
 
 - Önceki son canlı kontrolde 161 likit USDT paritesi vardı; yalnızca 51 parite ayrıntılı grafiğe giriyordu. İzleme artık sabit kısa liste yerine en az 1 milyon USDT 24s hacim eşiğini ve taze fiyat şartını geçen tüm düz USDT paritelerini kapsar. Gerçek sayı piyasaya göre değişir.
