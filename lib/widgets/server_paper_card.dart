@@ -127,6 +127,15 @@ class ServerPaperCard extends StatelessWidget {
             .fold<int>(0, (sum, item) =>
                 sum + ((item['closed'] as num?)?.toInt() ?? 0))
         : 0;
+    final contextClosures = plan['contextStats'] is Map
+        ? (plan['contextStats'] as Map).values.whereType<Map>()
+            .fold<int>(0, (sum, item) =>
+                sum + ((item['closed'] as num?)?.toInt() ?? 0))
+        : 0;
+    final newsStatus = plan['newsStatus']?.toString() ?? 'UNAVAILABLE';
+    final newsHeadlines = plan['newsHeadlines'] is List
+        ? (plan['newsHeadlines'] as List).whereType<Map>().take(3).toList()
+        : <Map>[];
     final candidates = plan['candidates'] is List
         ? (plan['candidates'] as List).whereType<Map>().take(5).toList()
         : <Map>[];
@@ -329,13 +338,37 @@ class ServerPaperCard extends StatelessWidget {
                 Row(children: [
                   Expanded(child: _metric('Gerçek 1dk mum',
                     '${plan['minutePairs'] is num ? plan['minutePairs'] : '—'} coin')),
-                  Expanded(child: _metric('Gerçek öğrenme',
+                  Expanded(child: _metric('Sinyal öğrenme',
                     '$learnedClosures kapanış')),
+                  Expanded(child: _metric('Bağlam öğrenme',
+                    '$contextClosures kapanış')),
                 ]),
                 const SizedBox(height: 5),
-                const Text('Sinyal öğrenimi sadece gerçekleşen sanal kapanışla '
-                  'güncellenir; ilk 5 kapanışta seçim puanına etkisi yoktur.',
+                const Text('Öğrenme sadece tamamlanan sanal işlemin net sonucundan '
+                  'yapılır. Az örneklemde etki çok düşüktür; geçmişte olmayan sonuç '
+                  'üretilmez.',
                   style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
+                const SizedBox(height: 9),
+                Align(alignment: Alignment.centerLeft, child: Text(
+                  'Haber radarı · $newsStatus',
+                  style: const TextStyle(color: PremiumColors.gold,
+                    fontSize: 11, fontWeight: FontWeight.w800),
+                )),
+                const SizedBox(height: 3),
+                const Text('Başlıklar bilgilendirme ve yeni giriş risk kontrolü '
+                  'içindir; tek başına alım/satım emri değildir.',
+                  style: TextStyle(color: PremiumColors.muted, fontSize: 9)),
+                for (final story in newsHeadlines)
+                  Padding(padding: const EdgeInsets.only(top: 4),
+                    child: Align(alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${story['source'] ?? 'Haber'} · ${story['title'] ?? ''}',
+                        maxLines: 2, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: PremiumColors.muted, fontSize: 10),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(child: _metric('Seçilen',
