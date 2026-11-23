@@ -228,7 +228,8 @@ def analyze_batches(batches, previous=None, now=None, errors=None):
     return current
 
 
-def refresh(previous=None, now=None, *, fetcher=None, sleep=None):
+def refresh(previous=None, now=None, *, fetcher=None, sleep=None,
+            security_fetcher=None):
     """Rate-limited public read; never touches the simulated portfolio."""
     now = (now or dt.datetime.now(UTC)).astimezone(UTC)
     prev = previous if isinstance(previous, dict) else {}
@@ -269,7 +270,17 @@ def refresh(previous=None, now=None, *, fetcher=None, sleep=None):
     unique_pools = list({(p["chain"], p["token"]): p
                          for p, _ in batches}.values())
     try:
-        state["tokenRisk"] = inspect_token_security(unique_pools)
+        if fetcher is not None and security_fetcher is None:
+            # Do not let offline/test data fake a live contract audit or
+            # accidentally call a second provider from an isolated test.
+            state["tokenRisk"] = {
+                "status": "NOT_TESTED", "checked": 0, "results": [],
+                "riskFlagged": 0, "unknown": len(unique_pools),
+                "automaticOrder": False, "tokenSafetyVerified": False,
+            }
+        else:
+            state["tokenRisk"] = inspect_token_security(
+                unique_pools, fetcher=security_fetcher)
     except Exception as exc:
         state["tokenRisk"] = {
             "status": "UNAVAILABLE", "checked": 0, "results": [],
