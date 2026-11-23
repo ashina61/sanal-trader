@@ -6,7 +6,7 @@
   },
   "cashTry": 277.3042724819038,
   "contextStats": {},
-  "cycles": 104,
+  "cycles": 105,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -15106,6 +15106,10 @@
   "intradayPairs": 54,
   "journal": [
     {
+      "at": "2026-11-23T01:18:49Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T01:18:39Z",
       "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
     },
@@ -15260,10 +15264,6 @@
     {
       "at": "2026-11-23T00:16:32Z",
       "message": "115 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (19 coin)."
-    },
-    {
-      "at": "2026-11-23T00:14:26Z",
-      "message": "115 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (18 coin)."
     }
   ],
   "lastDecision": "117 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Zayıf 6s momentum (22 coin).",
@@ -15282,11 +15282,12 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-22T23:15:14Z"
   },
-  "lastRunAt": "2026-11-23T01:18:39Z",
+  "lastRunAt": "2026-11-23T01:18:49Z",
   "lastScheduledTriggerAt": "2026-11-23T01:09:19Z",
   "lastSuccessAt": "2026-11-23T01:17:39Z",
-  "lastTriggerAt": "2026-11-23T01:18:39Z",
+  "lastTriggerAt": "2026-11-23T01:18:49Z",
   "lastTriggerEvent": "push",
+  "marketPulse": {},
   "marksTry": {
     "ETHUSDT": 87034.00319999999,
     "KITEUSDT": 7.238659999999999,
