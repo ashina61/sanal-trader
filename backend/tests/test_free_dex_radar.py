@@ -1,7 +1,9 @@
 import datetime as dt
+import urllib.error
 import unittest
 
-from backend.free_dex_radar import _select_pools, analyze_batches, refresh
+from backend.free_dex_radar import (PUBLIC_REQUEST_GAP_SECONDS,
+    _error_label, _select_pools, analyze_batches, refresh)
 
 NOW = dt.datetime(2026, 11, 23, 21, 0, tzinfo=dt.timezone.utc)
 
@@ -101,8 +103,14 @@ class FreeDiscoveryTests(unittest.TestCase):
         self.assertEqual(unavailable["status"], "UNAVAILABLE")
         self.assertFalse(unavailable["automaticOrder"])
 
+    def test_http_error_status_is_persisted_for_diagnosis(self):
+        exc = urllib.error.HTTPError('https://api.geckoterminal.com',
+                                      429, 'Too Many Requests', {}, None)
+        self.assertEqual(_error_label(exc), 'HTTP_429')
+
     def test_free_refresh_makes_real_reads_without_paid_credentials(self):
         seen = []
+        delays = []
         def fake_fetch(path):
             seen.append(path)
             if path.endswith("/trending_pools"):
@@ -110,10 +118,11 @@ class FreeDiscoveryTests(unittest.TestCase):
                     return {"data": []}
                 return top_response()
             return trades()
-        result = refresh({}, NOW, fetcher=fake_fetch, sleep=lambda _n: None)
+        result = refresh({}, NOW, fetcher=fake_fetch, sleep=delays.append)
         self.assertEqual(result["status"], "OBSERVING")
         self.assertEqual(result["requestsMade"], 3)
         self.assertEqual(len(seen), 3)
+        self.assertEqual(delays, [PUBLIC_REQUEST_GAP_SECONDS] * 2)
         self.assertEqual(len(result["newClusters"]), 1)
         cached = refresh(result, NOW + dt.timedelta(minutes=5),
                          fetcher=lambda _p: self.fail("Should use cache"),
