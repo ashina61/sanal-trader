@@ -251,8 +251,7 @@ class ServerPaperCard extends StatelessWidget {
           ]),
           const SizedBox(height: 5),
           Text('İzlenen açık pozisyon: ${plan['openPositionsChecked'] ?? longs.length + shorts.length}'
-            ' · Koruyucu çıkış adayı: ${plan['protectiveExitCandidates'] ?? '—'}'
-            ' · Son karar: $actionText',
+            ' · Koruyucu çıkış adayı: ${plan['protectiveExitCandidates'] ?? '—'}',
             style: const TextStyle(fontSize: 9, color: PremiumColors.muted)),
           const SizedBox(height: 11),
           const Text('SON GERÇEK SANAL EMİRLER',
