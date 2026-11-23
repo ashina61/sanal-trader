@@ -5,7 +5,7 @@
     "status": "PROTECTIVE_EXIT"
   },
   "cashTry": 277.3042724819038,
-  "cycles": 59,
+  "cycles": 60,
   "day": "2026-11-22",
   "decisionPlan": {
     "action": "SELL",
@@ -12942,6 +12942,10 @@
   "intradayPairs": 34,
   "journal": [
     {
+      "at": "2026-11-23T00:00:18Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-22T23:59:05Z",
       "message": "Sanal SPOT SAT LISTAUSDT: 50.74 TL; SPOT gözlenen 1dk kâr koruyan dönüş"
     },
@@ -13096,10 +13100,6 @@
     {
       "at": "2026-11-22T21:16:05Z",
       "message": "114 coin tarandı; Günlük 8 sanal emir sınırı; yeni pozisyon açılmadı"
-    },
-    {
-      "at": "2026-11-22T21:15:18Z",
-      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
     }
   ],
   "lastDecision": "Sanal SPOT SAT LISTAUSDT: 50.74 TL; SPOT gözlenen 1dk kâr koruyan dönüş",
@@ -13118,11 +13118,11 @@
     "WLDUSDT": "2026-11-22T22:45:15Z",
     "XVGUSDT": "2026-11-22T23:15:14Z"
   },
-  "lastRunAt": "2026-11-22T23:59:05Z",
+  "lastRunAt": "2026-11-23T00:00:18Z",
   "lastScheduledTriggerAt": null,
   "lastSuccessAt": "2026-11-22T23:59:05Z",
-  "lastTriggerAt": "2026-11-22T23:59:05Z",
-  "lastTriggerEvent": "push",
+  "lastTriggerAt": "2026-11-23T00:00:18Z",
+  "lastTriggerEvent": "workflow_dispatch",
   "marksTry": {
     "ETHUSDT": 87197.50579999998,
     "KITEUSDT": 7.198163999999999,
