@@ -27,6 +27,13 @@ class FreeDexRadarCard extends StatelessWidget {
     final wallets = data['walletsObserved'] is List
         ? (data['walletsObserved'] as List).whereType<Map>().take(8).toList()
         : <Map>[];
+    final risk = data['tokenRisk'] is Map
+        ? data['tokenRisk'] as Map : const <String, dynamic>{};
+    final inspected = risk['results'] is List
+        ? (risk['results'] as List).whereType<Map>().take(4).toList()
+        : <Map>[];
+    final riskCount = (risk['riskFlagged'] as num?)?.toInt() ?? 0;
+    final riskUnknown = (risk['unknown'] as num?)?.toInt() ?? 0;
     final history = data['history'] is List
         ? (data['history'] as List).whereType<Map>().toList().reversed.take(6)
             .toList()
@@ -78,6 +85,57 @@ class FreeDexRadarCard extends StatelessWidget {
           'Aynı kişinin birden fazla adresi olabilir; LP, mint, fon kaynağı '
           've 30 günlük kâr kanıtı yok. Sinyaller işleme dönüşmez.',
           style: TextStyle(color: PremiumColors.muted, fontSize: 11)),
+        const SizedBox(height: 8),
+        Material(color: Colors.transparent, child: ExpansionTile(
+          tilePadding: EdgeInsets.zero, dense: true,
+          leading: const Icon(Icons.gpp_maybe_outlined,
+              size: 19, color: PremiumColors.gold),
+          title: const Text('Token sözleşmesi · Risk kontrolü',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+          subtitle: Text('${risk['checked'] ?? 0} token · '
+                  '$riskCount uyarılı · $riskUnknown bilinmeyen',
+              style: const TextStyle(fontSize: 10,
+                  color: PremiumColors.muted)),
+          children: [
+            if (inspected.isEmpty)
+              const Padding(padding: EdgeInsets.only(bottom: 7),
+                child: Text('Henüz sözleşme risk verisi alınmadı.',
+                    style: TextStyle(fontSize: 11,
+                        color: PremiumColors.muted))),
+            for (final item in inspected)
+              Padding(padding: const EdgeInsets.only(bottom: 9),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Expanded(child: Text(
+                          '${item['chain'] ?? '—'} · ${item['symbol'] ?? '—'}',
+                          style: const TextStyle(fontSize: 11,
+                              fontWeight: FontWeight.w800))),
+                      Text(item['status'] == 'RISK_FLAGGED' ? 'RİSK UYARISI'
+                          : item['status'] == 'PARTIAL' ? 'KISMİ KONTROL'
+                          : 'BİLİNMİYOR',
+                          style: TextStyle(fontSize: 10,
+                              color: item['status'] == 'RISK_FLAGGED'
+                                  ? PremiumColors.danger
+                                  : PremiumColors.gold)),
+                    ]),
+                    const SizedBox(height: 2),
+                    Text((item['flags'] is List &&
+                             (item['flags'] as List).isNotEmpty)
+                          ? (item['flags'] as List).take(3).join(' · ')
+                          : item['reason']?.toString() ?? 'Veri yetersiz',
+                        maxLines: 3, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11,
+                            color: PremiumColors.muted)),
+                  ])),
+            const Padding(padding: EdgeInsets.only(bottom: 7),
+              child: Text('GoPlus verisi bağımsız güvenlik sertifikası değildir. '
+                  'LP kilidi, satışın gerçekleşmesi ve token güvenliği '
+                  'tam doğrulanmaz. Otomatik DEX emri kapalıdır.',
+                  style: TextStyle(fontSize: 10,
+                      color: PremiumColors.muted))),
+          ],
+        )),
         if (history.isNotEmpty)
           Material(color: Colors.transparent, child: ExpansionTile(
             tilePadding: EdgeInsets.zero,
