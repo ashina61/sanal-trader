@@ -9,6 +9,7 @@ import '../widgets/free_dex_radar_card.dart';
 import '../widgets/premium_theme.dart';
 import '../widgets/compact_wallet_card.dart';
 import '../widgets/execution_pipeline_card.dart';
+import '../widgets/trade_learning_card.dart';
 import '../widgets/formatters.dart';
 import 'update_history_screen.dart';
 
@@ -334,6 +335,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         const SizedBox(height: 9),
         ExecutionPipelineCard(snapshot: s),
         const SizedBox(height: 9),
+        TradeLearningCard(snapshot: s),
+        const SizedBox(height: 9),
         PremiumSurface(child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           leading: const Icon(Icons.tune_outlined,
@@ -413,6 +416,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ],
           ),
         ),
+        const SizedBox(height: 9),
+        TradeLearningCard(snapshot: s),
         const SizedBox(height: 9),
         OutlinedButton.icon(
           onPressed: _showTrades,
