@@ -31,7 +31,7 @@
       "wins": 0
     }
   },
-  "cycles": 626,
+  "cycles": 627,
   "day": "2026-11-23",
   "decisionPlan": {
     "action": "WAIT",
@@ -17523,6 +17523,10 @@
   "intradayPairs": 52,
   "journal": [
     {
+      "at": "2026-11-23T18:26:28Z",
+      "message": "Tekrarlanan kontrol atlandı; önceki karar korundu."
+    },
+    {
       "at": "2026-11-23T18:26:09Z",
       "message": "164 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin)."
     },
@@ -17677,10 +17681,6 @@
     {
       "at": "2026-11-23T17:12:34Z",
       "message": "161 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (23 coin)."
-    },
-    {
-      "at": "2026-11-23T17:10:28Z",
-      "message": "161 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin)."
     }
   ],
   "lastDecision": "164 coin tarandı; Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin).",
@@ -17710,11 +17710,11 @@
     "WLDUSDT": "2026-11-23T13:58:27Z",
     "XVGUSDT": "2026-11-23T03:20:27Z"
   },
-  "lastRunAt": "2026-11-23T18:25:52Z",
+  "lastRunAt": "2026-11-23T18:26:28Z",
   "lastScheduledTriggerAt": "2026-11-23T09:03:31Z",
   "lastSuccessAt": "2026-11-23T18:26:09Z",
-  "lastTriggerAt": "2026-11-23T18:25:52Z",
-  "lastTriggerEvent": "push",
+  "lastTriggerAt": "2026-11-23T18:26:28Z",
+  "lastTriggerEvent": "workflow_dispatch",
   "marketPulse": {
     "advancersPct": 78.8,
     "down": 10,
@@ -21587,45 +21587,25 @@
   },
   "realizedTry": 6.6967421310420825,
   "runtimeStatus": {
-    "completedAt": "2026-11-23T18:26:09Z",
-    "cycleElapsedSec": 16.96,
-    "exitCheckedAt": "2026-11-23T18:26:09Z",
+    "completedAt": "2026-11-23T18:26:28Z",
+    "cycleElapsedSec": 0.0,
+    "exitCheckedAt": null,
     "exitOrders": 0,
-    "marketObservedAt": "2026-11-23T18:26:09Z",
+    "marketObservedAt": null,
     "missingPositionQuotes": [],
     "mode": "scheduled-rest",
-    "newestQuoteAt": "2026-11-23T18:26:06Z",
-    "oldestQuoteAt": "2026-11-23T18:25:02Z",
-    "phase": "COMPLETE",
-    "positionsChecked": 5,
-    "positionsTotal": 5,
-    "previousSuccessAt": "2026-11-23T18:24:36Z",
-    "quotesReceived": 1324,
-    "reason": "Yeterli trend/momentum, maliyet payı ve risk koşulu oluşmadı. En sık neden: Fazla oynaklık / komisyon riski (22 coin).",
-    "scanCompleted": true,
-    "scanCoverage": {
-      "fast15m": {
-        "elapsedSec": 0.61,
-        "failed": 0,
-        "requested": 2,
-        "valid": 2
-      },
-      "hourly": {
-        "elapsedSec": 0.766,
-        "failed": 0,
-        "requested": 3,
-        "valid": 3
-      },
-      "minute1m": {
-        "elapsedSec": 5.391,
-        "failed": 0,
-        "requested": 52,
-        "valid": 52
-      }
-    },
+    "newestQuoteAt": null,
+    "oldestQuoteAt": null,
+    "phase": "SKIPPED",
+    "positionsChecked": 0,
+    "previousSuccessAt": "2026-11-23T18:26:09Z",
+    "quotesReceived": 0,
+    "reason": "Tekrarlanan tetik atlandı; yeni piyasa kontrolü yapılmadı",
+    "scanCompleted": false,
+    "scanCoverage": {},
     "schema": 1,
-    "shortlisted": 52,
-    "startedAt": "2026-11-23T18:25:52Z"
+    "shortlisted": 0,
+    "startedAt": "2026-11-23T18:26:28Z"
   },
   "scanStats": {
     "candleElapsedSec": 6.767,
