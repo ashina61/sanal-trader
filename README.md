@@ -21,6 +21,29 @@ Yalnızca başlangıç değeri **650 TL** olan tek bir sanal portföyü takip ed
 **Ekranlar:** Kasa (net bakiye ve açık pozisyonlar), Radar (gerçek bot adayları
 ve ret gerekçeleri), Bot (son karar ve AI durumu), Kâr (net büyüme ve kapanışlar).
 
+## Öğrenen piyasa ve haber takibi (v0.9.14)
+
+- Binlerce gerçek coin fiyatından likidite elemesi yapılır. Kısa liste için
+  1dk, 15dk ve saatlik mumlar ayrı ayrı değerlendirilir. Son 24 saatteki
+  yükselen/düşen coin sayıları ve ortanca değişim tek sunucu durumuna yazılır.
+- CoinDesk ve Cointelegraph'ın **ücretsiz RSS** yayınları yaklaşık 20 dakikada
+  bir sorgulanır. Başlık, kaynak, yayın zamanı ve bağlantı doğrulanır; en
+  fazla 6 saatlik başlıklar gösterilir. Kaynak yetersizse haberler uydurulmaz.
+- Son 2 saatte ilgili coinde hack, delist, iflas vb. kritik başlık varsa o
+  coin için **yeni** giriş durdurulur; yalnızca piyasa çapında iki bağımsız
+  kaynaktan risk haberi varsa genel yeni giriş engellenebilir. Haber tek başına
+  AL, SAT, SHORT veya kapatma emri vermez. Başlıkların doğru olup olmadığı
+  ayrıca doğrulanmalıdır.
+- Motor, girişteki genel piyasa yönünü ve oynaklık sınıfını kaydeder.
+  **Yalnızca gerçekten kapatılan sanal işlemler** net kâr-zarar bilgisiyle
+  bağlam istatistiklerini günceller. En az 3 sonuçtan sonra küçük bir
+  puan düzeltmesi yapabilir; az veri, kesin bir öngörü sağlamaz.
+- Haber taraması isteğe bağlı izin gerektirmeyen okuma isteğidir;
+  kaynaklar erişilemezse fiyat, koruyucu çıkış ve mevcut kasa çalışmaya
+  devam eder. RSS, hızlı işlem sinyali değil, gecikmeli bir risk filtresidir.
+- Tüm bilgiler uygulamanın **Otonom Karar Merkezi** bölümünde bulunur.
+  Sistem gerçek emir göndermez, gerçek para veya borsa API anahtarı kullanmaz.
+
 ## Neden bazen işlem yapmıyor?
 
 Botun amacı işlem sayısını yükseltmek değil, **sanal sermayeyi komisyon
