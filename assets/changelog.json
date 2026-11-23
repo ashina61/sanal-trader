@@ -3,6 +3,21 @@
   "updatedAt": "2026-11-23",
   "releases": [
     {
+      "version": "0.9.14",
+      "date": "2026-11-23",
+      "title": "Piyasa hafızası, haber radarı ve gerçekten öğrenen sanal bot",
+      "details": [
+        "Gerçek 24 saatlik kamu fiyatlarından yükselen/düşen/yatay coin sayısı, ortanca değişim ve günün güçlü/zayıf coinleri hesaplanır. Piyasa genel görünümü artık Bot Karar Merkezi'nde raporlanır.",
+        "CoinDesk ve Cointelegraph ücretsiz RSS üzerinden yaklaşık 20 dakikada bir güncel başlıkları çeker. Başlık, URL, alan adı ve yayımlanma zamanı doğrulanır; haber bulunmazsa içerik uydurulmaz.",
+        "Son iki saatte açıkça eşleştirilen coinde doğrulanması gereken hack, exploit, delist, iflas veya sert yasal sorun başlıkları varsa o coine yeni giriş risk uyarısıyla ertelenir. İki bağımsız haber kaynağında kritik genel piyasa uyarısı olmadıkça bütün coinlerde haber engeli yaratılmaz. Haber tek başına AL/SAT/SHORT emri vermez.",
+        "Her sanal girişte yön, BTC bazlı piyasa rejimi ve oynaklık sınıfı kaydedilir. Sadece tamamlanan sanal işlemin net sonucu aynı bağlama yazılır; üç kapanıştan sonra sınırlı puan düzeltmesi denenebilir. Küçük örneklemin öğrenmesi kesin tahmin değildir.",
+        "Groq AI, motorun onayladığı başka aday coini seçerse o coinin öğrenme bağlamı taşınır. Açık pozisyonların çıkışları AI veya haber servisinin erişimine bağlı değildir.",
+        "Bot ekranında haber radarı durumu, son üç gerçek kaynak başlığı ve bağlam bazlı öğrenme kapanış sayısı gösterilir. Dış kaynak hatasında koruyucu emirler ve fiyat motoru çalışır.",
+        "Yeni otomatik testler haberin yayın zamanı ve kaynağı, coin eşlemesi, genel piyasa uyarısında çoklu kaynak, piyasa genişliği ve gerçekleşen kapanıştan öğrenmeyi kapsar.",
+        "Flutter sürümü 0.9.14+20. Tek 650 TL sanal kasa, mevcut P&L, açık pozisyonlar ve geçmiş emirler sıfırlanmaz. Gerçek para veya borsa API anahtarı kullanılmaz."
+      ]
+    },
+    {
       "version": "0.9.13",
       "date": "2026-11-23",
       "title": "Tam dakika grafiği, doğru aday sıralaması ve güncel emir fiyatı",
