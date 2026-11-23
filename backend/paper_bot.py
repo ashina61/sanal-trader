@@ -15,6 +15,7 @@ import urllib.request
 from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
+from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
 from backend.context_learning import (context_key, adjustment as context_adjustment,
@@ -235,6 +236,12 @@ class Market:
     def candles_fast(self, symbol):
         return self.request("/api/v3/klines",
                             {"symbol": symbol, "interval": "15m", "limit": 96})
+
+    def depth(self, symbol):
+        # Query only the selected entry, not every tracked trading pair.
+        if not eligible(symbol):
+            raise ValueError('Invalid spot symbol for depth')
+        return self.request('/api/v3/depth', {'symbol': symbol, 'limit': 20})
 
     def candles_minute(self, symbol):
         return self.request("/api/v3/klines",
@@ -1042,7 +1049,8 @@ def record_performance(state, t):
 def apply_order(state, latest, t, planned):
     """One accounting path for both early protection and regular decisions."""
     pair, side, gross, reason = planned["order"]
-    price = latest[pair]["priceTry"]
+    price = (planned.get("bookEntryPriceTry")
+             if side in ("buy", "short") else None) or latest[pair]["priceTry"]
     if side == "short":
         executed = open_short(state, t, pair, gross, price, reason)
     elif side == "cover":
@@ -1195,6 +1203,7 @@ def cycle(state, market, t, clock=None):
                 "scanSkippedReason": "Koruyucu çıkış önceliği; geniş tarama sonraki kontrolde",
                 "positionHealth": position_monitor(state, latest, t),
                 "aiBrain": {"status": "PROTECTIVE_EXIT", "provider": "Rules"},
+                "executionPipeline": idle_trace(first_exit),
             })
             state["aiBrain"] = state["decisionPlan"]["aiBrain"]
             update_wallet_marks(state, latest, t)
@@ -1330,6 +1339,7 @@ def cycle(state, market, t, clock=None):
             refreshed = market.tickers()
             t = observed_time()
             fresh_lookup, fresh_fx = quotes(refreshed, t, max_age=90)
+            rate = fresh_fx
             latest = {
                 pair: {"symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
                        "volumeUsdt": fresh_lookup[pair]["volume"],
@@ -1372,6 +1382,7 @@ def cycle(state, market, t, clock=None):
             refreshed = market.tickers()
             t = observed_time()
             fresh_lookup, fresh_fx = quotes(refreshed, t, max_age=90)
+            rate = fresh_fx
             latest = {
                 pair: {
                     "symbol": pair, "priceTry": fresh_lookup[pair]["usdt"] * fresh_fx,
@@ -1396,6 +1407,12 @@ def cycle(state, market, t, clock=None):
             planned, state, api_key=os.environ.get("GROQ_API_KEY", ""),
             model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"))
         state["aiBrain"] = ai_meta
+        # Six deterministic audit stages: query depth only for final approved
+        # BUY/SHORT. Protective SELL/COVER always bypasses this gate.
+        planned, execution_trace = orderbook_guard(planned, market, latest, rate)
+        if execution_trace["status"] == "BLOCKED":
+            ai_meta = {**ai_meta, "orderBookGate": "BLOCKED"}
+            state["aiBrain"] = ai_meta
         # Independent observations from the SAME price/risk signal code:
         # research_only bypasses cash/exposure and exits but never places
         # another order, uses another wallet or invents prices.
@@ -1410,6 +1427,7 @@ def cycle(state, market, t, clock=None):
             if key not in ("order", "aiChoices")
         }
         state["decisionPlan"]["aiBrain"] = ai_meta
+        state["decisionPlan"]["executionPipeline"] = execution_trace
         state["decisionPlan"]["universe"] = len(eligible_pairs)
         state["decisionPlan"]["historyPairs"] = state["historyPairs"]
         state["decisionPlan"]["intradayPairs"] = state.get("intradayPairs", 0)
@@ -1456,6 +1474,7 @@ def cycle(state, market, t, clock=None):
                        if already_closed else "Veri hatası nedeniyle yeni sanal emir engellendi"),
             "reviewed": 0, "candidates": [],
             "exitBatch": saved_exits,
+            "executionPipeline": idle_trace({"action": "WAIT"}),
         }
         update_wallet_marks(state, latest, t)
         log(state, t, state["decisionPlan"]["reason"] + ". " + state["lastError"])
