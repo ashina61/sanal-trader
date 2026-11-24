@@ -3,6 +3,18 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.30",
+      "date": "2026-11-24",
+      "title": "Kazanan SPOT kırılımına denetimli daha büyük sanal pozisyon",
+      "details": [
+        "Botun geçmişte 20–40 TL tutarlı girişlerden yalnızca kuruşlar elde ettiği görüldü. Artık yalnız doğrulanmış kârlı SPOT breakout denemesinin giriş tutarı, kasanın en fazla %18'ine kadar risk bütçesiyle hesaplanabilir.",
+        "Yeni tutar ayrıca sanal özsermayenin %0,60'ı kadar tahmini kayıp bütçesi, %20 nakit rezervi, %78 genel pozisyon payı ve toplam %25 breakout grup yoğunlaşması ile sınırlanır. En fazla üç breakout pozisyonu açık kalabilir.",
+        "SPOT stop %2,8 + komisyon %0,2 + varsayımsal kayma %0,1 hesabı kesin zarar sınırı değildir; seyrek piyasa taraması ve boşluklarda daha yüksek kayıp olabilir.",
+        "SHORT, genel trend işlemleri ve risk kapılarının boyutlandırması değişmedi. AI başka onaylı adayı seçerse ona ait risk/açılış tutarı kaydı korunur. Bot ekranı yalnız uygun girişte tutar ve model riski gösterir.",
+        "Bu düzeltme işlem büyüklüğünü artırabilir ama aynı oranda TL kaybını da artırabilir; kâr, sabit günlük gelir veya kesintisiz işlem garantisi yoktur. Sürüm 0.9.30+36."
+      ]
+    },
+    {
       "version": "0.9.29",
       "date": "2026-11-24",
       "title": "Net kazanan SPOT kurulumlarıyla sınırlı sanal denemeler",
