@@ -98,6 +98,28 @@ class ProfitFirstTests(unittest.TestCase):
         self.assertTrue(historical_loss_guard(state, "SHORT", "breakdown")["blocked"])
         self.assertTrue(historical_loss_guard(state, "SHORT", "trend")["blocked"])
 
+    def test_two_wins_in_six_do_not_unlock_deeply_losing_spot_trend(self):
+        state = upside_probe_state()
+        state["signalStats"]["spot:trend"] = {
+            "closed": 6, "wins": 2, "netTry": -9.555352,
+            "meanRoi": -.021260937,
+        }
+        # Original guard mistakenly required <=25% wins. With 2/6
+        # winners it reopened despite a worsening -9.56 TRY PnL.
+        row = historical_loss_guard(state, "BUY", "trend")
+        self.assertTrue(row["blocked"])
+        self.assertLess(row["actualClosed"]["netTry"], -9.5)
+        self.assertFalse(historical_loss_guard(
+            state, "BUY", "breakout")["blocked"])
+
+    def test_a_durable_net_recovery_can_reopen_the_loss_policy(self):
+        state = upside_probe_state()
+        state["signalStats"]["spot:trend"] = {
+            "closed": 16, "wins": 10, "netTry": 2.3,
+            "meanRoi": .002,
+        }
+        self.assertFalse(historical_loss_guard(state, "BUY", "trend")["blocked"])
+
     def test_proven_positive_future_short_evidence_can_reassess_after_losses(self):
         state = upside_probe_state()
         state["forwardEvidence"]["completed"] += [

@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.31",
+      "date": "2026-11-24",
+      "title": "Zararlı SPOT trend giriş freni ve seri stop kayıpları koruması",
+      "details": [
+        "SPOT trendin 6 kapanışta -9,56 TL kaybetmesine rağmen 2/6 kazanma oranından dolayı yanlışlıkla yeniden alıma izin veren hata giderildi. Net zarar varken tek başına artan başarılı işlem sayısı engeli kaldırmaz.",
+        "İki farklı coinde 90 dakikada gerçekleşmiş iki zarar kesin toplamı ilk sanal kasanın %0,3'ünü aşıyorsa, ikinci kayıptan sonraki yaklaşık 120 dakika yalnızca yeni girişler bekletilir.",
+        "Koruyucu satış, stop, SHORT kapama ve araştırma sinyali gözlemleri açık kalır; 650 TL başlangıç ve gerçek sanal işlem kayıtları değiştirilmez.",
+        "Bot kontrol merkezinde kalan geçici bekleme süresi görülebilir. Bu özellik zarar ihtimalini azaltmak içindir; net kâr veya kesin stop tutarı vaat etmez. 0.9.31+37."
+      ]
+    },
+    {
       "version": "0.9.30",
       "date": "2026-11-24",
       "title": "Kazanan SPOT kırılımına denetimli daha büyük sanal pozisyon",

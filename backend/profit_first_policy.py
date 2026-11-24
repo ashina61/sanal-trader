@@ -131,10 +131,17 @@ def historical_loss_guard(state, action, setup):
     key = ("spot:" if action == "BUY" else "short:") + setup
     data = _realized(state, key)
     n = data["closed"]
-    losers = (n >= 4 and data["wins"] / n <= .25
+    # A small increase in win count MUST NOT reopen a setup while its
+    # realized NET outcome keeps deteriorating. On 2026-11-24 the 6th
+    # completed SPOT trend close changed wins from 1/4 to 2/6 despite
+    # worsening cumulative net from -7.65 TRY to -9.56 TRY. The former
+    # <=25% win-rate condition incorrectly cleared the loss veto.
+    # A losing risk setup only resumes after its realized net / mean ROI
+    # actually recover, or when explicitly redesigned and revalidated.
+    losers = (n >= 4
               and data["netTry"] <= -3
               and data["meanRoiPct"] is not None
-              and data["meanRoiPct"] <= -1.5)
+              and data["meanRoiPct"] <= -.75)
     if action == "SHORT":
         # 3/3 real paper SHORT closes lost money. With only 40 also-negative
         # future observations, demand strongly improved *fresh* prospective

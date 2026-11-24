@@ -19,6 +19,7 @@ from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
     spot_giveback, short_giveback)
 from backend.profit_first_policy import evaluate as profit_first_review, historical_loss_guard
+from backend.loss_cluster_circuit import evaluate as recent_stop_review
 from backend.paper_position_sizer import size_trial as size_breakout_trial
 from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
@@ -462,6 +463,7 @@ def assess_decision(state, latest, t, research_only=False,
         "candidates": [], "order": None,
         "edgeCircuit": adverse_edge_snapshot(state),
         "profitFirst": profit_first_review(state, "BUY", "breakout", "YATAY", t),
+        "lossCooldown": recent_stop_review(state, t),
     }
     def wait(reason):
         plan["reason"] = reason
@@ -723,6 +725,11 @@ def assess_decision(state, latest, t, research_only=False,
         return wait("Gözlenen fiyatlarda koruyucu çıkış koşulu oluşmadı")
 
     # Controls below block NEW positions only, never protective exits.
+    # When multiple stop losses cluster, PAUSE new risk for 2 hours while
+    # allowing research-only candidates and normal SELL/COVER evaluation.
+    if not research_only and plan["lossCooldown"]["blocked"]:
+        return wait("Yakın zamanda iki zarar kes yaşandı; yeni risk "
+                    "geçici bekletildi. Koruyucu çıkışlar aktif.")
     if not research_only and total < state.get("peakEquityTry", total) * .88:
         return wait("Portföy gerilemesi %12'yi geçti; yeni risk durduruldu")
     used = exposure(state, latest)

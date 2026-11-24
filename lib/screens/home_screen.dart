@@ -297,6 +297,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         (circuit['BUY'] as Map)['blocked'] == true;
     final shortPaused = circuit['SHORT'] is Map &&
         (circuit['SHORT'] as Map)['blocked'] == true;
+    final cooldown = plan['lossCooldown'] is Map
+        ? plan['lossCooldown'] as Map : const {};
+    final stopBurst = cooldown['blocked'] == true;
     final sizing = plan['sizeAudit'] is Map
         ? plan['sizeAudit'] as Map : const {};
     final riskTicket = plan['action'] == 'BUY' &&
@@ -331,6 +334,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 maxLines: 3, overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 11,
                     color: PremiumColors.muted)),
+            if (stopBurst) ...[
+              const SizedBox(height: 7),
+              Row(children: [
+                const Icon(Icons.warning_amber_outlined,
+                    size: 14, color: PremiumColors.gold),
+                const SizedBox(width: 5),
+                Expanded(child: Text(
+                  'Zarar kes serisi: yeni girişler yaklaşık '
+                  '${cooldown['remainingMinutes']} dk beklemede · '
+                  'açık pozisyonların satışları devam ediyor',
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11,
+                      color: PremiumColors.gold,
+                      fontWeight: FontWeight.w700))),
+              ]),
+            ],
             if (buyPaused || shortPaused) ...[
               const SizedBox(height: 7),
               Row(children: [
