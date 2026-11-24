@@ -447,3 +447,20 @@ var olan pozisyonların fiyat kontrolleri, satış/SHORT kapama ve stop
 korumaları **engellenmez**. Para veya geçmiş işlem sıfırlanmaz. Stop
 fiyatları GitHub cron çalışma gecikmesi veya fiyat boşluğunda garanti
 edilemez. Net kâr veya gelir garantisi değildir.
+
+## Geçerli net avantaj olmadan yeni SPOT / SHORT alma (v0.9.33)
+
+Son erişilen tek sanal kasa sonucu **640,20 TL**, ilk kasa **650 TL**.
+181 ayrı fiyat gözleminde bir saat-sonrası ortalama net varsayımsal
+sonuç **-%0,335**. Bu nedenle bugünkü botun para kazandırdığı kanıtlı
+değildir. 30+ ileri gözlemden sonra, yön bazında son 60 tamamlanmış
+ileri fiyat gözleminde >=+%0,15 net ortalama ve son 24'te >=+%0,20 net
+ortalama ve en az 14 pozitif, en az 8 ayrı coin ve son 3 saatte yeni
+ölçüm şartları birlikte görülmedikçe yeni sanal BUY/SHORT açılmaz.
+Bu yalnızca ekonomik *veto* kontrolüdür, ileri kâr ispatı değildir.
+Daha önceki "iyi görünüyor" AI veya strateji puanı bunu geçemez.
+
+Koruyucu SPOT SAT, SHORT COVER, stop ve portföy hesaplamaları önce
+çalışmaya devam eder. Research-only adaylar yeni doğrulanabilir fiyat
+gözlemleri üretmeye devam eder, tek sanal kasa ve 650 TL başlangıç
+değişmez. Hiçbir gerçek kripto emri gönderilmez.

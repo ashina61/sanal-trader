@@ -41,10 +41,12 @@ class SelectiveRecoveryTests(unittest.TestCase):
         self.assertEqual(lane["sizeMultiplier"], .5)
         self.assertTrue(lane["recentlyMeasured"])
         planned = assess_decision(state, quotes, NOW)
-        self.assertEqual(planned["action"], "BUY")
-        self.assertEqual(planned["symbol"], "BTCUSDT")
-        self.assertLessEqual(planned["amountTry"], 40)
-        self.assertEqual(state["trades"], [])  # plan not a filled order
+        # This setup was previously allowed through based on its positive
+        # last twelve alone. The broader negative market evidence wins.
+        self.assertEqual(planned["action"], "WAIT")
+        self.assertTrue(planned["netEdgeReadiness"]["BUY"]["blocked"])
+        self.assertIsNone(planned["order"])
+        self.assertEqual(state["trades"], [])  # no fabricated fill
 
     def test_bad_latest_six_cannot_cherry_pick_last_twelve(self):
         state, _ = market_prices([100 + i*.4 for i in range(168)])

@@ -154,17 +154,12 @@ class ProfitFirstTests(unittest.TestCase):
         planned = assess_decision(state, latest, NOW)
         self.assertTrue(planned["edgeCircuit"]["BUY"]["blocked"])
         self.assertTrue(planned["profitFirst"]["qualified"])
-        self.assertEqual(planned["action"], "BUY")
-        self.assertEqual(planned["symbol"], "ETHUSDT")
-        self.assertGreater(planned["amountTry"], 5)
-        # Larger only under the account-level stop-risk and group caps.
-        self.assertGreater(planned["amountTry"], 40)
-        self.assertLessEqual(planned["amountTry"], 117)
-        self.assertEqual(
-            planned["sizeAudit"]["mode"],
-            "QUALIFIED_SPOT_BREAKOUT_RISK_BUDGET")
-        self.assertLessEqual(
-            planned["sizeAudit"]["estimatedLossAtStopTry"], 3.9)
+        # Prior versions could use a narrowly positive six-signal lane
+        # to bypass negative wider research. The new economic gate must
+        # veto this, despite the specialized trial being qualified.
+        self.assertEqual(planned["action"], "WAIT")
+        self.assertTrue(planned["netEdgeReadiness"]["BUY"]["blocked"])
+        self.assertIsNone(planned["order"])
         self.assertEqual(state["trades"], [])  # no imaginary execution
 
 

@@ -35,6 +35,8 @@ from backend.runtime_status import start as start_runtime, market_seen, finish a
 from backend.evidence_guard import gate_summary, strategy_gate, strategy_summary
 from backend.forward_edge_circuit import (review as adverse_edge_review,
     snapshot as adverse_edge_snapshot, lane_recovery)
+from backend.net_edge_readiness import (review as economic_readiness,
+    snapshot as economic_readiness_snapshot)
 from backend.net_objective import net_liquidation
 from backend.market_coverage import (MIN_VOLUME_USDT, HOURLY_BATCH, FAST_BATCH,
     minute_focus, due_batch, snapshot as coverage_snapshot)
@@ -463,6 +465,7 @@ def assess_decision(state, latest, t, research_only=False,
         "screened": len(latest), "rejectReasons": {},
         "candidates": [], "order": None,
         "edgeCircuit": adverse_edge_snapshot(state),
+        "netEdgeReadiness": economic_readiness_snapshot(state, t),
         "profitFirst": profit_first_review(state, "BUY", "breakout", "YATAY", t),
         "lossCooldown": recent_stop_review(state, t),
     }
@@ -921,6 +924,11 @@ def assess_decision(state, latest, t, research_only=False,
             rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
             continue
         action = "BUY" if mode == "buy" else "SHORT"
+        if (not research_only and
+                economic_readiness(state, action, t)["blocked"]):
+            rejected("Net pozitif ekonomik sinyal doğrulanmadı; "
+                     "sanal araştırma devam ediyor")
+            continue
         if not research_only and historical_loss_guard(
                 state, action, setup_for(micro, mode))["blocked"]:
             rejected("Kapanmış sanal pozisyonlar net zararlı; bu tür giriş bekletildi")

@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.33",
+      "date": "2026-11-24",
+      "title": "Net kâr avantajı doğrulanmayana yeni sanal işlem yok",
+      "details": [
+        "650 TL'lik tek sanal kasanın erişilen son ölçümü 640,20 TL; 181 saat-sonrası sinyal sonucu maliyetler sonrası ortalama -%0,335 net. Bu sinyaller mevcut hâliyle kâr ürettiği kanıtlanmış değil.",
+        "30+ gözlemden sonra yön bazında en az 60 ileri fiyat sonucu, son 60 ortalama +%0,15 net, son 24 ortalama +%0,20 net ve en az 14 pozitif, en az 8 farklı coin ve 3 saatten yeni ölçüm birlikte şart. Yalnız yeni BUY/SHORT emirleri için bir veto; garantili kâr veya istatistiksel ispat değil.",
+        "SPOT SAT, SHORT COVER, zarar kes, kâr kilitleme ve gerçek ileri fiyat araştırması devam ediyor. Tek sanal kasa ve geçmiş silinmiyor; gerçek borsa emri yok.",
+        "Bot sekmesinde kanıtlanmamış net SPOT/SHORT avantajı uyarısı var. 0.9.33+39."
+      ]
+    },
+    {
       "version": "0.9.32",
       "date": "2026-11-24",
       "title": "Kasa mutabakatı ve çalışma kayıtları",
