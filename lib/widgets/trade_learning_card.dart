@@ -20,6 +20,14 @@ class TradeLearningCard extends StatelessWidget {
     final closed = stats['closed'] is Map
         ? stats['closed'] as Map : const {};
     final objective = snapshot?.objective ?? const <String, dynamic>{};
+    final first = snapshot?.decisionPlan['profitFirst'] is Map
+        ? snapshot!.decisionPlan['profitFirst'] as Map : const {};
+    final breakout = first['realizedSpotBreakout'] is Map
+        ? first['realizedSpotBreakout'] as Map : const {};
+    final trend = first['realizedSpotTrend'] is Map
+        ? first['realizedSpotTrend'] as Map : const {};
+    final short = first['realizedShort'] is Map
+        ? first['realizedShort'] as Map : const {};
     final recentNet = recent['netRealizedTry'];
     final color = recentNet is num && recentNet < 0
         ? PremiumColors.danger : PremiumColors.emerald;
@@ -53,6 +61,29 @@ class TradeLearningCard extends StatelessWidget {
           Expanded(child: _stat('Kâr/zarar faktörü',
               closed['profitFactor']?.toString() ?? '—')),
         ]),
+        if ((breakout['closed'] as num? ?? 0) > 0)
+          Material(color: Colors.transparent,
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.zero, dense: true,
+              title: const Text('Hangi strateji gerçekten kazandı?',
+                  style: TextStyle(fontSize: 12,
+                      fontWeight: FontWeight.w800)),
+              subtitle: const Text('Kapanmış sanal işlemlerin net sonucu',
+                  style: TextStyle(fontSize: 10,
+                      color: PremiumColors.muted)),
+              children: [
+                _setupLine('SPOT kırılım', breakout),
+                _setupLine('SPOT trend', trend),
+                _setupLine('SHORT', short),
+                const Padding(padding: EdgeInsets.only(bottom: 7),
+                    child: Text(
+                  'Az sayıda kapanmış işlem gelecekte kazanç garantisi değildir. '
+                  'Küçük SPOT denemeleri ayrıca ileri piyasa verisi ve risk '
+                  'kontrollerinden geçmek zorundadır.',
+                  style: TextStyle(fontSize: 10,
+                      color: PremiumColors.muted))),
+              ],
+            )),
         if (objective['scenarioNetAfterSlippageTry'] is num) ...[
           const SizedBox(height: 9),
           Text('5 baz puan ek çıkış kayması senaryosu: '
@@ -85,6 +116,22 @@ class TradeLearningCard extends StatelessWidget {
             style: TextStyle(color: PremiumColors.muted, fontSize: 10)),
       ],
     ));
+  }
+
+  Widget _setupLine(String name, Map data) {
+    final wins = data['wins'] ?? 0;
+    final closed = data['closed'] ?? 0;
+    final net = data['netTry'];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(children: [
+        Expanded(child: Text(name,
+            style: const TextStyle(fontSize: 11))),
+        Text('$wins/$closed · ${_money(net)}',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                color: net is num && net < 0
+                    ? PremiumColors.danger : PremiumColors.emerald)),
+      ]));
   }
 
   Widget _stat(String name, String value, [Color? color]) => Column(
