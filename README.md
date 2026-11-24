@@ -429,3 +429,21 @@ yüksek kayma bu tutarı aşabilir. Belirsiz fiyat/muhasebe varsa yeni
 giriş bloke olur. Botun AI seçtiği kriptoya ait büyüklük bilgisi
 değiştirilmeden taşınır. Model, **kâr garantisi sunmaz** ve zararların
 TL karşılığını da artırabilir. Tek kasa ve geçmiş emirler korunur.
+
+## Net zarar gidişatı için giriş devre kesicisi (v0.9.31)
+
+Bot gerçek kapanışlardan öğrenirken bir hata düzeltildi: **SPOT trend**
+işlemleri toplamda ciddi zarardaysa, kapanan 6 pozisyonun 2'sinin
+kazanan olması artık zararlı kurulumun giriş engelini sıfırlayamaz.
+Kapanmış en az dört işlemde toplam en az -3 TL ve ortalama net getiri
+-%0,75 veya daha kötüyse o giriş türü durdurulur. Başka bir kurulumun
+verileri veya farazi kâr bu kısıtı kaldıramaz.
+
+Ayrıca, 90 dakika içinde **farklı iki coinde** gerçekleşmiş zarar kes
+işlemleri başlangıç kasasının en az %0,3'ünü kaybettirirse ikinci zarar
+kesin ardından 120 dakika yeni SPOT/SHORT girişleri durur. Bu
+iki saatlik koruyucu duraklama araştırma adaylarını **kapatmaz**;
+var olan pozisyonların fiyat kontrolleri, satış/SHORT kapama ve stop
+korumaları **engellenmez**. Para veya geçmiş işlem sıfırlanmaz. Stop
+fiyatları GitHub cron çalışma gecikmesi veya fiyat boşluğunda garanti
+edilemez. Net kâr veya gelir garantisi değildir.
