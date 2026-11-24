@@ -354,3 +354,19 @@ Mevcut sanal kasa rakamının yanına yalnızca ayrı bir 5 baz puan ekstra
 Bot/Kâr arayüzünde kapanan sanal işlemlerden net rapor ve kayıp serisi
 görülür. Otomatik yeni strateji veya kâr garanti edilmez.
 [Detaylar](docs/rug-cost-learning-v0926.md).
+
+## Net negatif sinyal devre kesicisi (v0.9.27)
+
+Bot her yeni SPOT BUY / sanal 1x SHORT girişini yalnız geçmişteki kârlı
+görünen bir puana göre onaylamaz. Araştırma modunun daha sonra gerçek
+piyasa fiyatıyla ölçtüğü, komisyon ve varsayımsal kayma sonrası bir saatlik
+**son 24 sonuç** yön bazında kontrol edilir. En az 20 örnekte ortalama net
+sonuç %−0,05 veya altı ve pozitif gözlem oranı %40 veya altındaysa ilgili
+yönde yeni giriş **geçici olarak bekler**. Bu risk filtresi piyasanın
+geleceğini bilmez. Tek sanal kasa, geçmiş, var olan pozisyonların fiyat
+kontrolleri ve koruyucu satış/SHORT kapamalar etkilenmez.
+
+Araştırma modu bu filtreden bağımsız yeni gerçek gözlemler toplar; son 24
+sonuç toparlandığında girişler yeniden değerlendirilebilir. Bot ekranı
+hangi yönün durdurulduğunu gösterir. Görülen kâr/zarar, gerçek alım-satım
+veya gelir garantisi değildir.
