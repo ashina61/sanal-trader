@@ -1,3 +1,12 @@
+## 2026-11-24 — v0.9.30 Risk bütçesiyle seçici büyük SPOT pozisyon
+
+- 650 TL'lik tek sanal kasadaki kârlı çıkışlar çoğunlukla 20–80 TL tutarındaki girişlerden geliyor. Örneğin son ALLOUSDT çıkışı +0,39 TL. Pozisyon büyüklüğünü genel piyasa koşullarında rastgele artırmak yerine, **yalnız hem tamamlanmış kazanan kapanış hem ileriye dönük net fiyat gözlemi şartını sağlayan YATAY/SPOT/breakout** denemesine ayrı büyüklük modeli eklendi.
+- Önceki seçici denemede toplam kasanın %12'sinin yarısı (yaklaşık 39 TL) üst sınırdı. Yeni modelde **en fazla kasanın %18'i**, aynı anda **en fazla üç breakout pozisyonu**, bu pozisyonlara ayrılan **toplam değer en fazla kasanın %25'i**, genel pozisyon payı **en fazla %78** ve serbest nakit rezervi **en az %20** korunur. Bunların en kısıtlayıcı olanı geçerlidir.
+- Yeni SPOT breakout girişinin varsayımsal stop riski tüm sanal özsermayenin **en fazla %0,60'ı** ile sınırlandırılmaya çalışılır: gözlenen SPOT stop %2,8, varsayımsal gidiş-dönüş komisyonu %0,2 ve ek kayma %0,1 varsayılır. Bu yalnız **risk senaryosudur**; 5 dakikalık GitHub cron veya gecikmiş anlık fiyat, sert boşluk ya da emir defteri kayması nedeniyle gerçek kayıp hesaplanan bütçeyi aşabilir.
+- Normal SPOT trend, SHORT, açığa alım, zarar kes ve mevcut koruyucu çıkış kuralları, haber kontrolü, giriş yönü ve olumsuz ileri sonuç frenleri değiştirilmedi. Sadece gerçekten nitelikli SPOT breakout pilotlarının TL tutarı artabilir; işlem miktarı veya kesin kâr vaat edilmez.
+- AI farklı onaylı bir coin seçerse, seçilen coinin kendi kayıtlı tutarı ve risk denetimi kullanılır. Bot ekranında planlanan sanal tutar ve model stop zarar senaryosu görülebilir.
+- İlk kasa 650 TL, mevcut sanal emir geçmişi ve tek hesap aynen korunur; gerçek alım satım yapılmaz. Yeni maliyet/konsantrasyon ve AI seçim testleri eklendi. Sürüm 0.9.30+36.
+
 ## 2026-11-24 — v0.9.29 Gerçekleşmiş kazanan kurulumu ayıran SPOT denemesi
 
 - Tek sanal kasanın bu sürüm öncesi kapanan, sinyal etiketli SPOT kırılım işlemleri: 8/8 kârlı, toplam +11,45 TL; SPOT trend: 1/4 kârlı, -7,65 TL; SHORT: 0/3 kârlı, -6,80 TL. Bu tarihsel ve seçilmiş örneklem **kârlılık garantisi değildir**, açık pozisyonlar bu karşılaştırmaya dahil değildir.
