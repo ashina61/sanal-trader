@@ -27,6 +27,7 @@ from backend.market_breadth import market_breadth
 from backend.scan_engine import fetch_candle_batch
 from backend.runtime_status import start as start_runtime, market_seen, finish as finish_runtime
 from backend.evidence_guard import gate_summary, strategy_gate, strategy_summary
+from backend.forward_edge_circuit import review as adverse_edge_review, snapshot as adverse_edge_snapshot
 from backend.net_objective import net_liquidation
 from backend.market_coverage import (MIN_VOLUME_USDT, HOURLY_BATCH, FAST_BATCH,
     minute_focus, due_batch, snapshot as coverage_snapshot)
@@ -454,6 +455,7 @@ def assess_decision(state, latest, t, research_only=False,
         "reason": "Güncel veri bekleniyor", "reviewed": 0,
         "screened": len(latest), "rejectReasons": {},
         "candidates": [], "order": None,
+        "edgeCircuit": adverse_edge_snapshot(state),
     }
     def wait(reason):
         plan["reason"] = reason
@@ -887,6 +889,10 @@ def assess_decision(state, latest, t, research_only=False,
                              setup_for(micro, mode), plan["marketRegime"])
         if not research_only and gate["blocked"]:
             rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
+            continue
+        if not research_only and adverse_edge_review(
+                state, "BUY" if mode == "buy" else "SHORT")["blocked"]:
+            rejected("Son 24 ileri gözlemde net sonuç negatif; yeni giriş freni")
             continue
         if (not research_only and mode == "short" and
                 broad_risk_on(state.get("marketPulse", {}),
