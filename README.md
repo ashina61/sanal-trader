@@ -390,3 +390,22 @@ denemeye izin verilebilir. STRATEGY ve depth risk kapıları yine geçilmeli,
 mevcut kasanın geçmişi değiştirilmemelidir. Mevcut araştırma
 örneklemi zayıf olduğundan bu değişiklik herhangi bir gün için
 kâr veya işlem açılmasını garanti etmez.
+
+## Kârı hedefleyen seçici SPOT araştırma denemesi (v0.9.29)
+
+Son kapanmış işlemlerden **SPOT breakout 8/8 ve +11,45 TL**, SPOT
+trend 1/4 ve −7,65 TL, SHORT 0/3 ve −6,80 TL. Bu geçmiş kârlar
+gelecekte pozitif getiri kanıtı değildir; hâlâ 650 TL'lik **tek** sanal
+kasa masraflar sonrası eksidedir.
+
+Artık belirgin şekilde zarar eden SPOT trend kurulumları yeni giriş
+için bekletilir. Tüm SHORT'ların kaybettiği durumda, ciddi pozitif
+ileri araştırma sonucu olmadan yeni SHORT girişleri tekrar açılmaz.
+Buna karşılık **YATAY piyasadaki SPOT breakout** için hem kapatılmış
+işlemlerde sağlam net sonuç (en az 6, en az %75 kazanan ve +2 TL) hem de
+son altı **daha sonra** gözlenen bir saatlik fiyat sinyalinde net +%0,10
+ortalama, en az üç pozitif sinyal, farklı coin ve tarama zamanı ve güncel
+ölçüm varsa sadece **yarım standart pozisyon** ile deneysel alım
+yapılabilir. Aynı anda en fazla iki breakout açık kalabilir.
+Diğer bütün risk/stop/emir defteri kontrolleri korunur. Hiçbir rakam
+gerçek borsa gerçekleşmesi veya sabit günlük kazanç vaadi değildir.
