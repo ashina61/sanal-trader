@@ -58,3 +58,43 @@ def snapshot(state):
             "SHORT": review(state, "SHORT"),
             "researchStillActive": True,
             "newOrdersFromResearch": False}
+
+
+def lane_recovery(state, action, setup, regime):
+    """Qualified *limited-size* exploratory lane while broad direction loses.
+
+    This is a narrowly-scoped opportunity to collect real paper outcomes, not
+    statistical proof or permission to ignore the existing strategy risk gate.
+    Small correlated samples can mislead: require both 12-sample and *recent*
+    6-sample net-positive, majority-win observations. Never use unrealized
+    open trades, candle hindsight, or a different wallet.
+    """
+    evidence = state.get("forwardEvidence")
+    completed = evidence.get("completed", []) if isinstance(evidence, dict) else []
+    values = [float(row["netReturnPct"])
+              for row in completed if isinstance(row, dict)
+              and row.get("action") == action and row.get("setup") == setup
+              and row.get("regime") == regime
+              and isinstance(row.get("netReturnPct"), (int, float))
+              and not isinstance(row["netReturnPct"], bool)
+              and math.isfinite(row["netReturnPct"])]
+    tail12, tail6 = values[-12:], values[-6:]
+    avg12 = statistics.mean(tail12) if tail12 else None
+    avg6 = statistics.mean(tail6) if tail6 else None
+    wins12 = sum(v > 0 for v in tail12)
+    wins6 = sum(v > 0 for v in tail6)
+    qualified = (action == "BUY" and setup == "breakout"
+                 and regime == "YÜKSELİŞ"
+                 and len(values) >= 20 and len(tail12) == 12
+                 and avg12 >= .40 and wins12 >= 7
+                 and avg6 >= .15 and wins6 >= 4)
+    return {
+        "action": action, "setup": setup, "regime": regime,
+        "qualified": bool(qualified), "sampleSize": len(values),
+        "recent12AvgNetPct": round(avg12, 4) if avg12 is not None else None,
+        "recent6AvgNetPct": round(avg6, 4) if avg6 is not None else None,
+        "recent12Wins": wins12, "recent6Wins": wins6,
+        "sizeMultiplier": 0.5 if qualified else 0.0,
+        "researchOnlyWhenUnqualified": True,
+        "note": "Küçük/bağımlı örneklem; gelir veya kazanma olasılığı kanıtı değil.",
+    }
