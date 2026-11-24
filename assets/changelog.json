@@ -1,7 +1,18 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-23",
+  "updatedAt": "2026-11-24",
   "releases": [
+    {
+      "version": "0.9.27",
+      "date": "2026-11-24",
+      "title": "İleri gözlem zararı için dinamik giriş freni",
+      "details": [
+        "SPOT BUY ve sanal 1x SHORT yönleri son 24 gerçek ileriye dönük sonuçla ayrı denetlenir; en az 20 gözlemde net ortalama %−0,05 veya altı ve pozitif örnek oranı %40 veya altı ise yalnızca yeni giriş durdurulur.",
+        "Araştırma modunun sinyal gözlemleri ve ileriki saatlerdeki ölçümleri devam eder; son 24 sonuç toparlandığında giriş freni kendiliğinden yeniden değerlendirilir.",
+        "Var olan pozisyonlar otomatik kapatılmaz. Koruyucu SPOT SAT, SHORT COVER, stop ve bakiye hesaplaması değişmedi.",
+        "Bot ekranında kompakt SPOT/SHORT giriş freni gösterilir; yeni portföy, ücretli API veya gerçek emir yoktur. Flutter 0.9.27+33."
+      ]
+    },
     {
       "version": "0.9.26",
       "date": "2026-11-23",
