@@ -162,6 +162,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       : <Map>[];
     final rejected = plan['rejectReasons'];
     final rejectedMap = rejected is Map ? rejected : const {};
+    final chartRadar = plan['chartRadar'] is List
+        ? (plan['chartRadar'] as List).whereType<Map>().toList()
+        : <Map>[];
+    final chartLearn = plan['chartLearning'] is Map
+        ? plan['chartLearning'] as Map : const {};
+    final chartGroups = chartLearn['byVerdict'] is Map
+        ? chartLearn['byVerdict'] as Map : const {};
     final dex = s?.freeDexRadar ?? const <String, dynamic>{};
     final smart = s?.smartMoney ?? const <String, dynamic>{};
     return ListView(
@@ -248,6 +255,87 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ])),
                   ],
                 )),
+          ],
+        )),
+        const SizedBox(height: 9),
+        PremiumSurface(child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          leading: const Icon(Icons.auto_graph_outlined,
+              color: PremiumColors.gold, size: 20),
+          title: const Text('Gerçek mum ve grafik yorumlama',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+          subtitle: Text(
+            '1s EMA · 15dk yön · 1dk RSI / ATR / hacim · '
+            '${chartRadar.length} doğrulanmış okuma',
+            style: const TextStyle(fontSize: 10,
+                color: PremiumColors.muted)),
+          children: [
+            if (chartRadar.isEmpty)
+              const Padding(padding: EdgeInsets.only(bottom: 9),
+                child: Text('Kapalı OHLCV mumları tarandığında burada '
+                    'yorumları görünecek. Eksik veri alım onayı sayılmaz.',
+                    style: TextStyle(fontSize: 11,
+                        color: PremiumColors.muted))),
+            for (final row in chartRadar)
+              Padding(padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Expanded(child: Text(
+                        row['symbol']?.toString() ?? '—',
+                        style: const TextStyle(fontSize: 12,
+                            fontWeight: FontWeight.w800))),
+                      Text(row['spotVerdict']?.toString() ?? '—',
+                          style: TextStyle(fontSize: 10,
+                              color: row['spotVerdict'] == 'REJECTED'
+                                  ? PremiumColors.danger
+                                  : PremiumColors.gold)),
+                    ]),
+                    const SizedBox(height: 3),
+                    Text('1s: ${row['trend1h']} · 15dk: ${row['trend15m']} '
+                         '· RSI(1dk): ${row['rsi1m']} · '
+                         'Hacim: ${row['volumeRatio1m'] ?? '—'}x',
+                        maxLines: 2, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11)),
+                    Text('Mum: ${row['pattern1m']}'
+                         '${row['bullTrap'] == true ? ' · Sahte yukarı kırılım' : ''}',
+                        style: const TextStyle(fontSize: 10,
+                            color: PremiumColors.muted)),
+                    Text('15dk destek: ${row['supportTry']} · '
+                         'direnç: ${row['resistanceTry']}',
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 10,
+                            color: PremiumColors.muted)),
+                    if ((row['reasons'] is List) &&
+                        (row['reasons'] as List).isNotEmpty)
+                      Text((row['reasons'] as List).take(2).join(' · '),
+                          maxLines: 2, overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 10,
+                              color: PremiumColors.muted)),
+                  ],
+                )),
+            if (chartGroups.isNotEmpty) ...[
+              const Divider(height: 12),
+              const Padding(padding: EdgeInsets.only(bottom: 5),
+                child: Text('Grafik yorumlarının sonraki 1 saatlik '
+                    'gözlenen net sonuçları',
+                    style: TextStyle(fontSize: 11,
+                        fontWeight: FontWeight.w800))),
+              for (final entry in chartGroups.entries)
+                Padding(padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    '${entry.key}: ${entry.value['samples']} gözlem · '
+                    'ort. net ${entry.value['avgNetPct']}%',
+                    style: const TextStyle(fontSize: 11))),
+            ],
+            const Padding(padding: EdgeInsets.only(bottom: 7),
+              child: Text(
+                'Bunlar kapanmış mumlardan çıkarılmış kurallı yorumlardır. '
+                'Yapay zekânın kârı öğrendiği veya getiri tahmini değildir. '
+                'Açık pozisyonların koruyucu satışları önceliklidir.',
+                style: TextStyle(fontSize: 10,
+                    color: PremiumColors.muted))),
           ],
         )),
         const SizedBox(height: 9),
