@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.28",
+      "date": "2026-11-24",
+      "title": "Kâr geri verme koruması ve seçici breakout denemesi",
+      "details": [
+        "Gözlenen SPOT zarar kes seviyesi -%4,5 yerine -%2,8; sanal 1x SHORT için -%2,5 oldu. Zamanlanmış 2 dakikalık veya geciken kontrollerde fiyat farkı görülebilir; kesin kayıp sınırı değil.",
+        "Daha önce gözlenen en az +%1,2 tepe/dip avantajı sonrasında en az %0,85 fiyat tersine dönüşünde ve giriş fiyatına yaklaşıldığında erken SPOT SAT veya SHORT COVER değerlendirilir. Önceden hiç görülmemiş fiyatlar varsayılmaz.",
+        "Küresel negatif ileri sinyal freni korunuyor. Yalnızca yükseliş rejiminde SPOT breakout kurulumunun son 12 ve son 6 tamamlanmış araştırma sinyali, net pozitif gözlem + bağımsız tarama + güncellik şartlarını karşılarsa yarım büyüklükte deneme işlemine izin verilebilir.",
+        "Var olan stop, habere dikkat, emir defteri maliyeti ve tüm risk kontrolleri değişmedi. Canlı kâr kanıtı veya getirinin garantisi yoktur. Flutter 0.9.28+34."
+      ]
+    },
+    {
       "version": "0.9.27",
       "date": "2026-11-24",
       "title": "İleri gözlem zararı için dinamik giriş freni",
