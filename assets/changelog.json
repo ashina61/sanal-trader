@@ -3,6 +3,18 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.32",
+      "date": "2026-11-24",
+      "title": "Kasa mutabakatı ve çalışma kayıtları",
+      "details": [
+        "Aynı GitHub çalışma kimliğinin gecikmiş tekrarı ikinci karar üretmez; son 2048 kimlik saklanır.",
+        "Son 288 çevrimin sürümü, tetikleyicisi, sonucu ve ret nedenleri kaydedilir.",
+        "Nakit ve açık pozisyon maliyetleri başlangıç kasa ile gerçekleşmiş sonuçla karşılaştırılır. Uyuşmazlık yeni riski durdurur; koruyucu çıkışlar önceliklidir.",
+        "İşlem istatistiklerinin son 100 emir kaydı kapsamı belirtilir. Mevcut kasa korunur; kâr garantisi yoktur.",
+        "224 backend ve 6 zamanlayıcı testi geçti."
+      ]
+    },
+    {
       "version": "0.9.31",
       "date": "2026-11-24",
       "title": "Zararlı SPOT trend giriş freni ve seri stop kayıpları koruması",

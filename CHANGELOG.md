@@ -1,3 +1,11 @@
+## 2026-11-24 — v0.9.32 Kasa mutabakatı ve tekrarlı çalışma koruması
+
+- Aynı GitHub çalışma kimliğinin gecikmiş tekrarı ikinci karar üretmez; son 2048 kimlik saklanır.
+- Son 288 çevrimin sürümü, tetikleyicisi, sonucu ve ret nedenleri kaydedilir.
+- Nakit ve açık pozisyon maliyetleri başlangıç kasa ile gerçekleşmiş sonuçla karşılaştırılır. Uyuşmazlık yeni riski durdurur; koruyucu çıkışlar önceliklidir.
+- İşlem istatistiklerinin son 100 emir kaydı kapsamı belirtilir. Mevcut kasa korunur; kâr garantisi yoktur.
+- 224 backend ve 6 zamanlayıcı testi geçti.
+
 ## 2026-11-24 — v0.9.31 Gerçek zarar serisi ve yanlış açılan trend freni düzeltildi
 
 - 24 Kasım 12.24 (Türkiye) ölçülen tek sanal kasanın net değerinin 641,83 TL'ye, 650 TL başlangıçtan -8,17 TL'ye gerilediği doğrulandı. Gerçekleşmiş kapanışların net toplamı -3,52 TL; son iki farklı SPOT zarar kes (NEARUSDT, SPCXBUSDT) yaklaşık 9 dakikada toplam -3,04 TL zarar yazdı. Bu rakamlar gerçek zamanlı piyasa verisine bağlıdır, gün boyu sabit değildir.
