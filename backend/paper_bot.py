@@ -24,6 +24,7 @@ from backend.paper_position_sizer import size_trial as size_breakout_trial
 from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
+from backend.wallet_audit import reconcile
 from backend.context_learning import (context_key, adjustment as context_adjustment,
     record_entry as context_record_entry, record_exit as context_record_exit)
 from backend.news_radar import (fetch_rss, news_snapshot, entry_alert,
@@ -730,6 +731,9 @@ def assess_decision(state, latest, t, research_only=False,
     if not research_only and plan["lossCooldown"]["blocked"]:
         return wait("Yakın zamanda iki zarar kes yaşandı; yeni risk "
                     "geçici bekletildi. Koruyucu çıkışlar aktif.")
+    if not research_only and reconcile(state)["status"] != "PASS":
+        plan["reasonCode"] = "ACCOUNTING_MISMATCH"
+        return wait("Kasa mutabakatı başarısız; yeni risk durduruldu")
     if not research_only and total < state.get("peakEquityTry", total) * .88:
         return wait("Portföy gerilemesi %12'yi geçti; yeni risk durduruldu")
     used = exposure(state, latest)
@@ -1109,6 +1113,9 @@ def record_performance(state, t):
         "returnPct": round((current / initial - 1) * 100, 3),
         "drawdownPct": round(max(0, 1 - current / peak) * 100, 3),
         "closedTrades": len(closed), "wins": wins,
+        "tradeStatsScope": "retained-trade-window",
+        "retainedOrders": len(state.get("trades", [])),
+        "tradeRetentionLimit": 100,
         "winRatePct": round(wins * 100 / len(closed), 1) if closed else None,
         "feesTry": round(state.get("paidFeesTry", 0.0), 4),
         "realizedTry": round(state.get("realizedTry", 0.0), 4),
@@ -1150,6 +1157,7 @@ def apply_order(state, latest, t, planned):
 
 def update_wallet_marks(state, latest, t):
     """Persist only an entirely valued wallet; retain error on partial quotes."""
+    state["walletAudit"] = {**reconcile(state), "at": stamp(t)}
     value = equity(state, latest)
     if value is not None:
         state["equityTry"] = value
@@ -1186,7 +1194,29 @@ def store_market_health(state, market, t, clock=None):
         state.pop('marketBackoffUntil', None)
 
 
-def cycle(state, market, t, clock=None):
+def cycle(state, market, t, clock=None, run_id=None):
+    """Deduplicate persisted executions, including retries after the time guard.
+
+    The caller must serialize read/modify/save (Actions concurrency does this).
+    Error outcomes are consumed too: they may already contain protective fills.
+    """
+    if run_id and run_id in state.get("processedRunIds", []):
+        return json.loads(json.dumps(state))
+    result = _cycle(state, market, t, clock=clock)
+    if run_id:
+        result["processedRunIds"] = (
+            state.get("processedRunIds", []) + [run_id])[-2048:]
+    result["walletAudit"] = {**reconcile(result), "at": stamp(t)}
+    result["runtimeStatus"]["walletAuditStatus"] = result["walletAudit"]["status"]
+    result["runtimeStatus"]["runId"] = run_id
+    result["runtimeStatus"]["triggerEvent"] = result.get("lastTriggerEvent")
+    result["runtimeStatus"]["engineRevision"] = os.getenv("GITHUB_SHA")
+    result["cycleHistory"] = (
+        state.get("cycleHistory", []) + [dict(result["runtimeStatus"])])[-288:]
+    return result
+
+
+def _cycle(state, market, t, clock=None):
     state = json.loads(json.dumps(state))
     began = time.perf_counter()
     observed_time = clock if callable(clock) else lambda: t
@@ -1594,7 +1624,8 @@ def main():
         log(state, t, "Sunucu sanal botu etkinleştirildi.")
     else:
         state = record_trigger(state, t, os.getenv("TRIGGER_EVENT", ""))
-        state = cycle(state, Market(), t, clock=now_utc)
+        state = cycle(state, Market(), t, clock=now_utc,
+                      run_id=os.getenv("GITHUB_RUN_ID") or None)
         # Isolated research-only indexer: never changes the single paper wallet,
         # blocks protective exits, or converts a DEX token to a Binance pair.
         state["smartMoney"] = refresh_smart_money(state.get("smartMoney"), now_utc())
