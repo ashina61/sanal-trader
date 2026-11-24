@@ -15,7 +15,7 @@ import statistics
 MIN_CLOSED_BREAKOUT = 6
 MIN_FORWARD_LANE = 6
 MAX_PROBE_SIZE_MULTIPLIER = .50
-MAX_CONCURRENT_BREAKOUTS = 2
+MAX_CONCURRENT_BREAKOUTS = 3  # Group-value and portfolio-risk caps still apply
 
 
 def _finite(v):

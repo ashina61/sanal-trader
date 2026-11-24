@@ -19,6 +19,7 @@ from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
     spot_giveback, short_giveback)
 from backend.profit_first_policy import evaluate as profit_first_review, historical_loss_guard
+from backend.paper_position_sizer import size_trial as size_breakout_trial
 from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
@@ -803,6 +804,7 @@ def assess_decision(state, latest, t, research_only=False,
 
     candidates = []
     reasons = {}
+    sizing_by_pair = {}
     def rejected(label):
         reasons[label] = reasons.get(label, 0) + 1
     for pair, quote in latest.items():
@@ -937,15 +939,27 @@ def assess_decision(state, latest, t, research_only=False,
                  .65 if tech["volatility"] > 6 else 1.0)
         if mode == "short":
             scale *= short_size_multiplier(state)
-        if not research_only and broad_blocked:
-            # Neither limited experiment can override news, strategy,
-            # liquidity, exposure, or other safety gates. Never double boost.
-            if recovered_lane["qualified"]:
-                scale *= recovered_lane["sizeMultiplier"]
-            elif profit_trial["qualified"]:
-                scale *= profit_trial["sizeMultiplier"]
+        if not research_only and broad_blocked and recovered_lane["qualified"]:
+            scale *= recovered_lane["sizeMultiplier"]
         amount = (MIN_ORDER if research_only else
                   math.floor(max(0.0, upper) * scale * 100) / 100)
+        size_audit = {
+            "mode": "STANDARD_ENTRY", "amountTry": amount,
+            "scenarioNotGuaranteed": True,
+        }
+        if (not research_only and profit_trial["qualified"]
+                and not recovered_lane["qualified"]):
+            # Larger ONLY for the measured winning SIDEWAYS SPOT breakout
+            # lane. The strict sizer still applies group concentration,
+            # account loss budget, cash reserve and whole-wallet exposure.
+            # This is not a forecast and never overrides prior risk gates.
+            size_audit = size_breakout_trial(
+                state, latest, equity=total, exposure=used,
+                volatility=tech["volatility"],
+                cash_reserve_pct=MIN_ENTRY_CASH_RESERVE,
+                exposure_ceiling_pct=MAX_ENTRY_EXPOSURE,
+                entry_fee=FEE)
+            amount = size_audit["amountTry"]
         if amount < MIN_ORDER:
             rejected("Kullanılabilir sanal tutar")
             continue
@@ -966,6 +980,7 @@ def assess_decision(state, latest, t, research_only=False,
             if evidence < .35:
                 rejected("Sinyal komisyon üstü değil")
                 continue
+        sizing_by_pair[(pair, mode)] = size_audit
         candidates.append((score, pair, mode, amount, tech))
     plan["rejectReasons"] = dict(sorted(reasons.items(),
                                      key=lambda item: (-item[1], item[0])))
@@ -975,6 +990,8 @@ def assess_decision(state, latest, t, research_only=False,
         {
             "symbol": pair,
             "action": "BUY" if side == "buy" else "SHORT",
+            "amountTry": amount,
+            "sizeAudit": sizing_by_pair.get((pair, side)),
             "score": round(score, 3),
             "volatilityPct": round(tech["volatility"], 2),
             "momentum6Pct": round(tech["momentum6"], 2),
@@ -1003,6 +1020,7 @@ def assess_decision(state, latest, t, research_only=False,
     plan["aiChoices"] = [
         {"symbol": pair, "action": "BUY" if side == "buy" else "SHORT",
          "amountTry": amount, "score": round(score, 3),
+         "sizeAudit": sizing_by_pair.get((pair, side)),
          "momentum6Pct": round(tech["momentum6"], 2),
          "volatilityPct": round(tech["volatility"], 2),
          "momentum1hPct": round(quick(pair)["momentum1h"], 2)
@@ -1017,6 +1035,7 @@ def assess_decision(state, latest, t, research_only=False,
         for score, pair, side, amount, tech in candidates[:8]
     ]
     score, pair, side, amount, tech = candidates[0]
+    plan["sizeAudit"] = sizing_by_pair.get((pair, side))
     plan["setupTag"] = setup_for(minute(pair), side)
     plan["contextKey"] = context_key(side, plan["marketRegime"],
                                      tech["volatility"])

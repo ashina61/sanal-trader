@@ -131,6 +131,7 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
                        setupTag=selected.get("setupTag", "hourly"),
                        contextKey=selected.get("contextKey"),
                        amountTry=amount, score=selected["score"],
+                       sizeAudit=selected.get("sizeAudit"),
                        reason=trade_reason,
                        order=(name, side, amount, trade_reason))
         return revised, {"status": "TRADE", "provider": "Groq",

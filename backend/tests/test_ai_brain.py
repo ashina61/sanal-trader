@@ -80,6 +80,29 @@ class AiBrainTests(unittest.TestCase):
         self.assertEqual(plan["order"][0:3], ("ETHUSDT", "short", 30.0))
         self.assertEqual(meta["status"], "TRADE")
 
+    def test_ai_selected_candidate_keeps_its_own_risk_ticket_audit(self):
+        plan = dict(BASE,
+            sizeAudit={"mode": "STANDARD_ENTRY", "amountTry": 50.0},
+            aiChoices=[
+                {"symbol": "BTCUSDT", "action": "BUY",
+                 "amountTry": 50.0, "score": .9,
+                 "sizeAudit": {"mode": "STANDARD_ENTRY", "amountTry": 50.0}},
+                {"symbol": "ETHUSDT", "action": "BUY",
+                 "amountTry": 85.0, "score": 1.2,
+                 "sizeAudit": {
+                     "mode": "QUALIFIED_SPOT_BREAKOUT_RISK_BUDGET",
+                     "amountTry": 85.0,
+                     "estimatedLossAtStopTry": 2.635}},
+            ])
+        chosen, meta = apply_ai_brain(
+            plan, STATE, "fake",
+            ask_fn=lambda _: {"decision": "TRADE", "symbol": "ETHUSDT",
+                              "action": "BUY", "reason": "approved in tests"})
+        self.assertEqual(meta["status"], "TRADE")
+        self.assertEqual(chosen["order"][:3], ("ETHUSDT", "buy", 85.0))
+        self.assertEqual(chosen["sizeAudit"]["amountTry"], 85.0)
+        self.assertEqual(chosen["sizeAudit"]["estimatedLossAtStopTry"], 2.635)
+
     def test_wait_is_valid(self):
         plan, meta = apply_ai_brain(
             BASE, STATE, "fake", ask_fn=lambda ctx: {

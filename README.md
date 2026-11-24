@@ -409,3 +409,23 @@ ortalama, en az üç pozitif sinyal, farklı coin ve tarama zamanı ve güncel
 yapılabilir. Aynı anda en fazla iki breakout açık kalabilir.
 Diğer bütün risk/stop/emir defteri kontrolleri korunur. Hiçbir rakam
 gerçek borsa gerçekleşmesi veya sabit günlük kazanç vaadi değildir.
+
+## Risk bütçesiyle büyüyebilen küçük sanal SPOT denemeleri (v0.9.30)
+
+Mevcut tek sanal kasada işlem başına 25–40 TL giriş, başarılı bir
+%1–3 hareket sonunda dahi çok küçük TL kârı üretir. Bu sürüm **yalnız
+hem geçmiş kapanışlar hem daha sonra gözlenmiş 1 saatlik net sonuçlar
+olumlu olan SPOT breakout denemelerinde** giriş boyutunu biraz büyütür.
+Önceden tüm kasanın %12'sinin yarısını (650 TL kasada yaklaşık 39 TL)
+kullanırken şimdi toplam kasanın **en fazla %18'i** kullanılabilir.
+Aynı anda en fazla 3 breakout, bunların toplamı en fazla %25,
+genel portföy maruziyeti en fazla %78; minimum kasa rezervi %20'dir.
+
+Her yeni deneme girişinde model stop (%2,8), gidiş-dönüş işlem
+komisyonu (%0,2), ve ek kayma (%0,1) ile **tüm özsermayenin en fazla
+%0,60'ı kadar** varsayımsal kayıp bütçesi uygulanır. Bu bir borsa
+stop emri değildir; geciken tarama, anlık fiyat atlaması ve gerçekte
+yüksek kayma bu tutarı aşabilir. Belirsiz fiyat/muhasebe varsa yeni
+giriş bloke olur. Botun AI seçtiği kriptoya ait büyüklük bilgisi
+değiştirilmeden taşınır. Model, **kâr garantisi sunmaz** ve zararların
+TL karşılığını da artırabilir. Tek kasa ve geçmiş emirler korunur.

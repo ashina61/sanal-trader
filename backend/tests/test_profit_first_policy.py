@@ -81,15 +81,15 @@ class ProfitFirstTests(unittest.TestCase):
         self.assertFalse(evaluate(
             state, "BUY", "breakout", "YATAY", NOW)["qualified"])
 
-    def test_no_more_than_two_open_breakout_positions(self):
+    def test_no_more_than_three_open_breakout_positions(self):
         state = upside_probe_state()
-        for index in range(2):
+        for index in range(3):
             symbol = f"TEST{index}USDT"
             state["holdings"][symbol] = {"quantity": 1, "costTry": 50}
             state["openSignals"][symbol] = {"setup": "breakout", "side": "buy"}
         r = evaluate(state, "BUY", "breakout", "YATAY", NOW)
         self.assertFalse(r["qualified"])
-        self.assertEqual(r["openBreakoutPositions"], 2)
+        self.assertEqual(r["openBreakoutPositions"], 3)
 
     def test_losing_spot_trend_and_short_are_rejected(self):
         state = upside_probe_state()
@@ -135,7 +135,14 @@ class ProfitFirstTests(unittest.TestCase):
         self.assertEqual(planned["action"], "BUY")
         self.assertEqual(planned["symbol"], "ETHUSDT")
         self.assertGreater(planned["amountTry"], 5)
-        self.assertLess(planned["amountTry"], 40)
+        # Larger only under the account-level stop-risk and group caps.
+        self.assertGreater(planned["amountTry"], 40)
+        self.assertLessEqual(planned["amountTry"], 117)
+        self.assertEqual(
+            planned["sizeAudit"]["mode"],
+            "QUALIFIED_SPOT_BREAKOUT_RISK_BUDGET")
+        self.assertLessEqual(
+            planned["sizeAudit"]["estimatedLossAtStopTry"], 3.9)
         self.assertEqual(state["trades"], [])  # no imaginary execution
 
 
