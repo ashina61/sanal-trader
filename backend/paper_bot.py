@@ -909,7 +909,7 @@ def assess_decision(state, latest, t, research_only=False,
         setup = setup_for(micro, mode)
         broad_blocked = adverse_edge_review(state, action)["blocked"]
         recovered_lane = lane_recovery(
-            state, action, setup, plan["marketRegime"])
+            state, action, setup, plan["marketRegime"], t)
         if not research_only and broad_blocked and not recovered_lane["qualified"]:
             rejected("Son 24 ileri gözlemde net sonuç negatif; yeni giriş freni")
             continue
