@@ -1,3 +1,11 @@
+## 2026-11-24 — v0.9.27 Net zarar freni ve ileri gözlem denetimi
+
+- Canlı sanal kasanın ileriye dönük kaydettiği son 24 gerçek fiyat gözlemi, SPOT BUY ve 1x SHORT için ayrı izlenir. Yeterli 20+ örnekte komisyon/kayma varsayımı sonrası ortalama net getiri %−0,05 veya altındaysa **ve** kazanan örnek oranı %40 veya altındaysa o yönde **yeni** sanal pozisyon bekletilir. İstatistiksel kâr garantisi değildir.
+- Bu fren yalnızca yeni risk açılmasına uygulanır. SPOT SAT, SHORT COVER, stop, portföy değeri ve koruyucu erken çıkışlar aynen çalışır. Açık pozisyonlar otomatik tasfiye edilmez.
+- Araştırma modundaki doğrulanmış sinyal adayları frenden muaf olmaya devam eder; yeni fiyat gözlemleri ve ileriye dönük ölçümler kaydedildikçe 24 örneklik pencere kayar ve net sonuçlar düzeldiğinde yeni girişler yeniden değerlendirilebilir. Böylece strateji geçmişin kötü sinyallerinde takılıp kalmaz ama körlemesine işlem açmaz.
+- Bot ekranında 'Net sonuç freni' bilgisi kompakt gösterilir. Sıfır AI maliyetli analitik kurallarıdır; yeni ücretli veri sağlayıcısı, yeni kasa veya gerçek borsa emri yoktur.
+- Testler: negatif SPOT/SHORT, pencere toparlanması, yetersiz/bozuk veri, fiyat bazlı zorunlu satış önceliği ve araştırma adaylarının kesilmemesi. Flutter 0.9.27+33.
+
 ## 2026-11-23 — v0.9.26 DEX riskleri, maliyet senaryosu ve net öğrenme
 
 - Ücretsiz GeckoTerminal keşfinde yalnızca gözlenen maksimum dört token için GoPlus kamu Token Security API'sinden sözleşme riskleri araştırılıyor. Honeypot/mint/transfer, EVM vergi ve Solana yetki uyarıları görülebilir; eksik veri UNKNOWN/UNAVAILABLE, hiçbir token güvenli olarak sertifikalandırılmaz.
