@@ -16,6 +16,8 @@ from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
 from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
+from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
+    spot_giveback, short_giveback)
 from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
@@ -557,7 +559,7 @@ def assess_decision(state, latest, t, research_only=False,
         amount = pos["quantity"] * current
         if short_value(pos, current) <= pos["marginTry"] * .10:
             exits.append((130, pair, "cover", amount, "SHORT teminat koruması", technical))
-        elif adverse >= .045:
+        elif adverse >= SHORT_HARD_STOP_PCT:
             exits.append((120 + adverse, pair, "cover", amount,
                           f"SHORT zarar kes: ters hareket %{adverse*100:.1f}", technical))
         elif (minute(pair) is not None
@@ -569,6 +571,12 @@ def assess_decision(state, latest, t, research_only=False,
         elif adverse <= -.035:
             exits.append((100 - adverse, pair, "cover", amount,
                           f"SHORT kâr al: düşüş %{abs(adverse)*100:.1f}", technical))
+        elif (state.get("troughMarksTry", {}).get(pair) is not None
+              and short_giveback(entry, current,
+                                  state["troughMarksTry"][pair])):
+            exits.append((97, pair, "cover", amount,
+                "SHORT gözlenen dip kârını geri vermeme: erken çıkış",
+                technical))
         elif (state.get("troughMarksTry", {}).get(pair) is not None
               and 1 - state["troughMarksTry"][pair] / entry >= .015
               and adverse <= -.004
@@ -606,7 +614,7 @@ def assess_decision(state, latest, t, research_only=False,
         move = quote["priceTry"] / cost - 1
         technical = current_tech(pair)
         # Protective exits can close small remaining dust positions too.
-        if move <= -.045:
+        if move <= -SPOT_HARD_STOP_PCT:
             exits.append((120 - move, pair, "sell", amount,
                           f"Spot zarar kes: düşüş %{abs(move)*100:.1f}", technical))
         elif (minute(pair) is not None
@@ -618,6 +626,12 @@ def assess_decision(state, latest, t, research_only=False,
         elif move >= .035:
             exits.append((100 + move, pair, "sell", amount,
                           f"Spot kâr al: yükseliş %{move*100:.1f}", technical))
+        elif (state.get("peakMarksTry", {}).get(pair) is not None
+              and spot_giveback(cost, quote["priceTry"],
+                                 state["peakMarksTry"][pair])):
+            exits.append((97, pair, "sell", amount,
+                "SPOT gözlenen tepe kârını geri vermeme: erken çıkış",
+                technical))
         elif (state.get("peakMarksTry", {}).get(pair) is not None
               and state["peakMarksTry"][pair] / cost - 1 >= .015
               and move >= .004
