@@ -1,3 +1,11 @@
+## 2026-11-24 — v0.9.31 Gerçek zarar serisi ve yanlış açılan trend freni düzeltildi
+
+- 24 Kasım 12.24 (Türkiye) ölçülen tek sanal kasanın net değerinin 641,83 TL'ye, 650 TL başlangıçtan -8,17 TL'ye gerilediği doğrulandı. Gerçekleşmiş kapanışların net toplamı -3,52 TL; son iki farklı SPOT zarar kes (NEARUSDT, SPCXBUSDT) yaklaşık 9 dakikada toplam -3,04 TL zarar yazdı. Bu rakamlar gerçek zamanlı piyasa verisine bağlıdır, gün boyu sabit değildir.
+- **Kritik mantık hatası düzeltmesi:** SPOT trend'in kapanış sonucu 1/4 -7,65 TL iken 2/6 -9,56 TL'ye düştüğü hâlde, kazanma oranı %25'in üzerine çıktı diye giriş freni kendiliğinden kalkabiliyordu. Artık en az dört kapanış, toplam en az -3 TL ve ortalama net ROI en fazla -%0,75 ise, kazanma sayısının artması tek başına o kaybettiren kurulumun kilidini açamaz. Pozitif net gerçekleşen yeniden değerlendirme veya ayrıca doğrulanmış strateji değişimi gerekir.
+- **Seri zarar kes devre kesicisi:** 90 dakika içinde iki **farklı coinde** gözlenen negatif SPOT SAT veya SHORT COVER 'zarar kes' kapanışı toplamda başlangıç kasasının en az %0,3'ünü kaybettirmişse, ikinci zarardan sonraki en çok 120 dakika boyunca **yalnız yeni** sanal BUY/SHORT girişleri duraklatılır. Diğer güvenlik/strateji frenleri değişmez; zaten açık pozisyonların SPOT SAT/SHORT COVER/STOP korumaları en yüksek öncelikte çalışmaya devam eder.
+- Araştırma modunda yeni giriş simülasyonu olmadan fiyat adayları ve ileri ölçümler toplanmaya devam eder. Zaman aşımı sonunda bu ek fren yeniden değerlendirilir; otomatik kâr vaadi yoktur. Kasa, açık pozisyonlar, emir kayıtları ve ücretler silinmez/değiştirilmez.
+- Bot sayfasında kalan geçici giriş beklemesi ve koruyucu çıkışların çalıştığı gösterilir; Flutter 0.9.31+37. Bağımsız coin/zaman kontrolü, hatalı veri, koruyucu çıkış önceliği, araştırma sürekliliği ve net kayıp regresyon testleri eklendi.
+
 ## 2026-11-24 — v0.9.30 Risk bütçesiyle seçici büyük SPOT pozisyon
 
 - 650 TL'lik tek sanal kasadaki kârlı çıkışlar çoğunlukla 20–80 TL tutarındaki girişlerden geliyor. Örneğin son ALLOUSDT çıkışı +0,39 TL. Pozisyon büyüklüğünü genel piyasa koşullarında rastgele artırmak yerine, **yalnız hem tamamlanmış kazanan kapanış hem ileriye dönük net fiyat gözlemi şartını sağlayan YATAY/SPOT/breakout** denemesine ayrı büyüklük modeli eklendi.
