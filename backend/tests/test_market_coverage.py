@@ -55,8 +55,12 @@ class CoverageTests(unittest.TestCase):
                 return candles_for(t=self.at)
 
             def bars(self, period, n):
-                return [[0, '100', '100', '100', '100', '100',
-                         int((self.at - dt.timedelta(minutes=period * (n-i))).timestamp() * 1000)]
+                # A faithful, fully CLOSED OHLCV Binance-kline test
+                # fixture. The chart engine correctly rejects the old
+                # seven-element close-only stub lacking quote volume.
+                return [[0, '100', '100.25', '99.75', '100', '100',
+                         int((self.at - dt.timedelta(minutes=period * (n-i))).timestamp() * 1000),
+                         '150000']
                         for i in range(n)]
 
             def candles_fast(self, symbol):
