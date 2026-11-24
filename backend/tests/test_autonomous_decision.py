@@ -271,7 +271,7 @@ class AutonomousDecisionTests(unittest.TestCase):
 
     def test_full_portfolio_can_release_declining_held_coin(self):
         # Confirmed steep 4h weakness with meaningful loss may
-        # exit before hard -4.5% stop, not at every minor fluctuation.
+        # exit before the new -2.8% hard stop, not on tiny fluctuations.
         weak = [100 + i * .10 for i in range(168)]
         state = fresh_state()
         quotes = {}
@@ -283,11 +283,11 @@ class AutonomousDecisionTests(unittest.TestCase):
             execute(state, NOW - dt.timedelta(hours=3),
                     pair, "buy", 78, weak[-1], "existing paper long")
             quotes[pair] = {"priceTry": weak[-1], "change24h": 1}
-        # Realistic -2.8% paper decline, strongly negative 1h/4h data.
+        # Observed -2.7% decline, below the strengthened -2.8% stop.
         # No forced replacement entry or invented profitable order.
         pair = "ADAUSDT"
         entry = state["holdings"][pair]["costTry"] / state["holdings"][pair]["quantity"]
-        current = entry * .972
+        current = entry * .973
         quotes[pair]["priceTry"] = current
         state["intraday"][pair] = {
             "fetchedAt": NOW.isoformat(),
