@@ -1,3 +1,12 @@
+## 2026-11-24 — v0.9.28 Kârı geri vermeme ve seçici kazanç denemesi
+
+- 650 TL tek sanal kasanın 25 gerçekleşmiş kapanışındaki net kâr yalnızca +0,08 TL; iki SHORT kapanışı yaklaşık -5,17 TL. Ortalama 1 saatlik ileri sinyal getirisi işlem maliyeti sonrası negatiftir. Yeni stratejiler kâr etmiş sayılmaz.
+- Koruyucu SPOT zarar kes eşiği gözlenen fiyatta %4,5'ten %2,8'e; sanal 1x SHORT zarar kes eşiği %4,5'ten %2,5'e getirildi. Gap, 2 dakikalık manuel tetik ve seyrek GitHub cron gerçek gerçekleşme garantisi vermez.
+- Daha önce GÖZLENEN tepe/dip en az %1,2 elverişli olmuş ve fiyat tepe/dipten en az %0,85 geri dönüp yeniden giriş fiyatına yaklaşmışsa, mevcut SPOT SAT / SHORT COVER muhasebe yoluyla erken koruma değerlendirilir. Fiyat, miktar, geçmiş emir veya kâr uydurulmaz.
+- Küresel olumsuz ileri sinyal freni korunur. Buna rağmen sadece YÜKSELİŞ rejimindeki SPOT breakout kurulumunun en az 20 kapanmış 1 saatlik ileri gözlemi varsa, son 12'si ortalama en az +%0,40 net ve en az 7 pozitif; son 6'sı ortalama en az +%0,15 net ve en az 4 pozitif; en az 4 farklı tarama zamanı ve son 4 saatte son tamamlanmış ölçüm şartlarıyla **yarım pozisyon büyüklüğünde** seçici giriş mümkün olur. Eski lane'ler ve SHORT istisnasız engellenir. Mevcut çok aşamalı sinyal, komisyon, emir defteri ve strateji frenleri aşılamaz.
+- Bu istisna deneme amaçlıdır; bağımlı gözlem, küçük örneklem ve gelecekte kâr belirsizliği sürer. Araştırma modu, açık pozisyonlar, koruyucu çıkışlar ve sanal kasa geçmişi korunur.
+- Yalnızca veriye dayalı stop, kâr geri verme, olağanüstü kayma ve seçici lane senaryoları için regresyon testleri eklendi. Flutter 0.9.28+34.
+
 ## 2026-11-24 — v0.9.27 Net zarar freni ve ileri gözlem denetimi
 
 - Canlı sanal kasanın ileriye dönük kaydettiği son 24 gerçek fiyat gözlemi, SPOT BUY ve 1x SHORT için ayrı izlenir. Yeterli 20+ örnekte komisyon/kayma varsayımı sonrası ortalama net getiri %−0,05 veya altındaysa **ve** kazanan örnek oranı %40 veya altındaysa o yönde **yeni** sanal pozisyon bekletilir. İstatistiksel kâr garantisi değildir.
