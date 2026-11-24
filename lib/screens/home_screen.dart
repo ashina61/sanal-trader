@@ -297,6 +297,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         (circuit['BUY'] as Map)['blocked'] == true;
     final shortPaused = circuit['SHORT'] is Map &&
         (circuit['SHORT'] as Map)['blocked'] == true;
+    final sizing = plan['sizeAudit'] is Map
+        ? plan['sizeAudit'] as Map : const {};
+    final riskTicket = plan['action'] == 'BUY' &&
+        sizing['mode'] == 'QUALIFIED_SPOT_BREAKOUT_RISK_BUDGET';
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 22),
@@ -351,6 +355,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Expanded(child: _stat('Açık işlem',
                   '${(s?.holdings.length ?? 0) + (s?.shorts.length ?? 0)}')),
             ]),
+            if (riskTicket) ...[
+              const SizedBox(height: 9),
+              Text('Seçici SPOT işlem: '
+                  '${formatTry((sizing['amountTry'] as num).toDouble())} · '
+                  'model stop senaryosu: '
+                  '${formatTry((sizing['estimatedLossAtStopTry'] as num).toDouble())}',
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: PremiumColors.gold)),
+              const Text('Fiyat boşluğu veya emir kayması bu kaybı aşabilir.',
+                  style: TextStyle(fontSize: 10,
+                      color: PremiumColors.muted)),
+            ],
           ],
         )),
         const SizedBox(height: 9),
