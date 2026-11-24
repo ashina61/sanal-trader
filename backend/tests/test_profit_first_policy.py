@@ -22,8 +22,10 @@ def paper_stats(state):
 
 
 def sample(action, setup, regime, gain, index):
-    timestamp = NOW - dt.timedelta(minutes=20-index * 2)
-    measured = NOW - dt.timedelta(minutes=12-index * 2)
+    # Synthetic test fixtures mimic genuine later observations separated
+    # by at least one hour; neither sample nor validation is a wallet fill.
+    measured = NOW - dt.timedelta(minutes=max(1, 30 - index))
+    timestamp = measured - dt.timedelta(minutes=62)
     return {
         "action": action, "setup": setup, "regime": regime,
         "netReturnPct": gain, "at": timestamp.isoformat(),
