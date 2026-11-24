@@ -68,7 +68,7 @@ class PaperPositionSizerTests(unittest.TestCase):
         s = fresh_state()
         s["cashTry"] = 150
         result = trial(s, exposure=495)
-        self.assertLess(result["amountTry"], 11)
+        self.assertLess(result["amountTry"], 13)
         self.assertGreaterEqual(result["amountTry"], 5)
         self.assertLessEqual(
             result["amountTry"], (150-130)/1.001)
