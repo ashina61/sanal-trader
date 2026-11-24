@@ -6,6 +6,7 @@ circuit can only PAUSE new BUY/SHORT entries, never force trades or stop exits.
 Research-only candidate observations continue and can reopen the gate once
 the rolling sample improves. No second wallet and no persistent parameters.
 """
+import datetime as dt
 import math
 import statistics
 
@@ -60,7 +61,7 @@ def snapshot(state):
             "newOrdersFromResearch": False}
 
 
-def lane_recovery(state, action, setup, regime):
+def lane_recovery(state, action, setup, regime, now):
     """Qualified *limited-size* exploratory lane while broad direction loses.
 
     This is a narrowly-scoped opportunity to collect real paper outcomes, not
@@ -71,14 +72,30 @@ def lane_recovery(state, action, setup, regime):
     """
     evidence = state.get("forwardEvidence")
     completed = evidence.get("completed", []) if isinstance(evidence, dict) else []
-    values = [float(row["netReturnPct"])
-              for row in completed if isinstance(row, dict)
-              and row.get("action") == action and row.get("setup") == setup
-              and row.get("regime") == regime
-              and isinstance(row.get("netReturnPct"), (int, float))
-              and not isinstance(row["netReturnPct"], bool)
-              and math.isfinite(row["netReturnPct"])]
+    rows = [row for row in completed if isinstance(row, dict)
+            and row.get("action") == action and row.get("setup") == setup
+            and row.get("regime") == regime
+            and isinstance(row.get("netReturnPct"), (int, float))
+            and not isinstance(row["netReturnPct"], bool)
+            and math.isfinite(row["netReturnPct"])]
+    values = [float(row["netReturnPct"]) for row in rows]
     tail12, tail6 = values[-12:], values[-6:]
+    # Consecutive candidates often come from the same 2-minute scan.
+    # Correlated same-scan samples are not independent evidence of a lane.
+    distinct12 = len({r.get("at") for r in rows[-12:]
+                      if isinstance(r.get("at"), str)})
+    distinct6 = len({r.get("at") for r in rows[-6:]
+                     if isinstance(r.get("at"), str)})
+    last_fresh = False
+    if rows and isinstance(rows[-1].get("measuredAt"), str) and isinstance(
+            now, dt.datetime) and now.tzinfo is not None:
+        try:
+            last_time = dt.datetime.fromisoformat(
+                rows[-1]["measuredAt"].replace("Z", "+00:00"))
+            age = (now - last_time).total_seconds()
+            last_fresh = 0 <= age <= 4 * 3600
+        except (ValueError, OverflowError):
+            pass
     avg12 = statistics.mean(tail12) if tail12 else None
     avg6 = statistics.mean(tail6) if tail6 else None
     wins12 = sum(v > 0 for v in tail12)
@@ -86,6 +103,8 @@ def lane_recovery(state, action, setup, regime):
     qualified = (action == "BUY" and setup == "breakout"
                  and regime == "YÜKSELİŞ"
                  and len(values) >= 20 and len(tail12) == 12
+                 and distinct12 >= 4 and distinct6 >= 2
+                 and last_fresh
                  and avg12 >= .40 and wins12 >= 7
                  and avg6 >= .15 and wins6 >= 4)
     return {
@@ -94,6 +113,7 @@ def lane_recovery(state, action, setup, regime):
         "recent12AvgNetPct": round(avg12, 4) if avg12 is not None else None,
         "recent6AvgNetPct": round(avg6, 4) if avg6 is not None else None,
         "recent12Wins": wins12, "recent6Wins": wins6,
+        "distinctScanTimes12": distinct12, "recentlyMeasured": last_fresh,
         "sizeMultiplier": 0.5 if qualified else 0.0,
         "researchOnlyWhenUnqualified": True,
         "note": "Küçük/bağımlı örneklem; gelir veya kazanma olasılığı kanıtı değil.",
