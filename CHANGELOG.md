@@ -1,3 +1,10 @@
+## 2026-11-24 — v0.9.33 Net kârlılık avantajı olmadan yeni sanal giriş yok
+
+- Gerçek mevcut tek sanal kasanın son erişilen fiyat gözlemi 640,20 TL; başlangıç 650 TL. 181 ileriye dönük 1 saatlik sinyal sonucunda ortalama varsayımsal **-%0,335 net** görüldü. Kod/test başarısı para kazanma kanıtı değildir.
+- Yeni salt-okunur **ekonomik kârlılık hazır olma** denetimi her yön için ayrı uygulanır. Yön bazında 30+ tamamlanmış ileri fiyat gözlemi olduktan sonra yeni sanal SPOT BUY / 1x SHORT riskine, en az 60 tamamlanmış sonuç, son 60'ta +%0,15 net ortalama, son 24'te +%0,20 net ortalama ve en az 14 pozitif, en az 8 farklı coin ve en son 3 saatte gözlenmiş yeni ölçüm birlikte yoksa izin verilmez. Bu göstergeler kârı garanti etmez; yalnızca yeni giriş veto koşuludur.
+- SHORT'un son 24 gözlemi geçici olumlu olsa bile son 60 negatifse bot yeni risk açmaz. Pozisyonların var olan SPOT SAT / SHORT COVER / STOP koruması ve araştırma modu çalışır. Emir geçmişi, tek kasa, fiyat kaynakları ve gerçek emir olmaması korunur.
+- Bot sayfasında SPOT/SHORT için 'Net kâr avantajı doğrulanmadı' gösterilir. Daha ileri net ölçümler gerektiğinde aynı kontrol tekrar değerlendirilir. Sürüm 0.9.33+39.
+
 ## 2026-11-24 — v0.9.32 Kasa mutabakatı ve tekrarlı çalışma koruması
 
 - Aynı GitHub çalışma kimliğinin gecikmiş tekrarı ikinci karar üretmez; son 2048 kimlik saklanır.
