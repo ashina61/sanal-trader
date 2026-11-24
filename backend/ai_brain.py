@@ -28,6 +28,11 @@ def _ask_groq(context, api_key, model):
              "Favor credible risk-adjusted compounding with a cash reserve. "
              "Use current candidate strength, recent and multi-hour momentum, "
              "volatility, regime and round-trip fees as primary evidence. "
+             "Read only the supplied VERIFIED, fully CLOSED 1h/15m/1m OHLCV "
+             "chartReading evidence: EMA trend, RSI, ATR, candle wicks, "
+             "support/resistance and quote-volume confirmation. "
+             "A chart verdict is an explanation, NOT a profit probability. "
+             "Never invent a screenshot, candle, price or chart pattern. "
              "Closed-trade win rate from fewer than 20 trades is a tiny sample; "
              "do NOT reject all approved current candidates solely because "
              "two recent paper closes lost money or past net return is negative. "
@@ -132,6 +137,7 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
                        contextKey=selected.get("contextKey"),
                        amountTry=amount, score=selected["score"],
                        sizeAudit=selected.get("sizeAudit"),
+                       chartReadout=selected.get("chartReading"),
                        reason=trade_reason,
                        order=(name, side, amount, trade_reason))
         return revised, {"status": "TRADE", "provider": "Groq",

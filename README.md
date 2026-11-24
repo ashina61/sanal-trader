@@ -464,3 +464,36 @@ Koruyucu SPOT SAT, SHORT COVER, stop ve portföy hesaplamaları önce
 çalışmaya devam eder. Research-only adaylar yeni doğrulanabilir fiyat
 gözlemleri üretmeye devam eder, tek sanal kasa ve 650 TL başlangıç
 değişmez. Hiçbir gerçek kripto emri gönderilmez.
+
+## Gerçek mum grafiğini okuyabilen çoklu zaman dilimi katmanı (v0.9.34)
+
+Eski motor, Binance kline mumlarını yalnız kapanış fiyatlarına indirgiyor,
+mum gövdesini, fitilini ve hacmini kaybediyordu. Artık aynı 1s, 15dk, 1dk
+kamuya açık yanıtından **yalnız gerçekten kapanmış** OHLCV mumlarını parse
+eder: EMA (1s/15dk 20/50, 1dk 8/21), RSI(14), ATR(14), 20 mumluk
+destek/direnç, fitil-gövde tipi, kırılımın mum kapanışı ve hacmi
+(önceki 20 mumun medyanına göre), kısa EMA'dan uzaklaşma ve sahte
+kırılım işaretleri. Hatalı/eski/açık mumlar, varsayılan mumlar veya
+uydurulmuş fiyatlar yok. API istek sayısı artmaz; yalnız küçük özetler
+kalıcı cüzdan kaydına eklenir.
+
+Her yeni risk adayı üç zaman diliminden teyit alır. Ters ana trend,
+15dk ters yön, 1dk sahte kırılım, aşırı RSI/EMA veya yetersiz hacim
+yalnız yeni BUY/SHORT **VETO** edebilir; hiçbiri tek başına ticaret
+başlatamaz. Önceden eklenen komisyon sonrası net avantaj, nakit,
+spread, haber ve koruyucu risk kuralları korunur. Araştırma adaylarında
+veri eksikliği de dürüstçe NOT_READY olarak kaydedilir.
+
+Bir grafik yorumu, bir saat sonra **gerçek kamu fiyatı** gözlendiğinde
+yalnız araştırma amaçlı `CONFIRMED / MIXED / REJECTED / NOT_READY`
+etiketiyle analiz edilir. Bu emre dönüştürülmüş kâr değil, ileriye
+dönük model testi. Yeni yorumların net kârlılığa katkısı yeterince
+kanıtlanana kadar rakamlara bakıp otomatik güven veya yüksek tutarlı
+emir oluşmaz. **Yapay zekâ şu an kendi kendine eğitilen bir görsel model
+değildir**; deterministik, açıklanabilir teknik grafik okuyucusudur,
+üstüne zamanla ileri fiyat sonuçlarından kanıt biriktirir.
+
+Radar sekmesinin açılır grafik alanında 1s/15dk yön, 1dk RSI/hacim,
+destek, direnç ve bir saatlik sonradan ölçülen doğruluk sonuçları vardır.
+650 TL ilk sanal kasa, tek hesap, açık pozisyonlar, gerçek para
+kullanmama ve mevcut koruyucu SELL/COVER önceliği değişmez.

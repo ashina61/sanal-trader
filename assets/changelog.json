@@ -3,6 +3,18 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.34",
+      "date": "2026-11-24",
+      "title": "Gerçek grafik okuma: EMA, RSI, ATR, destek/direnç ve hacim",
+      "details": [
+        "Binance'in tamamlanmış 1s/15dk/1dk mumlarının OHLCV gövde-fitil-hacim bilgisi artık yalnız kapanış fiyatına indirgenmeden analiz ediliyor. Yeni API isteği veya ücret gerekmiyor.",
+        "EMA 20/50, 1dk EMA 8/21, RSI 14, ATR 14, 20 mumluk destek/direnç, hacim teyidi, sahte kırılım ve fiyatın ortalamadan uzaklaşması gerekçeli şekilde raporlanıyor.",
+        "Eksik, kapanmamış veya eski mum yeni giriş için teyit sayılmıyor. Grafik okuması tek başına emir açmaz ve net zararlı stratejilere izin vermez; koruyucu satışlar önceliklidir.",
+        "Radar ekranında kompakt, açılır grafik yorumlama alanı var. Geçmiş veriyi kazanç gibi göstermeden, her araştırma adayının CONFIRMED/MIXED/REJECTED/NOT_READY etiketinin gerçek 1 saat sonraki net sonucu izleniyor.",
+        "Groq yalnız doğrulanmış adayların gerçek grafik özetlerini yorumlayabilir. Başlangıç kasa, komisyonlar ve tek sanal cüzdan korundu. Kazanç garantisi yoktur. 0.9.34+40."
+      ]
+    },
+    {
       "version": "0.9.33",
       "date": "2026-11-24",
       "title": "Net kâr avantajı doğrulanmayana yeni sanal işlem yok",
