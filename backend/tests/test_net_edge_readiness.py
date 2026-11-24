@@ -32,7 +32,11 @@ class NetEdgeReadinessTests(unittest.TestCase):
         research = assess_decision(state, quotes, NOW, research_only=True)
         self.assertEqual(plan["action"], "WAIT")
         self.assertTrue(plan["netEdgeReadiness"]["BUY"]["blocked"])
-        self.assertIn("Net pozitif ekonomik sinyal", str(plan["rejectReasons"]))
+        # Per-setup risk veto may reject this symbol first; the independent
+        # economic gate still reports the failing overall net return.
+        self.assertTrue(plan["rejectReasons"])
+        self.assertEqual(plan["netEdgeReadiness"]["BUY"]["status"],
+                         "NO_PROVEN_NET_EDGE")
         self.assertTrue(any(row["symbol"] == "BTCUSDT"
                             for row in research["candidates"]))
         self.assertIsNone(research["order"])
