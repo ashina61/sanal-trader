@@ -470,6 +470,7 @@ def assess_decision(state, latest, t, research_only=False,
         "candidates": [], "order": None,
         "edgeCircuit": adverse_edge_snapshot(state),
         "netEdgeReadiness": economic_readiness_snapshot(state, t),
+        "chartReaderVersion": "ohlcv-v1",
         "profitFirst": profit_first_review(state, "BUY", "breakout", "YATAY", t),
         "lossCooldown": recent_stop_review(state, t),
     }
@@ -823,6 +824,7 @@ def assess_decision(state, latest, t, research_only=False,
     candidates = []
     reasons = {}
     sizing_by_pair = {}
+    charts_by_pair = {}
     def rejected(label):
         reasons[label] = reasons.get(label, 0) + 1
     for pair, quote in latest.items():
@@ -928,6 +930,13 @@ def assess_decision(state, latest, t, research_only=False,
             rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
             continue
         action = "BUY" if mode == "buy" else "SHORT"
+        # The chart reader uses ONLY verified fully closed candles. A chart
+        # veto cannot approve an order; economic gate still has final say.
+        chart = chart_entry_review(state, pair, mode, t)
+        charts_by_pair[(pair, mode)] = chart
+        if not research_only and chart["blocked"]:
+            rejected("Grafik filtresi: " + chart["reasons"][0])
+            continue
         if (not research_only and
                 economic_readiness(state, action, t)["blocked"]):
             rejected("Net pozitif ekonomik sinyal doğrulanmadı; "
@@ -997,6 +1006,11 @@ def assess_decision(state, latest, t, research_only=False,
             + context_adjustment(state, learned_context)
             + evidence_bias(state, "BUY" if mode == "buy" else "SHORT",
                             plan["marketRegime"]))
+        # Explanations are an advisory tie-break, not return forecasts.
+        if chart["verdict"] == "CONFIRMED":
+            score = round(score + .06, 4)
+        elif chart["verdict"] == "MIXED":
+            score = round(score - .04, 4)
         if micro is not None:
             evidence = min(abs(micro["momentum15"]),
                            abs(tech["momentum6"]) / 2)
@@ -1015,6 +1029,7 @@ def assess_decision(state, latest, t, research_only=False,
             "action": "BUY" if side == "buy" else "SHORT",
             "amountTry": amount,
             "sizeAudit": sizing_by_pair.get((pair, side)),
+            "chartReading": charts_by_pair.get((pair, side)),
             "score": round(score, 3),
             "volatilityPct": round(tech["volatility"], 2),
             "momentum6Pct": round(tech["momentum6"], 2),
@@ -1044,6 +1059,7 @@ def assess_decision(state, latest, t, research_only=False,
         {"symbol": pair, "action": "BUY" if side == "buy" else "SHORT",
          "amountTry": amount, "score": round(score, 3),
          "sizeAudit": sizing_by_pair.get((pair, side)),
+         "chartReading": charts_by_pair.get((pair, side)),
          "momentum6Pct": round(tech["momentum6"], 2),
          "volatilityPct": round(tech["volatility"], 2),
          "momentum1hPct": round(quick(pair)["momentum1h"], 2)
@@ -1059,6 +1075,7 @@ def assess_decision(state, latest, t, research_only=False,
     ]
     score, pair, side, amount, tech = candidates[0]
     plan["sizeAudit"] = sizing_by_pair.get((pair, side))
+    plan["chartReadout"] = charts_by_pair.get((pair, side))
     plan["setupTag"] = setup_for(minute(pair), side)
     plan["contextKey"] = context_key(side, plan["marketRegime"],
                                      tech["volatility"])
@@ -1569,6 +1586,32 @@ def _cycle(state, market, t, clock=None):
         state["decisionPlan"]["signalStats"] = state.get("signalStats", {})
         state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
         state["decisionPlan"]["forwardEvidence"] = forward_summary(state)
+        state["decisionPlan"]["chartLearning"] = chart_learning_summary(state)
+        # Compact learning dashboard: up to six genuinely observed
+        # three-timeframe chart reads. No raw OHLC arrays are persisted here.
+        chart_radar = []
+        for pair in list(CORE) + [
+                p for p in latest if p not in CORE]:
+            if len(chart_radar) >= 6:
+                break
+            view = chart_entry_review(state, pair, "buy", t)
+            if view["verdict"] in ("NOT_READY", "LEGACY_TEST"):
+                continue
+            charts = view["timeframes"]
+            chart_radar.append({
+                "symbol": pair,
+                "trend1h": charts["1h"]["trend"],
+                "trend15m": charts["15m"]["trend"],
+                "rsi1m": charts["1m"]["rsi"],
+                "volumeRatio1m": charts["1m"]["volumeRatio"],
+                "supportTry": charts["15m"]["supportTry"],
+                "resistanceTry": charts["15m"]["resistanceTry"],
+                "pattern1m": charts["1m"]["pattern"],
+                "bullTrap": charts["1m"]["bullTrap"],
+                "spotVerdict": view["verdict"],
+                "reasons": view["reasons"][:2],
+            })
+        state["decisionPlan"]["chartRadar"] = chart_radar
         state["decisionPlan"]["researchSignals"] = len(
             research_plan.get("candidates", []))
         state["decisionPlan"]["marketPulse"] = state.get("marketPulse", {})
