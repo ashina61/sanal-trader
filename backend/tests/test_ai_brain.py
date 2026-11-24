@@ -89,6 +89,9 @@ class AiBrainTests(unittest.TestCase):
                  "sizeAudit": {"mode": "STANDARD_ENTRY", "amountTry": 50.0}},
                 {"symbol": "ETHUSDT", "action": "BUY",
                  "amountTry": 85.0, "score": 1.2,
+                 "chartReading": {
+                     "verdict": "CONFIRMED", "blocked": False,
+                     "reasons": ["15dk ve 1s olumlu"], "timeframes": {}},
                  "sizeAudit": {
                      "mode": "QUALIFIED_SPOT_BREAKOUT_RISK_BUDGET",
                      "amountTry": 85.0,
@@ -102,6 +105,7 @@ class AiBrainTests(unittest.TestCase):
         self.assertEqual(chosen["order"][:3], ("ETHUSDT", "buy", 85.0))
         self.assertEqual(chosen["sizeAudit"]["amountTry"], 85.0)
         self.assertEqual(chosen["sizeAudit"]["estimatedLossAtStopTry"], 2.635)
+        self.assertEqual(chosen["chartReadout"]["verdict"], "CONFIRMED")
 
     def test_wait_is_valid(self):
         plan, meta = apply_ai_brain(
