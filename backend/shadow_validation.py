@@ -133,6 +133,9 @@ def record(state, latest, plan, t, ai_meta=None):
             "entryPriceTry": price,
             "regime": plan.get("marketRegime", "UNKNOWN"),
             "setup": candidate.get("setupTag", "hourly"),
+            "chartVerdict": (
+                candidate.get("chartReading", {}).get("verdict")
+                if isinstance(candidate.get("chartReading"), dict) else None),
             "candidateScore": candidate.get("score"),
             "aiStatus": str(ai_status)[:32],
             "selectedByAi": bool(
