@@ -295,6 +295,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ? plan['edgeCircuit'] as Map : const {};
     final buyPaused = circuit['BUY'] is Map &&
         (circuit['BUY'] as Map)['blocked'] == true;
+    final edge = plan['netEdgeReadiness'] is Map
+        ? plan['netEdgeReadiness'] as Map : const {};
+    final noSpotNet = edge['BUY'] is Map &&
+        (edge['BUY'] as Map)['blocked'] == true;
+    final noShortNet = edge['SHORT'] is Map &&
+        (edge['SHORT'] as Map)['blocked'] == true;
     final shortPaused = circuit['SHORT'] is Map &&
         (circuit['SHORT'] as Map)['blocked'] == true;
     final cooldown = plan['lossCooldown'] is Map
@@ -347,6 +353,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   maxLines: 2, overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11,
                       color: PremiumColors.gold,
+                      fontWeight: FontWeight.w700))),
+              ]),
+            ],
+            if (noSpotNet || noShortNet) ...[
+              const SizedBox(height: 7),
+              Row(children: [
+                const Icon(Icons.query_stats_outlined, size: 14,
+                    color: PremiumColors.danger),
+                const SizedBox(width: 5),
+                Expanded(child: Text(
+                  'Net kâr avantajı doğrulanmadı: '
+                  '${noSpotNet ? 'SPOT ' : ''}'
+                  '${noShortNet ? 'SHORT' : ''} · '
+                  'yeni risk bekliyor, sanal sinyaller ölçülüyor',
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11,
+                      color: PremiumColors.danger,
                       fontWeight: FontWeight.w700))),
               ]),
             ],
