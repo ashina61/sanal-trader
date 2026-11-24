@@ -77,6 +77,14 @@ def _forward_lane(state, action, setup, regime, t):
 def evaluate(state, action, setup, regime, now):
     """Profit-led, half-sized exception for observed SIDEWAYS SPOT breakout."""
     realized = _realized(state, "spot:breakout")
+    trend = _realized(state, "spot:trend")
+    short_breakdown = _realized(state, "short:breakdown")
+    short_trend = _realized(state, "short:trend")
+    short_net = {
+        "closed": short_breakdown["closed"] + short_trend["closed"],
+        "wins": short_breakdown["wins"] + short_trend["wins"],
+        "netTry": round(short_breakdown["netTry"] + short_trend["netTry"], 4),
+    }
     forward = _forward_lane(state, "BUY", "breakout", "YATAY", now)
     active = sum(1 for symbol, item in state.get("openSignals", {}).items()
                  if isinstance(item, dict) and item.get("side") == "buy"
@@ -103,6 +111,8 @@ def evaluate(state, action, setup, regime, now):
         "qualified": bool(eligible),
         "action": action, "setup": setup, "regime": regime,
         "realizedSpotBreakout": realized,
+        "realizedSpotTrend": trend,
+        "realizedShort": short_net,
         "forwardSidewaysBreakout": forward,
         "openBreakoutPositions": active,
         "sizeMultiplier": MAX_PROBE_SIZE_MULTIPLIER if eligible else 0.0,
