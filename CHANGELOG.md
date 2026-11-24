@@ -1,3 +1,11 @@
+## 2026-11-24 — v0.9.29 Gerçekleşmiş kazanan kurulumu ayıran SPOT denemesi
+
+- Tek sanal kasanın bu sürüm öncesi kapanan, sinyal etiketli SPOT kırılım işlemleri: 8/8 kârlı, toplam +11,45 TL; SPOT trend: 1/4 kârlı, -7,65 TL; SHORT: 0/3 kârlı, -6,80 TL. Bu tarihsel ve seçilmiş örneklem **kârlılık garantisi değildir**, açık pozisyonlar bu karşılaştırmaya dahil değildir.
+- Yeni **kâr öncelikli deneme politikası**: sadece YATAY rejimde ve 1dk gerçek breakout sinyalinde, geçmişte en az 6 tamamlanmış SPOT breakout işlemi, >=%75 kazanan, >=+2 TL gerçekleşmiş net ve ortalama en az +%0,75 net ROI varsa değerlendirme sürer. Buna ek, aynı kurulumun son en az 6 daha sonra gözlenmiş 1 saatlik fiyat sonucunda ortalama en az +%0,10 net, en az 3 pozitif, 5 farklı tarama ve 5 farklı coin, en son ölçüm 3 saatten güncel olmalıdır.
+- Bu iki bağımsız-kısmen-ilişkili kanıt kümesi olumluysa geniş yönün net negatif giriş frenine **en fazla yarım pozisyon büyüklüğüyle**, aynı anda en fazla iki açık breakout pozisyonu olacak şekilde sınırlı sanal test istisnası mümkün. Mevcut haber, komisyon, emir defteri, teknik teyit, konum, geçmiş ve risk frenleri aşılmaz. Kurulum şartları olumsuza dönerse izne son verilir.
+- Son dört kapanan SPOT trendi güçlü net zarar ve düşük kazanma oranındaysa o kurulumda yeni risk bekletilir. Üç SHORT kapanışı 3/3 zararlı olduğundan, yönün ileriye dönük son 24 sinyali belirgin biçimde pozitif iyileşmeden yeni SHORT riski tekrar açılmaz. Koruyucu satış ve SHORT kapama hep önceliklidir.
+- Bot/Kâr sayfasındaki öğrenme kartına 'Hangi strateji gerçekten kazandı?' başlıklı kısa, açılır net performans tablosu eklendi. **Tek kasa korunur**, ikinci demo cüzdan veya gerçek emir yok. Sürüm 0.9.29+35.
+
 ## 2026-11-24 — v0.9.28 Kârı geri vermeme ve seçici kazanç denemesi
 
 - 650 TL tek sanal kasanın 25 gerçekleşmiş kapanışındaki net kâr yalnızca +0,08 TL; iki SHORT kapanışı yaklaşık -5,17 TL. Ortalama 1 saatlik ileri sinyal getirisi işlem maliyeti sonrası negatiftir. Yeni stratejiler kâr etmiş sayılmaz.

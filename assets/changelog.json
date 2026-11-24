@@ -3,6 +3,17 @@
   "updatedAt": "2026-11-24",
   "releases": [
     {
+      "version": "0.9.29",
+      "date": "2026-11-24",
+      "title": "Net kazanan SPOT kurulumlarıyla sınırlı sanal denemeler",
+      "details": [
+        "Kapanmış sanal işlemler SPOT breakout (8/8 +11,45 TL), SPOT trend (1/4 −7,65 TL) ve SHORT (0/3 −6,80 TL) olarak ayrıldı. Küçük örneklemler kazanç garantisi değildir.",
+        "YATAY rejimde SPOT breakout, gerçek kapanmış işlem sonucu ve son 6 gerçek ileriye dönük 1 saatlik fiyat gözlemi birlikte olumluysa, negatif genel sinyal frenine rağmen yalnız yarım büyüklükte sınırlı sanal denemeye adaydır.",
+        "En fazla iki açık breakout; haber, komisyon, fiyat, giriş onayı, sipariş defteri, strateji ve risk kontrolleri aynen uygulanır. SPOT trend/SHORT zarar örnekleri yeni riskte ayrı değerlendirilir.",
+        "Bot ve Kâr sayfalarına strateji bazlı net kazanma tablosu açılır şekilde eklendi. Tek kasa korunur, otomatik kâr garanti edilmez. Flutter 0.9.29+35."
+      ]
+    },
+    {
       "version": "0.9.28",
       "date": "2026-11-24",
       "title": "Kâr geri verme koruması ve seçici breakout denemesi",

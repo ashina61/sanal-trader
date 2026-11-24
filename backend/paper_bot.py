@@ -18,6 +18,7 @@ from backend.ai_brain import apply_ai_brain
 from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
     spot_giveback, short_giveback)
+from backend.profit_first_policy import evaluate as profit_first_review, historical_loss_guard
 from backend.trade_audit import summarize as summarize_trades
 from backend.smart_money import refresh as refresh_smart_money
 from backend.free_dex_radar import refresh as refresh_free_dex_radar
@@ -459,6 +460,7 @@ def assess_decision(state, latest, t, research_only=False,
         "screened": len(latest), "rejectReasons": {},
         "candidates": [], "order": None,
         "edgeCircuit": adverse_edge_snapshot(state),
+        "profitFirst": profit_first_review(state, "BUY", "breakout", "YATAY", t),
     }
     def wait(reason):
         plan["reason"] = reason
@@ -906,11 +908,19 @@ def assess_decision(state, latest, t, research_only=False,
             rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
             continue
         action = "BUY" if mode == "buy" else "SHORT"
+        if not research_only and historical_loss_guard(
+                state, action, setup_for(micro, mode))["blocked"]:
+            rejected("Kapanmış sanal pozisyonlar net zararlı; bu tür giriş bekletildi")
+            continue
         setup = setup_for(micro, mode)
         broad_blocked = adverse_edge_review(state, action)["blocked"]
         recovered_lane = lane_recovery(
             state, action, setup, plan["marketRegime"], t)
-        if not research_only and broad_blocked and not recovered_lane["qualified"]:
+        profit_trial = profit_first_review(
+            state, action, setup, plan["marketRegime"], t)
+        if (not research_only and broad_blocked
+                and not recovered_lane["qualified"]
+                and not profit_trial["qualified"]):
             rejected("Son 24 ileri gözlemde net sonuç negatif; yeni giriş freni")
             continue
         if (not research_only and mode == "short" and
@@ -927,10 +937,13 @@ def assess_decision(state, latest, t, research_only=False,
                  .65 if tech["volatility"] > 6 else 1.0)
         if mode == "short":
             scale *= short_size_multiplier(state)
-        if not research_only and broad_blocked and recovered_lane["qualified"]:
-            # A small, observed favorable lane may cautiously reopen while
-            # the wider direction is negative. Never raise portfolio caps.
-            scale *= recovered_lane["sizeMultiplier"]
+        if not research_only and broad_blocked:
+            # Neither limited experiment can override news, strategy,
+            # liquidity, exposure, or other safety gates. Never double boost.
+            if recovered_lane["qualified"]:
+                scale *= recovered_lane["sizeMultiplier"]
+            elif profit_trial["qualified"]:
+                scale *= profit_trial["sizeMultiplier"]
         amount = (MIN_ORDER if research_only else
                   math.floor(max(0.0, upper) * scale * 100) / 100)
         if amount < MIN_ORDER:
