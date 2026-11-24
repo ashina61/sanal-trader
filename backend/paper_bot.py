@@ -29,7 +29,8 @@ from backend.market_breadth import market_breadth
 from backend.scan_engine import fetch_candle_batch
 from backend.runtime_status import start as start_runtime, market_seen, finish as finish_runtime
 from backend.evidence_guard import gate_summary, strategy_gate, strategy_summary
-from backend.forward_edge_circuit import review as adverse_edge_review, snapshot as adverse_edge_snapshot
+from backend.forward_edge_circuit import (review as adverse_edge_review,
+    snapshot as adverse_edge_snapshot, lane_recovery)
 from backend.net_objective import net_liquidation
 from backend.market_coverage import (MIN_VOLUME_USDT, HOURLY_BATCH, FAST_BATCH,
     minute_focus, due_batch, snapshot as coverage_snapshot)
@@ -904,8 +905,12 @@ def assess_decision(state, latest, t, research_only=False,
         if not research_only and gate["blocked"]:
             rejected("Son gözlenen sinyal sonuçları negatif; strateji yeni risk bekletildi")
             continue
-        if not research_only and adverse_edge_review(
-                state, "BUY" if mode == "buy" else "SHORT")["blocked"]:
+        action = "BUY" if mode == "buy" else "SHORT"
+        setup = setup_for(micro, mode)
+        broad_blocked = adverse_edge_review(state, action)["blocked"]
+        recovered_lane = lane_recovery(
+            state, action, setup, plan["marketRegime"])
+        if not research_only and broad_blocked and not recovered_lane["qualified"]:
             rejected("Son 24 ileri gözlemde net sonuç negatif; yeni giriş freni")
             continue
         if (not research_only and mode == "short" and
@@ -922,6 +927,10 @@ def assess_decision(state, latest, t, research_only=False,
                  .65 if tech["volatility"] > 6 else 1.0)
         if mode == "short":
             scale *= short_size_multiplier(state)
+        if not research_only and broad_blocked and recovered_lane["qualified"]:
+            # A small, observed favorable lane may cautiously reopen while
+            # the wider direction is negative. Never raise portfolio caps.
+            scale *= recovered_lane["sizeMultiplier"]
         amount = (MIN_ORDER if research_only else
                   math.floor(max(0.0, upper) * scale * 100) / 100)
         if amount < MIN_ORDER:
