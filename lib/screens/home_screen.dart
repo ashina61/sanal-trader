@@ -291,6 +291,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final s = _snapshot;
     final plan = s?.decisionPlan ?? const <String, dynamic>{};
     final ai = plan['aiBrain'] is Map ? plan['aiBrain'] as Map : const {};
+    final circuit = plan['edgeCircuit'] is Map
+        ? plan['edgeCircuit'] as Map : const {};
+    final buyPaused = circuit['BUY'] is Map &&
+        (circuit['BUY'] as Map)['blocked'] == true;
+    final shortPaused = circuit['SHORT'] is Map &&
+        (circuit['SHORT'] as Map)['blocked'] == true;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 22),
@@ -321,6 +327,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 maxLines: 3, overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 11,
                     color: PremiumColors.muted)),
+            if (buyPaused || shortPaused) ...[
+              const SizedBox(height: 7),
+              Row(children: [
+                const Icon(Icons.shield_outlined, size: 14,
+                    color: PremiumColors.gold),
+                const SizedBox(width: 5),
+                Expanded(child: Text(
+                  'Net sonuç freni: ${buyPaused ? 'SPOT ' : ''}'
+                  '${shortPaused ? 'SHORT' : ''} yeni giriş bekletiliyor · '
+                  'koruyucu çıkışlar aktif',
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11,
+                      color: PremiumColors.gold))),
+              ]),
+            ],
             const SizedBox(height: 10),
             Row(children: [
               Expanded(child: _stat('Karar',
