@@ -370,3 +370,23 @@ Araştırma modu bu filtreden bağımsız yeni gerçek gözlemler toplar; son 24
 sonuç toparlandığında girişler yeniden değerlendirilebilir. Bot ekranı
 hangi yönün durdurulduğunu gösterir. Görülen kâr/zarar, gerçek alım-satım
 veya gelir garantisi değildir.
+
+## Kârı koruyan sanal çıkışlar ve veri bazlı fırsat (v0.9.28)
+
+650 TL'lik **tek sanal kasa** üzerinde gözlenen SPOT ve 1x SHORT
+pozisyonların zararı daha erken sınırlanmaya çalışılır: spot %2,8,
+short %2,5 ters fiyat hareketi (eski %4,5). Bot yalnızca gerçekten
+gözlediği daha önceki tepe/dipten en az %0,85 geri dönüşü kullanır;
+%1,2 önceden gözlenen avantaj büyük ölçüde geri veriliyorsa giriş
+fiyatına yakın fiyatta koruyucu çıkış değerlendirilir. GitHub Actions
+saniyelik çalışmadığından fiyat atlamaları nedeniyle bu oranlar
+garanti edilen gerçekleşme sınırı değildir.
+
+Son 24 ileri sinyalin net negatif çıktığı yönler genel olarak yeni
+girişe kapalıdır. **Sadece** son 12 ve son 6 tamamlanmış sonuçları
+pozitif olan, 20+ gözlemli, farklı tarama zamanları bulunan, yakın
+zamanda ölçülmüş YÜKSELİŞ SPOT breakout kurulumunda yarım boyutla
+denemeye izin verilebilir. STRATEGY ve depth risk kapıları yine geçilmeli,
+mevcut kasanın geçmişi değiştirilmemelidir. Mevcut araştırma
+örneklemi zayıf olduğundan bu değişiklik herhangi bir gün için
+kâr veya işlem açılmasını garanti etmez.
