@@ -497,3 +497,31 @@ Radar sekmesinin açılır grafik alanında 1s/15dk yön, 1dk RSI/hacim,
 destek, direnç ve bir saatlik sonradan ölçülen doğruluk sonuçları vardır.
 650 TL ilk sanal kasa, tek hesap, açık pozisyonlar, gerçek para
 kullanmama ve mevcut koruyucu SELL/COVER önceliği değişmez.
+
+## v0.9.35 — Dürüst ekonomik kapı ve mobilde küçük kasa verisi
+
+Sanal botun 25 Kasım 10.10 itibarıyla gözlenen tek kasası 639,04 TL:
+650 TL başlangıçtan **-10,96 TL**. 35 tamamlanan sanal işlemin
+gerçekleşmiş net sonucu **-10,60 TL**. 302 'grafik onaylı' ileri sinyal
+gözlemi ortalama **-%0,414** net; bu kurallı grafik okuyucu kâr
+edebildiğini henüz göstermedi.
+
+Eski yönsel araştırma geçmişi, son 360 sinyalin neredeyse tamamı SHORT
+olduğunda BUY tarafını 30 örneğin altına itip ekonomik veto koşulunu
+yanlışlıkla 'INITIAL_RESEARCH' olarak açık tutabiliyordu. Artık herhangi
+bir yönde toplam **60+** gerçekleşmiş ileri fiyat gözlemi olan yetişkin
+sanal kasada, bir yönde en az 60 pozitif doğrulamaya aday taze örnek
+olmadan yeni BUY/SHORT açılmaz. Koruyucu çıkışlar ve fiyat
+araştırmaları bundan etkilenmez. Bu, net kâr üretmenin değil,
+kanıtsız pozisyonların açılmasının önüne geçmenin düzeltmesidir.
+
+Ayrıca **tam** ve tek sanal cüzdan `bot-data/state.json` aynen kalır;
+uygulamaya gerekli 37 alanın küçük bir salt-okunur görünümü
+`bot-data/public-state.json` olarak her döngüde yazılır. Güncel
+örnekte yaklaşık 124 KB görünüm / 2,14 MB tam veri. Grafik önbellekleri,
+araştırmanın ham sonuçları ve binlerce satırlık çalışma günlükleri
+mobil uygulamaya indirilmez; uygulama net kasayı, açık pozisyonları,
+**tüm** işlem geçmişini, grafik raporlarını ve karar nedenlerini
+yine gerçek tek cüzdandan türetilmiş şekilde gösterir. İlk dağıtımda
+yeni görünüm 404 dönerse eski salt-okunur kaynağa geri dönülür.
+Uydurma gelir, ayrı sanal hesap veya gerçek borsa emri yoktur.

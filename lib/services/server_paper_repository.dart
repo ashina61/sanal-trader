@@ -150,6 +150,8 @@ class ServerPaperRepository {
   ServerPaperRepository({http.Client? client}) : _client = client ?? http.Client();
   final http.Client _client;
   static const sourceUrl =
+      'https://raw.githubusercontent.com/ashina61/sanal-trader/bot-data/public-state.json';
+  static const legacySourceUrl =
       'https://raw.githubusercontent.com/ashina61/sanal-trader/bot-data/state.json';
   static const controlsUrl =
       'https://github.com/ashina61/sanal-trader/actions/workflows/paper-bot.yml';
@@ -159,9 +161,18 @@ class ServerPaperRepository {
     // Only CORS-safelisted Accept: non-safelisted Cache-Control can
     // trigger a failed OPTIONS preflight on a public GitHub raw file.
     // The timestamp query already avoids stale CDN cache entries.
-    final response = await _client.get(uri, headers: {
+    var response = await _client.get(uri, headers: {
       'Accept': 'application/json',
     }).timeout(const Duration(seconds: 14));
+    if (response.statusCode == 404) {
+      // Backward compatible with an existing bot-data branch while its
+      // first public-state.json is being produced. The fallback is READ ONLY.
+      final fallback = Uri.parse(
+        '$legacySourceUrl?refresh=${DateTime.now().millisecondsSinceEpoch}');
+      response = await _client.get(fallback, headers: {
+        'Accept': 'application/json',
+      }).timeout(const Duration(seconds: 14));
+    }
     if (response.statusCode != 200) {
       throw Exception(response.statusCode == 404
           ? 'İlk sunucu sanal cüzdanı henüz oluşturulmadı'

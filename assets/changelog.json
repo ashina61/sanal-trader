@@ -1,7 +1,19 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-24",
+  "updatedAt": "2026-11-25",
   "releases": [
+    {
+      "version": "0.9.35",
+      "date": "2026-11-25",
+      "title": "Ekonomik alım freni ve hafif mobil kasa görünümü",
+      "details": [
+        "25 Kasım'daki son gözlemde tek sanal kasa 639,04 TL; 35 tamamlanan işlemden toplam -10,60 TL net gerçekleşen zarar. 302 grafik onaylı araştırma sinyali -%0,414 ortalama net. Yazılım güncellemesi otomatik kârlılık değildir.",
+        "Son 360 araştırma örneğinin 348 SHORT / 12 BUY olarak dengesiz dağılması nedeniyle yetersiz BUY örneğinin yeni girişleri yanlışlıkla açabilmesi düzeltildi. Toplam ileri gözlem yeterliyken yönsel pozitiflik ispatı yoksa yeni sanal BUY/SHORT kapısı kapanır.",
+        "Kasa ve tüm geçmiş işlem/araştırma kayıtları değişmeden bot-data/state.json dosyasında kalır. Uygulama sadece görüntüleme için üretilmiş yaklaşık 124 KB public-state.json dosyasını indirir; önceki 2,14 MB veri transferi mobilde kullanılmaz.",
+        "Koruyucu pozisyon çıkışları ve ileri sinyal araştırması devam eder. Her bot döngüsü tam kayıt ve hafif görüntülemeyi birlikte yayımlar, eski mobil veri adresine yalnız 404 durumunda geri dönüş vardır.",
+        "Kâr garantisi, gerçek emir, ikinci cüzdan veya başlangıç kasası sıfırlama yok. Flutter 0.9.35+41."
+      ]
+    },
     {
       "version": "0.9.34",
       "date": "2026-11-24",
