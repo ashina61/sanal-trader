@@ -59,10 +59,18 @@ jobs:
           SMART_WALLET_FEED_URL: ${{ secrets.SMART_WALLET_FEED_URL }}
         run: python3 -m backend.paper_bot --state "$STATE_FILE" --mode "$RUN_MODE"
 
+      - name: Create compact read-only app snapshot
+        env:
+          STATE_FILE: ${{ runner.temp }}/paper-state.json
+          PUBLIC_FILE: ${{ runner.temp }}/paper-public.json
+        run: |
+          python3 -m backend.public_snapshot --state "$STATE_FILE" --output "$PUBLIC_FILE"
+
       - name: Commit result to independent bot-data branch
         shell: bash
         env:
           STATE_FILE: ${{ runner.temp }}/paper-state.json
+          PUBLIC_FILE: ${{ runner.temp }}/paper-public.json
         run: |
           git config user.name "SanalTrader Paper Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -75,7 +83,8 @@ jobs:
             git clean -fdx >/dev/null 2>&1 || true
           fi
           cp "$STATE_FILE" state.json
-          git add state.json
+          cp "$PUBLIC_FILE" public-state.json
+          git add state.json public-state.json
           if ! git diff --cached --quiet; then
             git commit -m "paper-bot: simulated cycle"
             git push origin HEAD:bot-data
