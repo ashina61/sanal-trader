@@ -53,6 +53,17 @@ def review(state, action, now):
             and not isinstance(r["netReturnPct"], bool)
             and math.isfinite(r["netReturnPct"])]
     length = len(rows)
+    # The research queue retains only the last 360 signals overall.
+    # In a falling market SHORT observations can crowd almost all BUY
+    # observations out, e.g. 348 SHORT / 12 BUY. A mature losing wallet
+    # must NOT reopen BUY risk just because its directional sample fell
+    # below OBSERVED_MIN due to the shared rolling cap.
+    total_completed = sum(
+        isinstance(r, dict) and r.get("action") in ("BUY", "SHORT")
+        and isinstance(r.get("netReturnPct"), (int, float))
+        and not isinstance(r.get("netReturnPct"), bool)
+        and math.isfinite(r["netReturnPct"])
+        for r in completed)
     values = [float(r["netReturnPct"]) for r in rows]
     tail60 = values[-REVALIDATION_LONG:]
     tail24 = values[-REVALIDATION_SHORT:]
@@ -75,16 +86,19 @@ def review(state, action, now):
     # completed forward observations exist, require STRICT, fresh evidence
     # before resuming exposure. A positive latest 24 SHORT streak alone
     # cannot erase a negative last 60 sample or 3/3 realized SHORT losses.
-    block = length >= OBSERVED_MIN and not calibrated
+    mature = length >= OBSERVED_MIN or total_completed >= REVALIDATION_LONG
+    block = mature and not calibrated
     if block:
-        status = "NO_PROVEN_NET_EDGE"
+        status = ("INSUFFICIENT_DIRECTIONAL_EVIDENCE"
+                  if length < REVALIDATION_LONG else "NO_PROVEN_NET_EDGE")
     elif calibrated:
         status = "PROVISIONAL_REVALIDATION"
     else:
         status = "INITIAL_RESEARCH"
     return {
         **base, "status": status, "blocked": block,
-        "samples": length,
+        "samples": length, "allDirectionsSamples": total_completed,
+        "missingDirectionalSamples": max(0, REVALIDATION_LONG-length),
         "last60AvgNetPct": round(avg60, 4) if avg60 is not None else None,
         "last24AvgNetPct": round(avg24, 4) if avg24 is not None else None,
         "last24Positive": wins24, "distinctSymbols": distinct,
