@@ -61,8 +61,39 @@ class NetEdgeReadinessTests(unittest.TestCase):
         self.assertFalse(result["blocked"])
         self.assertEqual(result["status"], "PROVISIONAL_REVALIDATION")
         self.assertTrue(result["provisionallyRevalidated"])
-        self.assertFalse(review(state, "SHORT", NOW)["blocked"])
+        # A mature wallet cannot trade a side with zero measurements
+        # merely because the other direction dominated the research tape.
+        unmeasured = review(state, "SHORT", NOW)
+        self.assertTrue(unmeasured["blocked"])
+        self.assertEqual(unmeasured["status"],
+                         "INSUFFICIENT_DIRECTIONAL_EVIDENCE")
         self.assertTrue(snapshot(state, NOW)["notAProfitForecast"])
+
+    def test_short_research_crowds_buy_out_of_shared_360_tape(self):
+        state = fresh_state()
+        state["forwardEvidence"]["completed"] = (
+            [observed("BUY", -.981, i) for i in range(12)]
+            + [observed("SHORT", -.62, i+12) for i in range(348)])
+        check = review(state, "BUY", NOW)
+        self.assertEqual(check["samples"], 12)
+        self.assertEqual(check["allDirectionsSamples"], 360)
+        self.assertEqual(check["missingDirectionalSamples"], 48)
+        self.assertTrue(check["blocked"])
+        self.assertEqual(check["status"],
+                         "INSUFFICIENT_DIRECTIONAL_EVIDENCE")
+        # Still allow future research, but NEVER approve new virtual BUY.
+        self.assertTrue(check["researchContinues"])
+        self.assertTrue(check["protectiveExitsUnaffected"])
+
+    def test_60_short_signals_prevent_unmeasured_new_buy_exposure(self):
+        state = fresh_state()
+        state["forwardEvidence"]["completed"] = [
+            observed("SHORT", -.55, i) for i in range(60)]
+        self.assertEqual(review(state, "BUY", NOW)["samples"], 0)
+        self.assertTrue(review(state, "BUY", NOW)["blocked"])
+        state["forwardEvidence"]["completed"] = [
+            observed("SHORT", -.55, i) for i in range(29)]
+        self.assertFalse(review(state, "BUY", NOW)["blocked"])
 
     def test_stale_or_single_coin_prevents_fake_revalidation(self):
         state = fresh_state()
