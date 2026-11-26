@@ -579,7 +579,8 @@ def assess_decision(state, latest, t, research_only=False,
         if adaptive_reason:
             exits.append((125, pair, "cover", amount, adaptive_reason, technical))
             continue
-        if str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX):
+        if (str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX)
+                and adverse < SHORT_HARD_STOP_PCT and short_value(pos, current) > pos["marginTry"] * .10):
             continue
         if short_value(pos, current) <= pos["marginTry"] * .10:
             exits.append((130, pair, "cover", amount, "SHORT teminat koruması", technical))
@@ -642,7 +643,8 @@ def assess_decision(state, latest, t, research_only=False,
         if adaptive_reason:
             exits.append((125, pair, "sell", amount, adaptive_reason, technical))
             continue
-        if str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX):
+        if (str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX)
+                and move > -SPOT_HARD_STOP_PCT):
             continue
         # Protective exits can close small remaining dust positions too.
         if move <= -SPOT_HARD_STOP_PCT:
@@ -798,6 +800,8 @@ def assess_decision(state, latest, t, research_only=False,
                 best_score, _, best_pair = max(leaders)
                 fading = []
                 for pair, pos in state["holdings"].items():
+                    if str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX):
+                        continue
                     quote = latest.get(pair)
                     when = as_date(state.get("lastOrder", {}).get(pair))
                     if not quote or not when or (t - when).total_seconds() < 5400:
