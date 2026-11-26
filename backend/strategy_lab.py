@@ -103,6 +103,15 @@ def classify(state, symbol, price, now):
     btc = prices(state, "BTCUSDT", "intraday")
     if len(coin) < 65 or len(btc) < 65 or abs(price/coin[-1]-1) > .004:
         return out
+    # Old cache entries are ignored until refreshed with actual timestamps.
+    cache = state.get("intraday", {})
+    ct = cache.get(symbol, {}).get("endTimesMs", [])
+    bt = cache.get("BTCUSDT", {}).get("endTimesMs", [])
+    if len(ct) != len(coin) or len(bt) != len(btc):
+        return out
+    ct, bt = ct[-65:], bt[-65:]
+    if ct != bt or any(y-x != 900000 for x,y in zip(ct,ct[1:])):
+        return out
     found = relative_signal(coin, btc)
     if found:
         out.append(found)
