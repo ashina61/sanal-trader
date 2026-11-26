@@ -1494,6 +1494,7 @@ def _cycle(state, market, t, clock=None):
                 fast_cache[pair] = {
                     "fetchedAt": stamp(t),
                     "prices": [b["c"] for b in bars],
+                    "endTimesMs": [b["t"] for b in bars],
                     "chart": summarize_chart(bars, "15m"),
                 }
         for pair in list(fast_cache):

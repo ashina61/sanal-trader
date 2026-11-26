@@ -10,9 +10,10 @@ import statistics
 
 from backend.chart_reader import read_entry
 from backend.shadow_validation import record, settle, summary
+from backend.relative_alpha import LANES as RELATIVE_LANES, signal as relative_signal
 
 VERSION = "retest-reversal-v1"
-LANES = ("support_reclaim", "breakout_retest", "breakdown_retest")
+LANES = ("support_reclaim", "breakout_retest", "breakdown_retest") + RELATIVE_LANES
 CACHES = {"1h": "histories", "15m": "intraday", "1m": "micro"}
 PERIOD_MS = {"1h": 3600000, "15m": 900000, "1m": 60000}
 
@@ -39,7 +40,7 @@ def reports(state, symbol, now):
     return out
 
 
-def classify(state, symbol, price, now):
+def _retest_classify(state, symbol, price, now):
     """Distinct causal setups. Score ranks hypotheses, not expected return."""
     chart = reports(state, symbol, now)
     if not chart or not valid(price) or price <= 0:
@@ -85,6 +86,35 @@ def classify(state, symbol, price, now):
             and lower*(1-3*tol) < price < lower
             and 35 <= rsi <= 52 and not m["bearTrap"]):
         out.append(("breakdown_retest", "SHORT", volume))
+    return out
+
+
+def classify(state, symbol, price, now):
+    out = _retest_classify(state, symbol, price, now)
+    if symbol == "BTCUSDT" or not valid(price) or price <= 0:
+        return out
+    chart = reports(state, symbol, now)
+    benchmark = reports(state, "BTCUSDT", now)
+    if not chart or not benchmark:
+        return out
+    if chart["15m"].get("endMs") != benchmark["15m"].get("endMs"):
+        return out
+    coin = prices(state, symbol, "intraday")
+    btc = prices(state, "BTCUSDT", "intraday")
+    if len(coin) < 65 or len(btc) < 65 or abs(price/coin[-1]-1) > .004:
+        return out
+    # Old cache entries are ignored until refreshed with actual timestamps.
+    cache = state.get("intraday", {})
+    ct = cache.get(symbol, {}).get("endTimesMs", [])
+    bt = cache.get("BTCUSDT", {}).get("endTimesMs", [])
+    if len(ct) != len(coin) or len(bt) != len(btc):
+        return out
+    ct, bt = ct[-65:], bt[-65:]
+    if ct != bt or any(y-x != 900000 for x,y in zip(ct,ct[1:])):
+        return out
+    found = relative_signal(coin, btc)
+    if found:
+        out.append(found)
     return out
 
 

@@ -1,0 +1,35 @@
+name: Relative Alpha Historical Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/relative_alpha.py"
+      - "backend/tests/test_relative_alpha.py"
+      - ".github/workflows/relative-alpha-research.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  historical-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regression tests
+        run: python3 -m unittest discover -s backend/tests -v
+      - name: Historical Binance comparison
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -m backend.relative_alpha | tee relative-alpha-report.json
+          echo '### Historical research (not live PnL)' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat relative-alpha-report.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relative-alpha-report
+          path: relative-alpha-report.json

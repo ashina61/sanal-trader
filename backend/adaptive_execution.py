@@ -49,7 +49,7 @@ def lane_evidence(state, lane, now):
              and mean >= .25 and recent >= .20
              and sum(x > 0 for x in values)/len(values) >= .45
              and (pf is None or pf >= 1.30))
-    action = "SHORT" if lane == "breakdown_retest" else "BUY"
+    action = "SHORT" if lane in ("breakdown_retest", "relative_fade") else "BUY"
     key = ("short:" if action == "SHORT" else "spot:") + PREFIX + lane
     closed = state.get("signalStats", {}).get(key, {})
     # Realized paper loss overrides the forward proxy.
