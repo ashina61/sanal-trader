@@ -63,5 +63,27 @@ class StrategyLabTests(unittest.TestCase):
             self.assertIsNotNone(lab.entry_veto(self.state, "ABCUSDT", "buy", self.now))
 
 
+    def test_observed_exit_path_keeps_first_target_without_future_fill(self):
+        with patch.object(lab, "classify", return_value=[("breakout_retest", "BUY", 1.5)]):
+            lab.observe(self.state, {"ABCUSDT": {"priceTry": 100}}, self.now)
+        with patch.object(lab, "classify", return_value=[]):
+            report = lab.observe(self.state, {"ABCUSDT": {"priceTry": 101.5}},
+                                 self.now + dt.timedelta(minutes=10))
+            models = report["lanes"]["breakout_retest"]["exitPathModels"]
+            self.assertEqual(models["net1_stop1"]["targetHits"], 1)
+            self.assertAlmostEqual(models["net1_stop1"]["avgNetPct"], 1.2)
+            self.assertEqual(models["net2_stop1"]["samples"], 0)
+            report = lab.observe(self.state, {"ABCUSDT": {"priceTry": 98}},
+                                 self.now + dt.timedelta(hours=1))
+        models = report["lanes"]["breakout_retest"]["exitPathModels"]
+        self.assertEqual(models["net1_stop1"]["targetHits"], 1)
+        self.assertEqual(models["net1_stop1"]["samples"], 1)
+        self.assertEqual(models["net2_stop1"]["stopHits"], 1)
+        self.assertAlmostEqual(models["net2_stop1"]["avgNetPct"], -2.3)
+        self.assertAlmostEqual(report["lanes"]["breakout_retest"]["avgNetPct"], -2.3)
+        self.assertEqual(self.state["cashTry"], 650)
+        self.assertEqual(self.state["trades"], [])
+
+
 if __name__ == "__main__":
     unittest.main()
