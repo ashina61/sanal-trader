@@ -55,7 +55,14 @@ def lane_evidence(state, lane, now):
     # Realized paper loss overrides the forward proxy.
     if closed.get("closed", 0) >= 3 and closed.get("netTry", 0) < 0:
         ready = False
-    return {"ready": ready, "samples": len(values), "distinctHours": hours,
+    # Limited paper exploration, explicitly NOT a validated trading edge.
+    pilot = (not ready and len(values) >= 3 and symbols >= 3
+             and age is not None and 0 <= age <= 10800
+             and mean >= .20 and recent >= .20
+             and sum(x > 0 for x in values)/len(values) >= .60
+             and (pf is None or pf >= 1.5)
+             and closed.get("netTry", 0) >= 0)
+    return {"ready": ready, "pilotReady": pilot, "samples": len(values), "distinctHours": hours,
             "distinctSymbols": symbols, "avgNetPct": round(mean, 4) if mean is not None else None,
             "recentNetPct": round(recent, 4) if recent is not None else None,
             "profitFactor": round(pf, 4) if pf is not None else None,
@@ -84,7 +91,7 @@ def candidates(state, latest, now, equity, exposure):
     if amount < 5:
         return []
     evidence = readiness(state, now)
-    if not any(proof['ready'] for proof in evidence.values()):
+    if not any(proof["ready"] or proof["pilotReady"] for proof in evidence.values()):
         return []
     found = []
     for symbol, quote in latest.items():
@@ -92,16 +99,35 @@ def candidates(state, latest, now, equity, exposure):
             continue
         for lane, action, rank in classify(state, symbol, quote.get("priceTry"), now):
             proof = evidence[lane]
-            if not proof["ready"] or action != proof["action"]:
+            if not (proof["ready"] or proof["pilotReady"]) or action != proof["action"]:
+                continue
+            pilot = not proof["ready"]
+            if pilot:
+                recent_pilot = []
+                for trade in state.get("trades", []):
+                    when = parse_time(trade.get("at"))
+                    if (when and 0 <= (now-when).total_seconds() < 86400
+                            and trade.get("side") in ("sell", "cover")
+                            and str(trade.get("reason", "")).startswith("Adaptif deneme ")):
+                        recent_pilot.append(trade)
+                loss = sum(max(0, -r.get("realizedPnlTry", 0)) for r in recent_pilot)
+                if len(recent_pilot) >= 6 or loss >= 2:
+                    continue
+                pilot_stats = state.get("signalStats", {}).get(
+                    ("short:" if action == "SHORT" else "spot:") + PREFIX + "pilot:" + lane, {})
+                if pilot_stats.get("closed", 0) >= 3 and pilot_stats.get("netTry", 0) < 0:
+                    continue
+            ticket = min(amount, math.floor(equity*.12*100)/100) if pilot else amount
+            if ticket < 5:
                 continue
             side = "short" if action == "SHORT" else "buy"
             if entry_veto(state, symbol, side, now):
                 continue
             found.append({"symbol": symbol, "action": action, "side": side,
-                "setupTag": PREFIX+lane, "amountTry": amount,
+                "setupTag": PREFIX+("pilot:" if pilot else "")+lane, "amountTry": ticket,
                 "score": proof["avgNetPct"], "volumeRank": rank,
-                "evidence": proof, "targetNetTry": round(amount*.02, 2),
-                "modelStopNetTry": round(amount*.01, 2)})
+                "evidence": {**proof, "exploratoryPaperOnly": pilot}, "targetNetTry": round(ticket*.02, 2),
+                "modelStopNetTry": round(ticket*.01, 2)})
     return sorted(found, key=lambda x: (-x["score"], -x["volumeRank"], x["symbol"]))
 
 
@@ -128,10 +154,11 @@ def exit_reason(state, symbol, side, price, now):
     # Additional 0.1% conservative reserve mirrors research friction.
     pct = 100*net/amount-.1
     opened = parse_time(info.get("openedAt"))
+    label = "Adaptif deneme " if info["setup"].startswith(PREFIX+"pilot:") else "Adaptif "
     if pct <= -STOP_NET_PCT:
-        return "Adaptif zarar kes: gözlenen net %+.2f" % pct
+        return label + "zarar kes: gözlenen net %+.2f" % pct
     if pct >= TARGET_NET_PCT:
-        return "Adaptif kâr al: gözlenen net %+.2f" % pct
+        return label + "kâr al: gözlenen net %+.2f" % pct
     if opened and (now-opened).total_seconds() >= 3600:
-        return "Adaptif süre çıkışı: 60dk, gözlenen net %+.2f" % pct
+        return label + "süre çıkışı: 60dk, gözlenen net %+.2f" % pct
     return None
