@@ -1,7 +1,18 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-26",
+  "updatedAt": "2026-11-27",
   "releases": [
+    {
+      "version": "0.9.40",
+      "date": "2026-11-27",
+      "title": "BTC'ye göre istatistiksel sapma ve dönüş motoru",
+      "details": [
+        "Bitcoin etkisi beta ile ayrıştırılarak aşırı göreli düşüşten dönüş (SPOT) ve aşırı göreli yükselişten dönüş (SHORT) için iki ayrı strateji eklendi. 65 kapanmış 15dk mum aynı zaman damgalarıyla doğrulanır.",
+        "Yeni stratejiler mevcut ileri gözlem ve sanal deneme motoruna bağlandı; kendi sonuçları pozitif değilse emir açmaz. Mevcut tek kasa ve eski işlem geçmişi korunur.",
+        "8 coin için gerçek Binance geçmiş fiyatlarıyla kronolojik %70/%30 karşılaştırma, sonraki mumdan giriş, net hedef/stop ve %0,3 varsayımsal maliyet. GitHub Actions ayrı araştırma raporu üretir; bu rapor tek başına canlı kârlılık kanıtı değildir.",
+        "Kaynak: https://doi.org/10.3390/jrfm12010031 ; https://www.freqtrade.io/en/stable/backtesting/ . Yöntem esinlenmedir, aynı akademik strateji veya garantili kâr değildir."
+      ]
+    },
     {
       "version": "0.9.39",
       "date": "2026-11-26",
