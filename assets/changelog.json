@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-26",
   "releases": [
     {
+      "version": "0.9.37",
+      "date": "2026-11-26",
+      "title": "Gerçek gözlemlenen hedef ve stop karşılaştırması",
+      "details": [
+        "26 Kasım 16.38 ölçümünde net kasa 630,79 TL. Yeni stratejiler henüz net pozitif sonuç göstermedi.",
+        "Yeni araştırma adayları için saat sonu karşılaştırmasına ek olarak ilk gözlenen net %1/%2/%3 hedef ve %1/%1/%2 stop modelleri ayrı kaydedilir. Gözlenmeyen fiyatlardan gerçekleşme uydurulmaz; önceki örneklere geriye dönük hedef isabeti yazılmaz.",
+        "Sanal kasa ve emir geçmişi değişmez; yeni model sonuçları gerçek işlem değildir ve ekonomik veto korunur."
+      ]
+    },
+    {
       "version": "0.9.36",
       "date": "2026-11-26",
       "title": "Dönüş ve kırılım yeniden test strateji laboratuvarı",
