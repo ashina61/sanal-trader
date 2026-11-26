@@ -1,7 +1,18 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-25",
+  "updatedAt": "2026-11-26",
   "releases": [
+    {
+      "version": "0.9.36",
+      "date": "2026-11-26",
+      "title": "Dönüş ve kırılım yeniden test strateji laboratuvarı",
+      "details": [
+        "Son incelenen sanal kasa 630,76 TL, 9 SHORT kapanışının 9'u ve son 12 kapanış zarar. Mevcut strateji kârlı olduğunu kanıtlamadı.",
+        "Dipte SHORT ve tepede SPOT kovalamayı önleyen RSI/fitil kontrolü; eşzamanlı SHORT yığılması ve mevcut aynı yön pozisyonlarla yüksek 15dk korelasyon için yeni giriş vetosu.",
+        "Destekten dönüş, yukarı kırılım-yeniden test ve aşağı kırılım-yeniden test ayrı gözlem kuyruğunda gerçek bir saat sonraki fiyatla, varsayımsal %0,3 masraf dahil ölçülüyor. Bu araştırma emir açmaz.",
+        "Tek kasa, geçmiş işlemler, ekonomik giriş kapısı ve koruyucu çıkışlar korunur. Yeni stratejiler bağımsız kârlılık doğrulaması olmadan aktif ticaret yetkisi almaz."
+      ]
+    },
     {
       "version": "0.9.35",
       "date": "2026-11-25",
