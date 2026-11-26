@@ -14,7 +14,6 @@ PREFIX = "adaptive:"
 MODEL = "net2_stop1"
 TARGET_NET_PCT = 2.0
 STOP_NET_PCT = 1.0
-MAX_AGE = 4800
 MAX_FRICTION_PCT = .30
 
 
@@ -85,6 +84,8 @@ def candidates(state, latest, now, equity, exposure):
     if amount < 5:
         return []
     evidence = readiness(state, now)
+    if not any(proof['ready'] for proof in evidence.values()):
+        return []
     found = []
     for symbol, quote in latest.items():
         if quote.get("entryEligible") is False or symbol in state.get("holdings", {}) or symbol in state.get("shorts", {}):
