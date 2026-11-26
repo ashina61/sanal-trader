@@ -16,6 +16,8 @@ from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
 from backend.strategy_lab import entry_veto as reversal_entry_veto, observe as observe_strategies
+from backend.adaptive_execution import (candidates as adaptive_candidates, readiness as adaptive_readiness,
+    exit_reason as adaptive_exit, PREFIX as ADAPTIVE_PREFIX, MAX_FRICTION_PCT)
 from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
     spot_giveback, short_giveback)
@@ -573,6 +575,13 @@ def assess_decision(state, latest, t, research_only=False,
         adverse = current / entry - 1
         technical = current_tech(pair)
         amount = pos["quantity"] * current
+        adaptive_reason = adaptive_exit(state, pair, "short", current, t)
+        if adaptive_reason:
+            exits.append((125, pair, "cover", amount, adaptive_reason, technical))
+            continue
+        if (str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX)
+                and adverse < SHORT_HARD_STOP_PCT and short_value(pos, current) > pos["marginTry"] * .10):
+            continue
         if short_value(pos, current) <= pos["marginTry"] * .10:
             exits.append((130, pair, "cover", amount, "SHORT teminat koruması", technical))
         elif adverse >= SHORT_HARD_STOP_PCT:
@@ -629,6 +638,14 @@ def assess_decision(state, latest, t, research_only=False,
         cost = pos["costTry"] / pos["quantity"]
         move = quote["priceTry"] / cost - 1
         technical = current_tech(pair)
+        # Adaptive trades use the SAME tested target/stop/time exit policy.
+        adaptive_reason = adaptive_exit(state, pair, "buy", quote["priceTry"], t)
+        if adaptive_reason:
+            exits.append((125, pair, "sell", amount, adaptive_reason, technical))
+            continue
+        if (str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX)
+                and move > -SPOT_HARD_STOP_PCT):
+            continue
         # Protective exits can close small remaining dust positions too.
         if move <= -SPOT_HARD_STOP_PCT:
             exits.append((120 - move, pair, "sell", amount,
@@ -783,6 +800,8 @@ def assess_decision(state, latest, t, research_only=False,
                 best_score, _, best_pair = max(leaders)
                 fading = []
                 for pair, pos in state["holdings"].items():
+                    if str(state.get("openSignals", {}).get(pair, {}).get("setup", "")).startswith(ADAPTIVE_PREFIX):
+                        continue
                     quote = latest.get(pair)
                     when = as_date(state.get("lastOrder", {}).get(pair))
                     if not quote or not when or (t - when).total_seconds() < 5400:
@@ -822,6 +841,28 @@ def assess_decision(state, latest, t, research_only=False,
     if not research_only and state["cashTry"] <= total * MIN_ENTRY_CASH_RESERVE:
         return wait("Yeni giriş için kullanılabilir sanal nakit yetersiz")
 
+    # Independently validated new lanes do not inherit the old failed
+    # momentum policy's directional sample. All wallet/exposure/loss gates
+    # above still apply. No unvalidated lane may open a paper position.
+    if not research_only and state.get("ohlcvReaderActive"):
+        plan["adaptiveReadiness"] = adaptive_readiness(state, t)
+        for trial in adaptive_candidates(state, latest, t, total, used):
+            pair, side = trial["symbol"], trial["side"]
+            if not cooled(pair) or loss_reentry_cooldown(state, pair, t):
+                continue
+            if entry_alert(state.get("newsPulse", {}), pair, t):
+                continue
+            if side == "short" and broad_risk_on(state.get("marketPulse", {}), btc["direction"] if btc else None):
+                continue
+            if btc is None:
+                continue
+            plan["adaptiveEvidence"] = trial["evidence"]
+            plan["setupTag"] = trial["setupTag"]
+            plan["adaptiveTargetTry"] = trial["targetNetTry"]
+            plan["adaptiveStopTry"] = trial["modelStopNetTry"]
+            plan["reviewed"] = len(latest)
+            return choose(pair, side, trial["amountTry"],
+                "Adaptif doğrulanmış sanal aday: " + trial["setupTag"], trial["score"])
     candidates = []
     reasons = {}
     sizing_by_pair = {}
@@ -1567,6 +1608,11 @@ def _cycle(state, market, t, clock=None):
         # Six deterministic audit stages: query depth only for final approved
         # BUY/SHORT. Protective SELL/COVER always bypasses this gate.
         planned, execution_trace = orderbook_guard(planned, market, latest, rate)
+        if (planned.get("action") in ("BUY", "SHORT") and planned.get("adaptiveEvidence")
+                and execution_trace.get("frictionPct", float("inf")) > MAX_FRICTION_PCT):
+            planned = dict(planned, action="WAIT", order=None, symbol=None, amountTry=None,
+                           reason="Adaptif adayın maliyeti araştırma varsayımını aştı")
+            execution_trace.update(status="BLOCKED", reason=planned["reason"])
         if execution_trace["status"] == "BLOCKED":
             ai_meta = {**ai_meta, "orderBookGate": "BLOCKED"}
             state["aiBrain"] = ai_meta
@@ -1638,7 +1684,7 @@ def _cycle(state, market, t, clock=None):
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v10 · reversal veto + isolated retest research"
+        state["decisionPlan"]["strategy"] = "Adaptive v11 · independent net-edge execution + target/stop exits"
         choice = planned["order"]
         if choice:
             executed = apply_order(state, latest, t, planned)

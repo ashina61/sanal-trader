@@ -79,6 +79,9 @@ def apply_ai_brain(plan, state, api_key="", model=DEFAULT_MODEL, ask_fn=None):
     if plan.get("action") in ("SELL", "COVER"):
         return plan, {"status": "PROTECTIVE_EXIT", "provider": "Groq",
                       "reason": "Protective exit does not require AI"}
+    if plan.get("adaptiveEvidence") and plan.get("order"):
+        return plan, {"status": "ADAPTIVE_RULES", "provider": "Rules",
+                      "reason": "Independently measured paper setup; execution still requires book and cost checks"}
     choices = plan.get("aiChoices") or []
     if not plan.get("order") or not choices:
         return plan, {"status": "NO_CANDIDATE", "provider": "Groq",
