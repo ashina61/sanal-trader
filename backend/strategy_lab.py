@@ -129,6 +129,70 @@ def entry_veto(state, symbol, side, now):
     return None
 
 
+
+# Fixed hypotheses, expressed as NET percentage of entry notional, after
+# the same assumed costs as the baseline. No intrabar fills are invented.
+EXIT_MODELS = {"net1_stop1": (1.0, 1.0), "net2_stop1": (2.0, 1.0),
+               "net3_stop2": (3.0, 2.0)}
+
+
+def observe_exit_paths(book, latest, now):
+    import datetime as dt
+    evidence = book.setdefault("forwardEvidence", {"pending": [], "completed": []})
+    history = book.setdefault("observedExitPathsV1", [])
+    for sample in evidence.get("pending", []):
+        path = sample.get("exitPathV1")
+        if not isinstance(path, dict):
+            continue  # Never reconstruct earlier missing observations.
+        try:
+            started = dt.datetime.fromisoformat(sample["at"].replace("Z", "+00:00"))
+            age = (now-started).total_seconds()
+            entry = sample["entryPriceTry"]
+            price = latest.get(sample["symbol"], {}).get("priceTry")
+        except (KeyError, ValueError, TypeError):
+            continue
+        if age <= 0:
+            continue
+        if age > 4800:
+            for name in EXIT_MODELS:
+                if name not in path["closed"]:
+                    path["closed"].append(name)
+                    history.append({"model": name, "reason": "NO_QUOTE",
+                                    "netPct": None, "symbol": sample["symbol"]})
+            continue
+        if not valid(price) or price <= 0 or not valid(entry) or entry <= 0:
+            continue
+        direction = 1 if sample["action"] == "BUY" else -1
+        net = direction * (price/entry-1)*100 - .3
+        for name, (target, stop) in EXIT_MODELS.items():
+            if name in path["closed"]:
+                continue
+            reason = ("TARGET" if net >= target else "STOP" if net <= -stop
+                      else "TIMEOUT" if age >= 3600 else None)
+            if reason:
+                path["closed"].append(name)
+                history.append({"model": name, "reason": reason,
+                                "netPct": round(net, 5), "symbol": sample["symbol"],
+                                "at": now.isoformat(), "elapsedMinutes": round(age/60, 2)})
+    del history[:-1080]
+
+
+def exit_path_summary(book):
+    history = book.get("observedExitPathsV1", [])
+    report = {}
+    for name, (target, stop) in EXIT_MODELS.items():
+        rows = [r for r in history if r["model"] == name]
+        values = [r["netPct"] for r in rows if valid(r.get("netPct"))]
+        report[name] = {"samples": len(values), "netTargetPct": target,
+            "netStopPct": stop, "targetHits": sum(r["reason"] == "TARGET" for r in rows),
+            "stopHits": sum(r["reason"] == "STOP" for r in rows),
+            "timeouts": sum(r["reason"] == "TIMEOUT" for r in rows),
+            "missingQuotes": sum(r["reason"] == "NO_QUOTE" for r in rows),
+            "avgNetPct": round(statistics.mean(values), 4) if values else None,
+            "winRatePct": round(100*sum(x>0 for x in values)/len(values), 2) if values else None}
+    return report
+
+
 def observe(state, latest, now):
     """Independent per-lane queues, no portfolio, order, or gate overrides."""
     if not state.get("ohlcvReaderActive"):
@@ -144,10 +208,14 @@ def observe(state, latest, now):
     output = {}
     for lane in LANES:
         book = lab.setdefault(lane, {})
+        observe_exit_paths(book, latest, now)
         settle(book, latest, now)
         choices = sorted(candidates[lane], key=lambda x: (-x["score"], x["symbol"]))
         # Limit cross-sectional duplication to one observation per lane/cycle.
         new = record(book, latest, {"candidates": choices[:1]}, now)
+        if new:
+            for sample in book["forwardEvidence"]["pending"][-new:]:
+                sample["exitPathV1"] = {"closed": []}
         stats = summary(book)
         rows = book["forwardEvidence"]["completed"]
         distinct = len({r["symbol"] for r in rows})
@@ -156,7 +224,9 @@ def observe(state, latest, now):
             "avgNetPct": stats["avgNetPct"], "winRatePct": stats["winRatePct"],
             "medianNetPct": stats["medianNetPct"], "distinctSymbols": distinct,
             "expiredNoQuote": stats["expiredNoQuote"], "new": new,
-            "candidates": len(choices), "top": choices[:3]}
+            "candidates": len(choices), "top": choices[:3],
+            "exitPathModels": exit_path_summary(book)}
     return {"version": VERSION, "status": "RESEARCH_ONLY", "lanes": output,
+        "exitPathVersion": "observed-first-trigger-v1",
         "horizonMinutes": 60, "assumedRoundTripCostPct": .3,
         "automaticOrder": False, "promotionRequiresIndependentValidation": True}
