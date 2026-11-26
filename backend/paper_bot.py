@@ -15,6 +15,7 @@ import urllib.request
 from pathlib import Path
 
 from backend.ai_brain import apply_ai_brain
+from backend.strategy_lab import entry_veto as reversal_entry_veto, observe as observe_strategies
 from backend.orderbook_pipeline import guard_plan as orderbook_guard, idle_trace
 from backend.profit_protection import (SPOT_HARD_STOP_PCT, SHORT_HARD_STOP_PCT,
     spot_giveback, short_giveback)
@@ -937,6 +938,11 @@ def assess_decision(state, latest, t, research_only=False,
         if not research_only and chart["blocked"]:
             rejected("Grafik filtresi: " + chart["reasons"][0])
             continue
+        if not research_only:
+            reversal_reason = reversal_entry_veto(state, pair, mode, t)
+            if reversal_reason:
+                rejected(reversal_reason)
+                continue
         if (not research_only and
                 economic_readiness(state, action, t)["blocked"]):
             rejected("Net pozitif ekonomik sinyal doğrulanmadı; "
@@ -1587,6 +1593,15 @@ def _cycle(state, market, t, clock=None):
         state["decisionPlan"]["contextStats"] = state.get("contextStats", {})
         state["decisionPlan"]["forwardEvidence"] = forward_summary(state)
         state["decisionPlan"]["chartLearning"] = chart_learning_summary(state)
+        # Experiments are observational and isolated from the real paper wallet.
+        # Never let an experimental failure interfere with a protective exit.
+        try:
+            state["decisionPlan"]["strategyLab"] = observe_strategies(state, latest, t)
+        except Exception as exc:
+            state["decisionPlan"]["strategyLab"] = {
+                "status": "ERROR", "error": type(exc).__name__,
+                "automaticOrder": False,
+            }
         # Compact learning dashboard: up to six genuinely observed
         # three-timeframe chart reads. No raw OHLC arrays are persisted here.
         chart_radar = []
@@ -1623,7 +1638,7 @@ def _cycle(state, market, t, clock=None):
         state["decisionPlan"]["newsHeadlines"] = state.get("newsPulse", {}).get("headlines", [])[:6]
         state["decisionPlan"]["todayOrders"] = state["todayOrders"]
         state["decisionPlan"]["dailyLimit"] = None
-        state["decisionPlan"]["strategy"] = "Adaptive v9 · transparent trade tape + fee-positive peak profit lock"
+        state["decisionPlan"]["strategy"] = "Adaptive v10 · reversal veto + isolated retest research"
         choice = planned["order"]
         if choice:
             executed = apply_order(state, latest, t, planned)
