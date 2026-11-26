@@ -861,8 +861,9 @@ def assess_decision(state, latest, t, research_only=False,
             plan["adaptiveTargetTry"] = trial["targetNetTry"]
             plan["adaptiveStopTry"] = trial["modelStopNetTry"]
             plan["reviewed"] = len(latest)
-            return choose(pair, side, trial["amountTry"],
-                "Adaptif doğrulanmış sanal aday: " + trial["setupTag"], trial["score"])
+            label = ("Adaptif sınırlı sanal deneme: " if trial["evidence"].get("exploratoryPaperOnly")
+                     else "Adaptif doğrulanmış sanal aday: ")
+            return choose(pair, side, trial["amountTry"], label + trial["setupTag"], trial["score"])
     candidates = []
     reasons = {}
     sizing_by_pair = {}
@@ -1213,6 +1214,10 @@ def record_performance(state, t):
 def apply_order(state, latest, t, planned):
     """One accounting path for both early protection and regular decisions."""
     pair, side, gross, reason = planned["order"]
+    setup = state.get("openSignals", {}).get(pair, {}).get("setup", "")
+    if side in ("sell", "cover") and str(setup).startswith(ADAPTIVE_PREFIX+"pilot:"):
+        if not reason.startswith("Adaptif deneme "):
+            reason = "Adaptif deneme " + reason
     price = (planned.get("bookEntryPriceTry")
              if side in ("buy", "short") else None) or latest[pair]["priceTry"]
     if side == "short":

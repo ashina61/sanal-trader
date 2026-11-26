@@ -49,5 +49,22 @@ class AdaptiveExecutionTests(unittest.TestCase):
                                           self.now+dt.timedelta(hours=1)))
 
 
+    def test_small_positive_sample_is_pilot_not_validated_and_limited(self):
+        rows = self.rows[-3:]
+        self.state["strategyLabV1"]["breakout_retest"]["observedExitPathsV1"] = rows
+        proof = a.lane_evidence(self.state, "breakout_retest", self.now)
+        self.assertFalse(proof["ready"])
+        self.assertTrue(proof["pilotReady"])
+        with patch.object(a, "classify", return_value=[("breakout_retest", "BUY", 1.5)]), patch.object(a, "entry_veto", return_value=None):
+            latest = {"ABCUSDT": {"priceTry": 100}}
+            choices = a.candidates(self.state, latest, self.now, 650, 0)
+            self.assertEqual(len(choices), 1)
+            self.assertTrue(choices[0]["evidence"]["exploratoryPaperOnly"])
+            self.assertLessEqual(choices[0]["amountTry"], 78)
+            self.state["trades"] = [{"at": self.now.isoformat(), "side": "sell",
+                                    "reason": "Adaptif deneme zarar kes", "realizedPnlTry": -2.1}]
+            self.assertEqual(a.candidates(self.state, latest, self.now, 650, 0), [])
+
+
 if __name__ == "__main__":
     unittest.main()

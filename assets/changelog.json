@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-26",
   "releases": [
     {
+      "version": "0.9.39",
+      "date": "2026-11-26",
+      "title": "Sınırlı aktif sanal deneme ve gözlem kilidi düzeltmesi",
+      "details": [
+        "Bot çalışıyor ancak 24 sonuç/8 saat koşulundan dolayı emir açmıyordu. En az 3 farklı coinde taze, ortalama net +%0,20 ve %60 pozitif gözlem sağlayan strateji, doğrulanmış strateji olarak gösterilmeden sınırlı sanal deneme adayı olabilir.",
+        "Tek adaptif pozisyon, pilot için azami %12 notional, net %2 hedef/%1 stop ve 60dk çıkış. Son 24 saatte 6 pilot kapanışı veya 2 TL toplam gerçekleşmiş pilot zararı yeni pilot girişini durdurur; gecikme daha büyük kayıp oluşturabilir. Mevcut maliyet, haber, fiyat ve genel risk korumaları korunur.",
+        "Araştırma ilk aday tekrar engeline takıldığında diğer uygun adayları da değerlendirir, döngü başına en fazla 3 gözlem. Kasa ve geçmiş korunur. Bu bir kârlılık garantisi değildir."
+      ]
+    },
+    {
       "version": "0.9.38",
       "date": "2026-11-26",
       "title": "Net getiriye göre otomatik SPOT/SHORT strateji seçimi",
