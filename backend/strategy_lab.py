@@ -211,8 +211,9 @@ def observe(state, latest, now):
         observe_exit_paths(book, latest, now)
         settle(book, latest, now)
         choices = sorted(candidates[lane], key=lambda x: (-x["score"], x["symbol"]))
-        # Limit cross-sectional duplication to one observation per lane/cycle.
-        new = record(book, latest, {"candidates": choices[:1]}, now)
+        # Try other eligible symbols if the leader is already being observed.
+        # record caps new observations at three and enforces per-symbol cooldown.
+        new = record(book, latest, {"candidates": choices[:8]}, now)
         if new:
             for sample in book["forwardEvidence"]["pending"][-new:]:
                 sample["exitPathV1"] = {"closed": []}
