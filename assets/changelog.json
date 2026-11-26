@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-26",
   "releases": [
     {
+      "version": "0.9.38",
+      "date": "2026-11-26",
+      "title": "Net getiriye göre otomatik SPOT/SHORT strateji seçimi",
+      "details": [
+        "Yeni dönüş ve kırılım stratejileri artık yalnız araştırmada kalmaz: sabit net %2 hedef/%1 stop modelinde en az 24 ölçülmüş sonuç, 8 farklı saat, 6 coin ve güncel pozitif net sonuç varsa aynı tek sanal kasada otomatik aday olabilir.",
+        "Eski zarar eden momentum modelinin onayını gerektirmez; eski modelin kendi ekonomik kapısı kaldırılmaz. Tek adaptif pozisyon, en fazla %18 notional, mevcut nakit/portföy/stop/haber/makas korumaları geçerlidir.",
+        "Adaptif emir yalnız ölçülen strateji ve geçerli emir defteriyle; net hedef, stop veya 60 dakika sonunda gözlenen fiyattan kapanır. Gerçekleşmeler garanti edilmez. Örneklem bağımsız istatistiksel ispat değildir, gerçek para kullanılmaz."
+      ]
+    },
+    {
       "version": "0.9.37",
       "date": "2026-11-26",
       "title": "Gerçek gözlemlenen hedef ve stop karşılaştırması",
