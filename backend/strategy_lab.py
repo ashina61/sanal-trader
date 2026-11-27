@@ -90,7 +90,9 @@ def _retest_classify(state, symbol, price, now):
 
 
 def classify(state, symbol, price, now):
-    out = _retest_classify(state, symbol, price, now)
+    # Own the result list: never mutate a reused upstream result, including
+    # on a later rejected candle-alignment check.
+    out = list(_retest_classify(state, symbol, price, now))
     if symbol == "BTCUSDT" or not valid(price) or price <= 0:
         return out
     chart = reports(state, symbol, now)
