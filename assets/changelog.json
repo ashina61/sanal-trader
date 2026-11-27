@@ -3,6 +3,16 @@
   "updatedAt": "2026-11-27",
   "releases": [
     {
+      "version": "0.9.41",
+      "date": "2026-11-27",
+      "title": "GitHub çalışma ve yayın hatalarının giderilmesi",
+      "details": [
+        "Bitcoin ve altcoin mumlarının zaman hizalaması kontrolünde tekrar kullanılan sonuç listesinin değiştirilmesi düzeltildi. Başarısız regresyon testi korunarak 255 testin başarılı olduğu GitHub Actions üzerinde doğrulandı.",
+        "Web kontrolleri ve yayın iş akışlarında zorunlu CHANGELOG.md ve assets/changelog.json kayıtları eşitlendi; yayın güvenlik kontrolleri kaldırılmadı.",
+        "Mevcut tek sanal kasa ve işlem geçmişi korunuyor. Bu bakım güncellemesi yeni kâr iddiası veya yeni işlem stratejisi içermez."
+      ]
+    },
+    {
       "version": "0.9.40",
       "date": "2026-11-27",
       "title": "BTC'ye göre istatistiksel sapma ve dönüş motoru",

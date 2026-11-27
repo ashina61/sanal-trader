@@ -1,3 +1,41 @@
+## 2026-11-27 — v0.9.41 GitHub çalışma ve yayın hatalarının giderilmesi
+
+- Bitcoin ve altcoin mumlarının zaman hizalaması kontrolünde tekrar kullanılan sonuç listesinin değiştirilmesi düzeltildi. Başarısız regresyon testi korunarak 255 testin başarılı olduğu GitHub Actions üzerinde doğrulandı.
+- Web kontrolleri ve yayın iş akışlarında zorunlu CHANGELOG.md ve assets/changelog.json kayıtları eşitlendi; yayın güvenlik kontrolleri kaldırılmadı.
+- Mevcut tek sanal kasa ve işlem geçmişi korunuyor. Bu bakım güncellemesi yeni kâr iddiası veya yeni işlem stratejisi içermez.
+
+## 2026-11-27 — v0.9.40 BTC'ye göre istatistiksel sapma ve dönüş motoru
+
+- Bitcoin etkisi beta ile ayrıştırılarak aşırı göreli düşüşten dönüş (SPOT) ve aşırı göreli yükselişten dönüş (SHORT) için iki ayrı strateji eklendi. 65 kapanmış 15dk mum aynı zaman damgalarıyla doğrulanır.
+- Yeni stratejiler mevcut ileri gözlem ve sanal deneme motoruna bağlandı; kendi sonuçları pozitif değilse emir açmaz. Mevcut tek kasa ve eski işlem geçmişi korunur.
+- 8 coin için gerçek Binance geçmiş fiyatlarıyla kronolojik %70/%30 karşılaştırma, sonraki mumdan giriş, net hedef/stop ve %0,3 varsayımsal maliyet. GitHub Actions ayrı araştırma raporu üretir; bu rapor tek başına canlı kârlılık kanıtı değildir.
+- Kaynak: https://doi.org/10.3390/jrfm12010031 ; https://www.freqtrade.io/en/stable/backtesting/ . Yöntem esinlenmedir, aynı akademik strateji veya garantili kâr değildir.
+
+## 2026-11-26 — v0.9.39 Sınırlı aktif sanal deneme ve gözlem kilidi düzeltmesi
+
+- Bot çalışıyor ancak 24 sonuç/8 saat koşulundan dolayı emir açmıyordu. En az 3 farklı coinde taze, ortalama net +%0,20 ve %60 pozitif gözlem sağlayan strateji, doğrulanmış strateji olarak gösterilmeden sınırlı sanal deneme adayı olabilir.
+- Tek adaptif pozisyon, pilot için azami %12 notional, net %2 hedef/%1 stop ve 60dk çıkış. Son 24 saatte 6 pilot kapanışı veya 2 TL toplam gerçekleşmiş pilot zararı yeni pilot girişini durdurur; gecikme daha büyük kayıp oluşturabilir. Mevcut maliyet, haber, fiyat ve genel risk korumaları korunur.
+- Araştırma ilk aday tekrar engeline takıldığında diğer uygun adayları da değerlendirir, döngü başına en fazla 3 gözlem. Kasa ve geçmiş korunur. Bu bir kârlılık garantisi değildir.
+
+## 2026-11-26 — v0.9.38 Net getiriye göre otomatik SPOT/SHORT strateji seçimi
+
+- Yeni dönüş ve kırılım stratejileri artık yalnız araştırmada kalmaz: sabit net %2 hedef/%1 stop modelinde en az 24 ölçülmüş sonuç, 8 farklı saat, 6 coin ve güncel pozitif net sonuç varsa aynı tek sanal kasada otomatik aday olabilir.
+- Eski zarar eden momentum modelinin onayını gerektirmez; eski modelin kendi ekonomik kapısı kaldırılmaz. Tek adaptif pozisyon, en fazla %18 notional, mevcut nakit/portföy/stop/haber/makas korumaları geçerlidir.
+- Adaptif emir yalnız ölçülen strateji ve geçerli emir defteriyle; net hedef, stop veya 60 dakika sonunda gözlenen fiyattan kapanır. Gerçekleşmeler garanti edilmez. Örneklem bağımsız istatistiksel ispat değildir, gerçek para kullanılmaz.
+
+## 2026-11-26 — v0.9.37 Gerçek gözlemlenen hedef ve stop karşılaştırması
+
+- 26 Kasım 16.38 ölçümünde net kasa 630,79 TL. Yeni stratejiler henüz net pozitif sonuç göstermedi.
+- Yeni araştırma adayları için saat sonu karşılaştırmasına ek olarak ilk gözlenen net %1/%2/%3 hedef ve %1/%1/%2 stop modelleri ayrı kaydedilir. Gözlenmeyen fiyatlardan gerçekleşme uydurulmaz; önceki örneklere geriye dönük hedef isabeti yazılmaz.
+- Sanal kasa ve emir geçmişi değişmez; yeni model sonuçları gerçek işlem değildir ve ekonomik veto korunur.
+
+## 2026-11-26 — v0.9.36 Dönüş ve kırılım yeniden test strateji laboratuvarı
+
+- Son incelenen sanal kasa 630,76 TL, 9 SHORT kapanışının 9'u ve son 12 kapanış zarar. Mevcut strateji kârlı olduğunu kanıtlamadı.
+- Dipte SHORT ve tepede SPOT kovalamayı önleyen RSI/fitil kontrolü; eşzamanlı SHORT yığılması ve mevcut aynı yön pozisyonlarla yüksek 15dk korelasyon için yeni giriş vetosu.
+- Destekten dönüş, yukarı kırılım-yeniden test ve aşağı kırılım-yeniden test ayrı gözlem kuyruğunda gerçek bir saat sonraki fiyatla, varsayımsal %0,3 masraf dahil ölçülüyor. Bu araştırma emir açmaz.
+- Tek kasa, geçmiş işlemler, ekonomik giriş kapısı ve koruyucu çıkışlar korunur. Yeni stratejiler bağımsız kârlılık doğrulaması olmadan aktif ticaret yetkisi almaz.
+
 ## 2026-11-25 — v0.9.35 Veri yoğunluğu ve yanlış açık kalan alım kapısı düzeltildi
 
 - **Başarısızlığı gizlemiyoruz:** 25 Kasım 10.10 Türkiye saati erişilen tek sanal kasa net değeri 639,04 TL; başlangıç 650 TL; 35 kapanış gerçekleşmiş net -10,60 TL. Grafik okuyucunun 302 CONFIRMED araştırma örneğinin ortalama varsayımsal net sonucu -%0,414. Bunlar kâr kanıtı değildir.
